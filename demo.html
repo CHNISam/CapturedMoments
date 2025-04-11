@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>旅行者的记忆</title>
+  <style>
+    /* ===================== 全局样式 ===================== */
+    body {
+      margin: 0;
+      font-family: 'Open Sans', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      background: #222;
+      color: #ccc;
+    }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; }
+    
+    /* ===================== 顶部导航 ===================== */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 100;
+    }
+    .navbar .logo {
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+    }
+    .navbar .nav-links {
+      list-style: none;
+      display: flex;
+    }
+    .navbar .nav-links li {
+      margin: 0 10px;
+    }
+    .navbar .nav-links li a {
+      padding: 5px 10px;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+    .navbar .nav-links li a:hover {
+      background-color: #ddd;
+    }
+    
+    /* ===================== 轮播图区域 ===================== */
+    #carousel {
+      margin-top: 70px; /* 留出导航高度 */
+      position: relative;
+      height: 300px;
+      overflow: hidden;
+      background: #e6e9f0;
+      border-bottom: 2px solid #ccc;
+    }
+    .carousel-container {
+      position: absolute;
+      width: 200%;
+      height: 100%;
+      animation: carouselScroll 20s linear infinite;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .carousel-item {
+      width: 150px;
+      height: 100px;
+      border: 2px solid #fff;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      line-height: 100px;
+      font-size: 14px;
+      transition: transform 0.3s;
+    }
+    .carousel-item:hover {
+      transform: translateY(-10px);
+    }
+    @keyframes carouselScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    .carousel-caption {
+      position: absolute;
+      width: 100%;
+      bottom: 20px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #555;
+    }
+    .map-view-btn {
+      position: absolute;
+      right: 20px;
+      top: 80px;
+      padding: 8px 12px;
+      background-color: #f39c12;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+    .map-view-btn:hover {
+      background-color: #e67e22;
+    }
+    
+    /* ===================== “动态”模块 ===================== */
+    #moments {
+      padding: 20px;
+      background-color: #fff;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+    }
+    #moments h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #444;
+    }
+    .moment-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .moment-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      background-color: #fafafa;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    .moment-card:hover {
+      transform: scale(1.02);
+    }
+    .moment-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 10px;
+    }
+    .moment-header .view-count {
+      font-size: 12px;
+      color: #e74c3c;
+    }
+    .moment-content {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .moment-photos {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+    }
+    .moment-photos img {
+      width: 100px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+    .moment-actions {
+      text-align: right;
+      font-size: 12px;
+      color: #3498db;
+    }
+    .moment-actions button {
+      background: none;
+      border: none;
+      color: #3498db;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    
+    /* ===================== 相册网格 ===================== */
+    #album-grid {
+      padding: 20px;
+      background-color: #fafafa;
+    }
+    #album-grid h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #444;
+    }
+    .grid-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .photo-card {
+      width: 200px;
+      background-color: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    .photo-card:hover {
+      transform: scale(1.03);
+    }
+    .photo-card img {
+      width: 100%;
+    }
+    .photo-info {
+      padding: 10px;
+      font-size: 14px;
+      color: #666;
+    }
+    .new-album {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .new-album button {
+      font-size: 20px;
+      padding: 10px 15px;
+      background-color: #3498db;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      transition: background-color 0.3s;
+    }
+    .new-album button:hover {
+      background-color: #2980b9;
+    }
+    .upload-photo {
+      margin: 10px auto;
+      text-align: center;
+    }
+    .upload-photo button {
+      padding: 10px 20px;
+      background-color: #2ecc71;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    .upload-photo button:hover {
+      background-color: #27ae60;
+    }
+    
+    /* ===================== 留言板 ===================== */
+    #message-board {
+      background-color: #fdfefe;
+      padding: 20px;
+      border-top: 2px solid #ddd;
+      border-bottom: 2px solid #ddd;
+    }
+    #message-board h2 {
+      text-align: center;
+      color: #555;
+      font-family: 'Georgia', serif;
+    }
+    .chat-container {
+      max-width: 600px;
+      margin: 0 auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      background-color: #fff;
+    }
+    .chat-history {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #444;
+    }
+    .chat-history p {
+      margin: 5px 0;
+    }
+    .chat-input {
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .chat-input button {
+      padding: 8px 12px;
+      border: none;
+      background-color: #e67e22;
+      color: #fff;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    .chat-input button:hover {
+      background-color: #d35400;
+    }
+    
+    /* ===================== 设置模块 ===================== */
+    #settings {
+      padding: 20px;
+      background-color: #fff;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      max-width: 600px;
+      margin: 20px auto;
+      display: none; /* 默认隐藏 */
+    }
+    #settings h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .setting-item {
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .setting-item label {
+      font-size: 16px;
+    }
+    .setting-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+    }
+    .setting-item button {
+      padding: 8px 12px;
+      background-color: rgba(0,0,0,0.3);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+    .setting-item button:hover {
+      background-color: rgba(0,0,0,0.5);
+    }
+    
+    /* ===================== 地图视图模块 ===================== */
+    #map-view {
+      display: none;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    /* ===================== 桌宠模块 ===================== */
+    #desktop-pet {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 120px;
+      text-align: center;
+      z-index: 200;
+    }
+    #desktop-pet img {
+      width: 100%;
+      border-radius: 50%;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    #desktop-pet p {
+      font-size: 12px;
+      color: #333;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <header>
+    <nav class="navbar">
+      <div class="logo">旅行者的记忆</div>
+      <ul class="nav-links">
+        <li><a href="#">首页</a></li>
+        <li><a href="#moments">动态</a></li>
+        <li><a href="#album-grid">相册</a></li>
+        <li><a href="#message-board">留言板</a></li>
+        <li><a href="#settings" id="settings-link">设置</a></li>
+        <li><a href="#map-view">地图视图</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <!-- 主体区域 -->
+  <main>
+    <!-- 轮播图区域 -->
+    <section id="carousel">
+      <div class="carousel-container">
+        <div class="carousel-item">图片1</div>
+        <div class="carousel-item">图片2</div>
+        <div class="carousel-item">图片3</div>
+        <div class="carousel-item">图片4</div>
+      </div>
+      <div class="carousel-caption">
+        把回忆拼好给你~
+      </div>
+      <button class="map-view-btn" onclick="alert('切换到地图视图（待集成）')">地图视图</button>
+    </section>
+    
+    <!-- “动态”模块 -->
+    <section id="moments">
+      <h2>动态</h2>
+      <div class="moment-container">
+        <!-- 示例动态帖子 -->
+        <div class="moment-card">
+          <div class="moment-header">
+            <span>2025-03-08 14:30</span>
+            <span class="view-count">浏览 123次</span>
+          </div>
+          <div class="moment-content">
+            <p>今天我们在提瓦特边走边拍，这一刻真的太美了～</p>
+          </div>
+          <div class="moment-photos">
+            <img src="images/photo1.jpg" alt="动态照片1">
+            <img src="images/photo2.jpg" alt="动态照片2">
+          </div>
+          <div class="moment-actions">
+            <button onclick="alert('编辑动态（待实现）')">编辑</button>
+            <button onclick="alert('删除动态（待实现）')">删除</button>
+          </div>
+        </div>
+        <!-- 可添加更多动态帖子 -->
+      </div>
+    </section>
+    
+    <!-- 相册展示区域 -->
+    <section id="album-grid">
+      <h2>相册展示</h2>
+      <div class="new-album">
+        <button onclick="alert('弹出新建相册对话框')">＋</button>
+      </div>
+      <div class="grid-container">
+        <div class="photo-card">
+          <img src="images/photo1.jpg" alt="照片1">
+          <div class="photo-info">
+            <p>日期：2025-01-01</p>
+            <p>描述：初次冒险</p>
+          </div>
+        </div>
+        <div class="photo-card">
+          <img src="images/photo2.jpg" alt="照片2">
+          <div class="photo-info">
+            <p>日期：2025-02-14</p>
+            <p>描述：温柔瞬间</p>
+          </div>
+        </div>
+        <!-- 更多照片卡片... -->
+      </div>
+      <div class="upload-photo">
+        <button onclick="alert('触发上传照片功能')">上传照片</button>
+      </div>
+    </section>
+    
+    <!-- 留言板模块 -->
+    <section id="message-board">
+      <h2>留言板</h2>
+      <div class="chat-container">
+        <div class="chat-history" id="chat-history">
+          <p><strong>小喵酱：</strong> 喵～今天的你真温柔！</p>
+          <p><strong>你：</strong> 谢谢，期待和你分享更多回忆~</p>
+        </div>
+        <div class="chat-input">
+          <input type="text" id="chat-input" placeholder="请输入留言...">
+          <button id="send-btn">发送</button>
+          <!-- “切换桌宠”按钮，后续可扩展不同桌宠 -->
+          <button id="toggle-pet" onclick="alert('切换桌宠功能（待实现）')">切换桌宠</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- 设置模块 -->
+    <section id="settings">
+      <h2>设置</h2>
+      <div class="setting-item">
+        <label for="pet-toggle">桌宠显示开关：</label>
+        <input type="checkbox" id="pet-toggle" checked>
+      </div>
+      <div class="setting-item">
+        <label for="theme-toggle">当前主题：</label>
+        <button id="theme-toggle">切换主题</button>
+      </div>
+      <!-- 未来可扩展：主题收藏、用户自定义背景图片等 -->
+    </section>
+    
+    <!-- 地图视图模块（占位） -->
+    <section id="map-view" style="display:none; padding:20px; text-align:center;">
+      <h2>提瓦特地图</h2>
+      <p>【这里展示提瓦特大陆的足迹与打卡点，待集成地图组件】</p>
+    </section>
+  </main>
+  
+  <!-- 桌宠模块：桌宠命名为“小喵酱” -->
+  <div id="desktop-pet">
+    <img src="images/desktop_pet.png" alt="小喵酱">
+    <p>小喵酱</p>
+  </div>
+  
+  <!-- 底部，仅保留版权信息 -->
+  <footer>
+    <p>© 2025 旅行者的记忆 | 关于我们</p>
+  </footer>
+  
+  <!-- 简单交互 JS 示例 -->
+  <script>
+    // 留言发送示例
+    document.getElementById('send-btn').addEventListener('click', function() {
+      const input = document.getElementById('chat-input');
+      const message = input.value.trim();
+      if (message) {
+        const chatHistory = document.getElementById('chat-history');
+        const p = document.createElement('p');
+        p.innerHTML = `<strong>你：</strong> ${message}`;
+        chatHistory.appendChild(p);
+        input.value = '';
+        setTimeout(() => {
+          const reply = document.createElement('p');
+          reply.innerHTML = `<strong>小喵酱：</strong> 喵～你说得真好！`;
+          chatHistory.appendChild(reply);
+          chatHistory.scrollTop = chatHistory.scrollHeight;
+        }, 1000);
+      }
+    });
+    
+    // 切换主题示例（Light/Dark）
+    document.getElementById('theme-toggle').addEventListener('click', function() {
+      document.body.classList.toggle('dark');
+      // 后续可在这里记录当前主题状态，支持主题收藏和置顶展示
+    });
+    
+    // 设置模块显示/隐藏
+    document.getElementById('settings-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      const settingsSection = document.getElementById('settings');
+      if (settingsSection.style.display === 'none' || settingsSection.style.display === '') {
+        settingsSection.style.display = 'block';
+      } else {
+        settingsSection.style.display = 'none';
+      }
+    });
+    
+    // 桌宠开关控制
+    document.getElementById('pet-toggle').addEventListener('change', function() {
+      const petDiv = document.getElementById('desktop-pet');
+      petDiv.style.display = this.checked ? 'block' : 'none';
+    });
+    
+    // 后续可增加：动态自动刷新、地图组件、主题收藏记录、桌宠自动发布动态等
+  </script>
+</body>
+</html>
