@@ -1,346 +1,821 @@
-<!DOCTYPE html>
+k<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>把回忆拼好给你</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>把回忆拼好给你</title>
+  <style>
+    :root {
+      --bg-light: #f5f7fa;
+      --bg-dark: #1e1f24;
+      --card-light: #ffffff33;
+      --card-dark: #2b2d3133;
+      --blur: 16px;
+      --text-light: #222;
+      --text-dark: #ddd;
+      --primary: #3fa7ff;
+      --accent: #ff9e3f;
+      --ai-btn-bg: #555;
+      --ai-btn-hover-bg: #777;
+      --ai-btn-color: #fff;
+      --radius: 14px;
+      --glass-border: 1px solid rgba(255, 255, 255, .25);
+      --select-arrow: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3e%3cpath fill='%23666' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Inter, "PingFang SC", sans-serif;
+      transition: .3s background-color, .3s color;
+    }
+    body {
+      background: var(--bg-light);
+      color: var(--text-light);
+    }
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .hidden { display: none; }
+    /* ===== 顶栏 ===== */
+    nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 22px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(var(--blur));
+    border-bottom: var(--glass-border);
+  }
 
-<!-- ========= 主题 & 组件 ========= -->
-<style>
-:root{
-  --bg-light:#f5f7fa;          --bg-dark:#1e1f24;
-  --card-light:#ffffff33;      --card-dark:#2b2d3133;
-  --blur:16px;
-  --text-light:#222;           --text-dark:#ddd;
-  --primary:#3fa7ff;           --accent:#ff9e3f;
+  .logo {
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: .5px;
+    text-align: left;
+  }
 
-  /* 发布 / 评论按钮配色 */
-  --ai-btn-bg:#555;            --ai-btn-hover-bg:#777; --ai-btn-color:#fff;
-
-  --radius:14px;
-  --glass-border:1px solid rgba(255,255,255,.25);
-  --select-arrow:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3e%3cpath fill='%23666' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+    .menu { display: flex; gap: 18px; align-items: center; }
+    .menu a {
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: .25s background;
+    }
+    .menu a:hover { background: rgba(0, 0, 0, .08); }
+    body.dark .menu a { color: var(--text-dark); }
+    .menu a.on { font-weight: 700; text-decoration: underline; }
+    .red { width: 8px; height: 8px; border-radius: 50%; background: #e74c3c; margin-left: 4px; }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; font-size: 14px;
+      border-radius: var(--radius);
+      border: var(--glass-border);
+      background: var(--card-light);
+      backdrop-filter: blur(calc(var(--blur) / 2));
+      color: inherit; cursor: pointer;
+      transition: .25s background;
+    }
+    .btn-ghost svg { width: 16px; height: 16px; pointer-events: none; }
+    .btn-ghost:hover { background: rgba(0, 0, 0, .08); }
+    body.dark .btn-ghost { background: rgba(255, 255, 255, .10); }
+    body.dark .btn-ghost:hover { background: rgba(255, 255, 255, .18); }
+    .btn-publish {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 20px; font-size: 14px;
+      border-radius: var(--radius);
+      background: var(--ai-btn-bg); color: var(--ai-btn-color);
+      border: none; cursor: pointer;
+      transition: .25s background;
+    }
+    .btn-publish:hover { background: var(--ai-btn-hover-bg); }
+    .upload-btn { position: relative; overflow: hidden; }
+    .upload-btn input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 6px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+    }
+    .badge.catgirl { color: #333; }
+    .card {
+      background: var(--card-light);
+      backdrop-filter: blur(calc(var(--blur) / 2));
+      border-radius: var(--radius);
+      border: var(--glass-border);
+      box-shadow: 0 6px 18px #0001;
+      padding: 18px;
+    }
+    h2.big { margin: 70px 0 22px; font-size: 26px; padding-left: 0; }
+    #moments { padding: 40px 8%; }
+    #new-post textarea {
+      resize: none; height: 78px;
+      border-radius: var(--radius);
+      border: var(--glass-border);
+      background: var(--card-light);
+      backdrop-filter: blur(calc(var(--blur) / 2));
+      padding: 10px; font-size: 14px; width: 100%;
+    }
+    #preview img { width: 70px; height: 50px; border-radius: 8px; object-fit: cover; }
+    #moments-list { display: flex; flex-direction: column; gap: 26px; }
+    .post .photos { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; }
+    .post .photos img { width: 96px; height: 68px; border-radius: 8px; object-fit: cover; }
+    .post .body p { margin: 0 0 6px; white-space: pre-wrap; line-height: 1.5; }
+    .post small { display: block; margin-top: 4px; font-size: 12px; color: #888; }
+    .actions { display: flex; gap: 8px; font-size: 13px; margin-top: 8px; align-items: center; color: var(--primary); }
+    .actions svg { width: 18px; height: 18px; fill: currentColor; }
+    .more { cursor: pointer; font-size: 18px; padding: 2px 6px; border-radius: 50%; transition: .2s background; }
+    .more:hover { background: rgba(0, 0, 0, .08); }
+    .post-txt.folded { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toggle { color: var(--primary); cursor: pointer; font-size: 13px; margin-left: 6px; }
+    #album { padding: 40px 8%; }
+    .album-tabs { display: flex; gap: 16px; margin-bottom: 18px; }
+    .album-tabs button {
+      background: none; border: none; font-weight: 600; cursor: pointer;
+      font-size: 15px; padding: 6px 10px; border-radius: 8px;
+      transition: .25s background;
+    }
+    .album-tabs .on { background: rgba(0, 0, 0, .08); }
+    body.dark .album-tabs button { color: var(--text-dark); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; }
+    .photo { border-radius: var(--radius); overflow: hidden; position: relative; cursor: pointer; }
+    .photo img { width: 100%; height: 120px; object-fit: cover; transition: .3s transform; }
+    .photo:hover img { transform: scale(1.05); }
+    .photo span { position: absolute; bottom: 6px; left: 6px; background: rgba(0, 0, 0, .45); color: #fff; font-size: 12px; padding: 2px 6px; border-radius: 8px; }
+    #settings { padding: 40px 8%; }
+    fieldset { border: none; padding: 0; margin: 0 0 24px; }
+    legend { font-weight: 600; font-size: 15px; margin-bottom: 8px; }
+    .setting-item { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
+    .setting-item + .setting-item { border-top: 1px solid rgba(0, 0, 0, .08); padding-top: 12px; }
+    body.dark .setting-item + .setting-item { border-top: 1px solid rgba(255, 255, 255, .10); }
+    .setting-item input[type=text], .setting-item textarea {
+      width: 60%; padding: 6px; border-radius: var(--radius);
+      border: var(--glass-border);
+      background: var(--card-light);
+      backdrop-filter: blur(calc(var(--blur) / 2));
+      color: inherit;
+    }
+    select {
+      appearance: none; padding: 8px 34px 8px 12px; font-size: 14px;
+      border-radius: var(--radius); border: var(--glass-border);
+      background: var(--card-light); color: inherit; max-width: 160px;
+      background-image: var(--select-arrow);
+      background-repeat: no-repeat; background-position: right 10px center;
+      backdrop-filter: blur(calc(var(--blur) / 2));
+    }
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      display: flex; justify-content: center; align-items: center;
+      opacity: 0; visibility: hidden; transition: .25s;
+    }
+    .modal.show { opacity: 1; visibility: visible; }
+    .box {
+      background: var(--card-light); backdrop-filter: blur(var(--blur));
+      border: var(--glass-border); border-radius: var(--radius);
+      max-width: 600px; width: 90%; max-height: 90vh;
+      overflow: auto; padding: 20px; position: relative;
+    }
+    body.dark .box { background: var(--card-dark); }
+    .close { position: absolute; top: 10px; right: 16px; font-size: 24px; cursor: pointer; }
+    #pet { position: fixed; right: 24px; bottom: 24px; width: 90px; user-select: none; cursor: move; z-index: 90; }
+    #pet svg { width: 100%; animation: breathe 3s ease-in-out infinite; }
+    @keyframes breathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+    /* 暗黑模式下输入框、文本域和下拉菜单样式 */
+body.dark input,
+body.dark textarea,
+body.dark select {
+  background-color: var(--card-dark); /* 使用暗黑模式下的卡片背景 */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* 边框颜色更柔和 */
+  color: var(--text-dark); /* 明确指定文字颜色 */
+  transition: border-color 0.2s ease;
 }
-html,body{margin:0;padding:0;height:100%;font-family:Inter,"PingFang SC",sans-serif;transition:.3s background-color,.3s color}
-body{background:var(--bg-light);color:var(--text-light)}
-body.dark{background:var(--bg-dark);color:var(--text-dark)}
-a{color:inherit;text-decoration:none;cursor:pointer}
-.hidden{display:none}
 
-/* ===== 顶栏 ===== */
-nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:10px 22px;background:rgba(255,255,255,.25);backdrop-filter:blur(var(--blur));border-bottom:var(--glass-border)}
-body.dark nav{background:rgba(43,45,49,.25)}
-.logo{font-weight:700;font-size:20px;letter-spacing:.5px}
-.menu{display:flex;gap:18px;align-items:center}
-.menu a{padding:6px 12px;border-radius:8px;transition:.25s background}
-.menu a:hover{background:rgba(0,0,0,.08)}
-body.dark .menu a{color:var(--text-dark)}
-.menu a.on{font-weight:700;text-decoration:underline}
-.red{width:8px;height:8px;border-radius:50%;background:#e74c3c;margin-left:4px}
+/* 调整输入框和文本域获取焦点时的样式 */
+body.dark input:focus,
+body.dark textarea:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.15);
+  outline: none;
+}
 
-/* ===== 按钮 ===== */
-/* 玻璃按钮（上传 / 普通） */
-.btn-ghost{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-size:14px;border-radius:var(--radius);border:var(--glass-border);background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2));color:inherit;cursor:pointer;transition:.25s background}
-.btn-ghost svg{width:16px;height:16px;pointer-events:none}
-.btn-ghost:hover{background:rgba(0,0,0,.08)}
-body.dark .btn-ghost{background:rgba(255,255,255,.10)}
-body.dark .btn-ghost:hover{background:rgba(255,255,255,.18)}
-/* 发布 / 评论发送按钮 */
-.btn-publish{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;font-size:14px;border-radius:var(--radius);background:var(--ai-btn-bg);color:var(--ai-btn-color);border:none;cursor:pointer;transition:.25s background}
-.btn-publish:hover{background:var(--ai-btn-hover-bg)}
-/* 上传 label 覆盖 */
-.upload-btn{position:relative;overflow:hidden}
-.upload-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+/* 调整下拉菜单获取焦点时的样式 */
+body.dark select:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.2);
+}
 
-/* 用户徽章 */
-.badge{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:11px;padding:2px 6px;border-radius:10px;margin-left:6px}
-
-/* ===== 其它公共样式 ===== */
-.card{background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2));border-radius:var(--radius);border:var(--glass-border);box-shadow:0 6px 18px #0001;padding:18px}
-
-#moments{padding:40px 8%}
-#new-post textarea{resize:none;height:78px;border-radius:var(--radius);border:var(--glass-border);background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2));padding:10px;font-size:14px;width:100%}
-#preview img{width:70px;height:50px;border-radius:8px;object-fit:cover}
-#moments-list{display:flex;flex-direction:column;gap:26px}
-.post .photos{display:flex;gap:8px;margin-top:8px;overflow-x:auto}
-.post .photos img{width:96px;height:68px;border-radius:8px;object-fit:cover}
-.post .body p{margin:0 0 6px;white-space:pre-wrap;line-height:1.5}
-.post small{display:block;margin-top:4px;font-size:12px;color:#888}
-.actions{display:flex;gap:8px;font-size:13px;margin-top:8px;align-items:center;color:var(--primary)}
-.actions svg{width:18px;height:18px;fill:currentColor}
-.more{cursor:pointer;font-size:18px;padding:2px 6px;border-radius:50%;transition:.2s background}
-.more:hover{background:rgba(0,0,0,.08)}
-
-#album{padding:40px 8%}
-.album-tabs{display:flex;gap:16px;margin-bottom:18px}
-.album-tabs button{background:none;border:none;font-weight:600;cursor:pointer;font-size:15px;padding:6px 10px;border-radius:8px;transition:.25s background}
-.album-tabs .on{background:rgba(0,0,0,.08)}
-body.dark .album-tabs button{color:var(--text-dark)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:18px}
-.photo{border-radius:var(--radius);overflow:hidden;position:relative;cursor:pointer}
-.photo img{width:100%;height:120px;object-fit:cover;transition:.3s transform}
-.photo:hover img{transform:scale(1.05)}
-.photo span{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.45);color:#fff;font-size:12px;padding:2px 6px;border-radius:8px}
-
-#settings{padding:40px 8%}
-fieldset{border:none;padding:0;margin:0 0 24px}
-legend{font-weight:600;font-size:15px;margin-bottom:8px}
-.setting-item{display:flex;justify-content:space-between;align-items:center;margin:12px 0}
-.setting-item+.setting-item{border-top:1px solid rgba(0,0,0,.08);padding-top:12px}
-body.dark .setting-item+.setting-item{border-top:1px solid rgba(255,255,255,.10)}
-.setting-item input[type=text],.setting-item textarea{width:60%;padding:6px;border-radius:var(--radius);border:var(--glass-border);background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2));color:inherit}
-select{appearance:none;padding:8px 34px 8px 12px;font-size:14px;border-radius:var(--radius);border:var(--glass-border);background:var(--card-light);color:inherit;max-width:160px;background-image:var(--select-arrow);background-repeat:no-repeat;background-position:right 10px center;backdrop-filter:blur(calc(var(--blur)/2))}
-
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;justify-content:center;align-items:center;opacity:0;visibility:hidden;transition:.25s}
-.modal.show{opacity:1;visibility:visible}
-.box{background:var(--card-light);backdrop-filter:blur(var(--blur));border:var(--glass-border);border-radius:var(--radius);max-width:600px;width:90%;max-height:90vh;overflow:auto;padding:20px;position:relative}
-body.dark .box{background:var(--card-dark)}
-.close{position:absolute;top:10px;right:16px;font-size:24px;cursor:pointer}
-
-#pet{position:fixed;right:24px;bottom:24px;width:90px;user-select:none;cursor:move;z-index:90}
-#pet svg{width:100%;animation:breathe 3s ease-in-out infinite}
-@keyframes breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-
-#bubble{position:fixed;right:110px;bottom:110px;max-width:220px;background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2));border:var(--glass-border);border-radius:var(--radius);padding:12px;font-size:14px;line-height:1.45;box-shadow:0 4px 12px #0003;transition:opacity .4s,transform .4s;opacity:0;transform:translateY(10px);z-index:95}
-#bubble.show{opacity:1;transform:translateY(0)}
-</style>
+    #bubble {
+      position: fixed; right: 110px; bottom: 110px; max-width: 220px;
+      background: var(--card-light); backdrop-filter: blur(calc(var(--blur) / 2));
+      border: var(--glass-border); border-radius: var(--radius);
+      padding: 12px; font-size: 14px; line-height: 1.45;
+      box-shadow: 0 4px 12px #0003; transition: opacity .4s, transform .4s;
+      opacity: 0; transform: translateY(10px); z-index: 95;
+    }
+    #bubble.show { opacity: 1; transform: translateY(0); }
+  </style>
 </head>
 <body>
-
-<!-- ===== 顶栏 ===== -->
-<nav>
-  <div class="logo">把回忆拼好给你</div>
-  <div class="menu">
-    <a href="#moments" id="nav-moments">动态<span id="nav-dot" class="red hidden"></span></a>
-    <a href="#album">相册</a>
-    <a href="#settings">设置</a>
-    <a id="logout" class="btn-ghost">退出</a>
-    <button id="themeBtn" class="btn-ghost">
-      <svg id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
-      <svg id="moon" class="hidden" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
-    </button>
-  </div>
-</nav>
-
-<!-- ===== 动态 ===== -->
-<section id="moments">
-  <h2 style="margin-top:64px">动态</h2>
-  <div id="new-post" class="card" style="display:flex;flex-direction:column;gap:12px">
-    <textarea id="post-text" placeholder="这一刻想说点什么…"></textarea>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <select id="post-place">
-        <option value="">无地点</option><option>蒙德</option><option>璃月</option><option>稻妻</option><option>须弥</option><option>纳塔</option>
-      </select>
-
-      <!-- 上传按钮 -->
-      <label class="btn-ghost upload-btn">
-        上传<svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <input id="post-img" type="file" accept="image/*" multiple>
-      </label>
-
-      <!-- 发布按钮 -->
-      <button id="publish" class="btn-publish">发布</button>
+  <!-- ===== 顶栏 ===== -->
+  <nav>
+    <div class="logo">把回忆拼好给你</div>
+    <div class="menu">
+      <a href="#moments" id="nav-moments">动态<span id="nav-dot" class="red hidden"></span></a>
+      <a href="#album">相册</a>
+      <a href="#settings">设置</a>
+      <!-- 可以在此处增加显示当前用户名的额外区域，例如 -->
+      <span id="header-name" style="font-weight:600;"></span>
+      <a id="logout" class="btn-ghost">退出</a>
+      <button id="themeBtn" class="btn-ghost">
+        <svg id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
+        <svg id="moon" class="hidden" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+      </button>
     </div>
-    <div id="preview" style="display:flex;gap:8px;overflow-x:auto"></div>
-  </div>
-
-  <div id="moments-list"></div>
-</section>
-
-<!-- ===== 相册 ===== -->
-<section id="album">
-  <div class="album-tabs">
-    <button data-tab="time" class="on">按时间</button>
-    <button data-tab="region">按地区</button>
-  </div>
-  <div id="album-grid" class="grid"></div>
-  <div id="album-empty" class="hidden" style="text-align:center;margin-top:30px;color:#888">暂无照片，快去上传吧~</div>
-</section>
-
-<!-- ===== 设置 ===== -->
-<section id="settings">
-  <h2>设置</h2>
-  <div class="card">
-    <fieldset>
-      <legend>外观</legend>
-      <div class="setting-item"><span>暗黑模式</span><input type="checkbox" id="theme-toggle"></div>
-    </fieldset>
-
-    <fieldset>
-      <legend>桌宠 / LLM</legend>
-      <div class="setting-item"><span>显示桌宠</span><input type="checkbox" id="pet-toggle" checked></div>
-      <div class="setting-item"><span>桌宠类型</span><select id="pet-type"><option value="cat">猫娘</option><option value="bird">魈鸟</option></select></div>
-      <div class="setting-item"><span>启用 LLM</span><input type="checkbox" id="ai-toggle" checked></div>
-      <div class="setting-item"><span id="prompt-label">桌宠 Prompt</span><input id="pet-prompt" value="喵～ 记得喝水喔！"></div>
-    </fieldset>
-
-    <fieldset>
-      <legend>账户</legend>
-      <div class="setting-item"><span>头像</span>
-        <label class="btn-ghost upload-btn">上传
-          <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
-          <input id="avatar-input" type="file" accept="image/*">
+  </nav>
+  
+  <!-- ===== 动态 ===== -->
+  <section id="moments">
+    <h2 class="big">投稿</h2>
+    <div id="new-post" class="card" style="display:flex;flex-direction:column;gap:12px">
+      <textarea id="post-text" placeholder="说点什么…"></textarea>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <select id="post-place">
+          <option value="">无地点</option>
+          <option>蒙德</option>
+          <option>璃月</option>
+          <option>稻妻</option>
+          <option>须弥</option>
+          <option>纳塔</option>
+        </select>
+        <label class="btn-ghost upload-btn">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <input id="post-img" type="file" accept="image/*" multiple>
         </label>
+        <button id="publish" class="btn-publish">发布</button>
       </div>
-      <div class="setting-item"><span>我的昵称</span><input id="name-me"></div>
-    </fieldset>
-  </div>
-</section>
-
-<!-- ===== 照片 Modal ===== -->
-<div id="photoModal" class="modal">
-  <div class="box"><span class="close" onclick="hideModal()">×</span>
-    <img id="mImg"><p id="mMeta" style="margin-top:8px;font-size:14px;color:#888"></p>
-  </div>
-</div>
-
-<!-- ===== 登录 Modal ===== -->
-<div id="loginModal" class="modal show">
-  <div class="box" style="text-align:center;max-width:340px">
-    <h3>选择登录身份</h3>
-    <div style="display:flex;justify-content:center;gap:40px">
-      <div class="avatar" data-user="Furinya"><img src="https://placehold.co/90x90?text=F" alt="Furinya"></div>
-      <div class="avatar" data-user="离"><img src="https://placehold.co/90x90?text=离" alt="离"></div>
+      <div id="preview" style="display:flex;gap:8px;overflow-x:auto"></div>
+    </div>
+    <h2 class="big">动态</h2>
+    <div id="moments-list"></div>
+  </section>
+  
+  <!-- ===== 相册 ===== -->
+  <section id="album">
+    <h2 class="big">相册</h2>
+    <div class="album-tabs">
+      <button data-tab="time" class="on">按时间</button>
+      <button data-tab="region">按地区</button>
+    </div>
+    <div id="album-grid" class="grid"></div>
+    <div id="album-empty" class="hidden" style="text-align:center;margin-top:30px;color:#888">
+      暂无照片，快去上传吧~
+    </div>
+  </section>
+  
+  <!-- ===== 设置 ===== -->
+  <section id="settings">
+    <h2 class="big">设置</h2>
+    <div class="card">
+      <fieldset>
+        <legend>外观</legend>
+        <div class="setting-item">
+          <span>暗黑模式</span>
+          <input type="checkbox" id="theme-toggle">
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>桌宠 / LLM</legend>
+        <div class="setting-item">
+          <span>显示桌宠</span>
+          <input type="checkbox" id="pet-toggle" checked>
+        </div>
+        <div class="setting-item">
+          <span>桌宠类型</span>
+          <select id="pet-type">
+            <option value="cat">猫娘</option>
+            <option value="bird">魈鸟</option>
+          </select>
+        </div>
+        <div class="setting-item">
+          <span>启用 LLM</span>
+          <input type="checkbox" id="ai-toggle" checked>
+        </div>
+        <div class="setting-item">
+          <span id="prompt-label">桌宠 Prompt</span>
+          <input id="pet-prompt" value="喵～ 记得喝水喔！">
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>账户</legend>
+        <div class="setting-item">
+          <span>头像</span>
+          <label class="btn-ghost upload-btn">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            <input id="avatar-input" type="file" accept="image/*">
+          </label>
+        </div>
+        <div class="setting-item">
+          <span>我的昵称</span>
+          <!-- 此输入框与 displayName 双向绑定 -->
+          <input id="name-me">
+        </div>
+      </fieldset>
+      <!-- 勋章设置：显示当前徽章和更换勋章按钮 -->
+      <fieldset id="badge-field">
+        <legend>勋章</legend>
+        <div id="currentBadgeDisplay" class="setting-item" style="flex-direction: row; align-items: center;">
+          暂无勋章 <button id="changeBadgeBtn" class="btn-ghost" style="margin-left:12px;">更换勋章</button>
+        </div>
+      </fieldset>
+    </div>
+  </section>
+  
+  <!-- ===== 照片 Modal ===== -->
+  <div id="photoModal" class="modal">
+    <div class="box">
+      <span class="close" onclick="hideModal()">×</span>
+      <img id="mImg">
+      <p id="mMeta" style="margin-top:8px;font-size:14px;color:#888"></p>
     </div>
   </div>
-</div>
-
-<!-- ===== 桌宠 & 气泡 ===== -->
-<div id="pet"></div>
-<div id="bubble" class="hidden"></div>
-
-<footer style="text-align:center;padding:24px 0;font-size:13px;color:#777">© 2025 把回忆拼好给你</footer>
-
-<!-- ========= 脚本 ========= -->
-<script>
-/* ---------- 工具 ---------- */
-const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s),
-      store=(k,v)=>v===undefined?JSON.parse(localStorage.getItem(k)||'null'):localStorage.setItem(k,JSON.stringify(v));
-
-/* ---------- 全局数据 ---------- */
-let posts = store('posts') || [];
-let currentUser = store('currentUser') || null;
-function readKey(){return 'readIds_'+currentUser;}
-let readIds = new Set(store(readKey())||[]);
-
-/* ---------- 登录 & 退出 ---------- */
-$('#loginModal').addEventListener('click',e=>{
-  const ava=e.target.closest('.avatar');if(!ava)return;
-  currentUser=ava.dataset.user;store('currentUser',currentUser);
-  $('#loginModal').classList.remove('show');readIds=new Set(store(readKey())||[]);initAfterLogin();
-});
-if(currentUser)$('#loginModal').classList.remove('show');
-$('#logout').onclick=()=>{localStorage.removeItem('currentUser');location.reload();};
-
-/* ---------- 主题 ---------- */
-const body=document.body,themeT=$('#theme-toggle'),sun=$('#sun'),moon=$('#moon');
-function setTheme(dark){body.classList.toggle('dark',dark);themeT.checked=dark;sun.classList.toggle('hidden',dark);moon.classList.toggle('hidden',!dark);localStorage.theme=dark?'dark':'light'}
-setTheme(localStorage.theme==='dark');
-$('#themeBtn').onclick=()=>setTheme(!body.classList.contains('dark'));
-themeT.onchange=()=>setTheme(themeT.checked);
-
-/* ---------- 平滑滚动 & 高亮 ---------- */
-$$('nav .menu a[href^="#"]').forEach(a=>a.onclick=e=>{e.preventDefault();document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'});});
-const sections=['moments','album','settings'].map(id=>$('#'+id));
-const menuLinks={moments:$('#nav-moments'),album:document.querySelector('a[href="#album"]'),settings:document.querySelector('a[href="#settings"]')};
-window.addEventListener('scroll',()=>{const top=scrollY+80;sections.forEach(sec=>{const active=top>=sec.offsetTop&&top<sec.offsetTop+sec.offsetHeight;menuLinks[sec.id].classList.toggle('on',active);});});
-
-/* ---------- 锁定桌宠输入 ---------- */
-function lockPetFields(){const on=$('#pet-toggle').checked;['pet-type','ai-toggle','pet-prompt'].forEach(id=>$('#'+id).disabled=!on);}
-$('#pet-toggle').onchange=lockPetFields;lockPetFields();
-
-/* ---------- 头像上传 & 渲染 ---------- */
-$('#avatar-input').onchange=e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);store('avatar-'+currentUser,url);renderAvatars();renderPosts();};
-function renderAvatars(){$$('.avatar').forEach(a=>{const saved=store('avatar-'+a.dataset.user);if(saved)a.querySelector('img').src=saved;});}
-renderAvatars();
-
-/* ---------- 桌宠 ---------- */
-const pet=$('#pet');
-function petSVG(type){return type==='bird'?`<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="#cdeffd" stroke="#333" stroke-width="3"/><path d="M40 70 Q60 90 80 70" stroke="#333" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="45" cy="55" r="8"/><circle cx="75" cy="55" r="8"/></svg>`:`<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="#ffe4e1" stroke="#333" stroke-width="3"/><circle cx="45" cy="50" r="10"/><circle cx="75" cy="50" r="10"/><path d="M45 80 Q60 95 75 80" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`;}
-function syncPet(){pet.style.display=$('#pet-toggle').checked?'block':'none';pet.innerHTML=petSVG($('#pet-type').value);}
-$('#pet-toggle').onchange=syncPet;$('#pet-type').onchange=syncPet;syncPet();
-let ox,oy;pet.onmousedown=e=>{ox=e.offsetX;oy=e.offsetY;document.onmousemove=ev=>{pet.style.left=ev.pageX-ox+'px';pet.style.top=ev.pageY-oy+'px';};document.onmouseup=()=>document.onmousemove=null;};
-
-/* ---------- 上传 / 发布 ---------- */
-const postImg=$('#post-img'),preview=$('#preview'),publishBtn=$('#publish');let draftImgs=[];
-postImg.onchange=e=>{preview.innerHTML='';draftImgs=[...e.target.files].slice(0,3);draftImgs.forEach(f=>preview.innerHTML+=`<img src="${URL.createObjectURL(f)}">`);};
-publishBtn.onclick=()=>{if(!currentUser)return alert('请先登录');const txt=$('#post-text').value.trim(),place=$('#post-place').value;if(!txt&&draftImgs.length===0)return alert('写点文字或选张图片吧~');addPost({id:Date.now(),uid:currentUser,txt,place,imgs:draftImgs.map(f=>URL.createObjectURL(f)),ts:Date.now(),views:0,cmts:[]});$('#post-text').value='';draftImgs=[];preview.innerHTML='';$('#post-place').value='';savePosts();};
-
-/* ---------- 动态核心 ---------- */
-function savePosts(){store('posts',posts);}function saveRead(){store(readKey(),[...readIds]);}
-function addPost(p){posts.unshift(p);if(p.uid===currentUser)readIds.add(p.id);saveRead();renderPosts();}
-
-function renderPosts(){
-  const list=$('#moments-list');list.innerHTML='';
-  posts.forEach(p=>{
-    const unread=!readIds.has(p.id)&&p.uid!==currentUser,isMine=p.uid===currentUser;
-    const badge = p.uid==='离' ? '<span class="badge">最好的大佬</span>' : '';
-    const card=document.createElement('div');card.className='post card';card.dataset.id=p.id;
-    card.innerHTML=`
-      <div class="head" style="display:flex;justify-content:space-between;align-items:center">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:34px;height:34px;border-radius:50%;background:url('${store('avatar-'+p.uid)||'https://placehold.co/60'}') center/cover"></div>
-          <b>${p.uid}</b>${badge}${unread?'<span class="red"></span>':''}
+  
+  <!-- ===== 登录 Modal ===== -->
+  <div id="loginModal" class="modal show">
+    <div class="box" style="text-align:center;max-width:340px">
+      <h3>选择登录身份</h3>
+      <div style="display:flex;justify-content:center;gap:40px">
+        <div class="avatar" data-user="Furinya">
+          <img src="https://placehold.co/90x90?text=F" alt="Furinya">
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px">${new Date(p.ts).toLocaleTimeString()}</span>${isMine?'<span class="more del-post">⋯</span>':''}
+        <div class="avatar" data-user="离">
+          <img src="https://placehold.co/90x90?text=离" alt="离">
         </div>
       </div>
-      <div class="body"><p>${p.txt||''}</p><small>${new Date(p.ts).toLocaleDateString()}${p.place?' · '+p.place:''}</small></div>
-      <div class="photos">${p.imgs.map(u=>`<img src="${u}">`).join('')}</div>
-      <div class="actions"><svg viewBox="0 0 24 24"><path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 110-10 5 5 0 010 10z"/></svg><span>${p.views}</span></div>
-      <div class="comments">
-        ${p.cmts.map((c,i)=>`<div class="c" data-idx="${i}" style="display:flex;justify-content:space-between"><span>${c.who==='pet'?'🐱':'我'}：${c.txt}</span>${isMine&&c.who!=='pet'?'<span class="more del-c">×</span>':''}</div>`).join('')}
-        <div class="c-input" style="display:flex;gap:8px;margin-top:8px">
-          <input placeholder="评论..." style="flex:1;border-radius:var(--radius);border:var(--glass-border);padding:6px;background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2))">
-          <button class="btn-publish" style="padding:6px 14px;font-size:13px">发送</button>
-        </div>
-      </div>`;
-    /* 删除动态 / 评论 */
-    if(isMine)card.querySelector('.del-post').onclick=()=>{if(confirm('撤回这条动态？')){posts=posts.filter(x=>x.id!==p.id);savePosts();renderPosts();}};
-    card.querySelectorAll('.del-c').forEach(el=>el.onclick=()=>{const idx=+el.parentNode.dataset.idx;p.cmts.splice(idx,1);savePosts();renderPosts();});
-    /* 评论发送 */
-    const ci=card.querySelector('.c-input input'),cb=card.querySelector('.c-input button');
-    cb.onclick=()=>{const v=ci.value.trim();if(!v)return;p.cmts.push({who:'me',txt:v});ci.value='';savePosts();renderPosts();};
-    list.appendChild(card);
-  });
-  observePosts();renderNavDot();
-}
-let io;
-function observePosts(){if(io)io.disconnect();io=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){const id=+en.target.dataset.id,p=posts.find(x=>x.id===id);if(p&&!readIds.has(id)){readIds.add(id);p.views++;saveRead();savePosts();renderPosts();}}});},{threshold:.6});$$('.post').forEach(c=>io.observe(c));}
-function renderNavDot(){const unread=posts.some(p=>!readIds.has(p.id)&&p.uid!==currentUser);$('#nav-dot').classList.toggle('hidden',!unread);}
-
-/* ---------- 初始示例 ---------- */
-function initAfterLogin(){
-  if(!posts.length){
-    addPost({id:1,uid:'Furinya',txt:'欢迎大佬~',place:'蒙德城',imgs:[],ts:Date.now()-86400000,views:0,cmts:[]});
-    savePosts();
-  }else renderPosts();
-}
-if(currentUser)initAfterLogin();
-
-/* ---------- 相册示例数据 ---------- */
-const albumGrid=$('#album-grid'),albumEmpty=$('#album-empty');
-const demoPhotos=[{url:'https://placehold.co/300x200?text=1',place:'蒙德城',date:'2025-01-01'}];
-function renderAlbum(mode='time'){
-  albumGrid.innerHTML='';
-  const grouped={};
-  demoPhotos.forEach(p=>{const k=mode==='time'?p.date.slice(0,7):p.place;(grouped[k]=grouped[k]||[]).push(p);});
-  Object.entries(grouped).forEach(([k,arr])=>{
-    albumGrid.innerHTML+=`<h4 style="grid-column:1/-1;margin:4px 0 6px">${k}</h4>`;
-    arr.forEach(p=>{
-      const div=document.createElement('div');div.className='photo';
-      div.innerHTML=`<img src="${p.url}"><span>${p.place}</span>`;
-      div.onclick=()=>showModal(p.url,`${p.date} · ${p.place}`);albumGrid.appendChild(div);
+    </div>
+  </div>
+  
+  <!-- ===== 勋章 Modal ===== -->
+  <div id="badgeModal" class="modal">
+    <div class="box">
+      <span class="close" onclick="hideBadgeModal()">×</span>
+      <h3>选择勋章</h3>
+      <div id="badgeOptions" style="margin: 10px 0;"></div>
+      <button id="confirmBadge" class="btn-publish" style="margin-top:12px;">确认</button>
+    </div>
+  </div>
+  
+  <!-- ===== 桌宠 & 气泡 ===== -->
+  <div id="pet"></div>
+  <div id="bubble" class="hidden"></div>
+  
+  <footer style="text-align:center;padding:24px 0;font-size:13px;color:#777">
+    © 2025 把回忆拼好给你
+  </footer>
+  
+  <!-- ========= 脚本 ========= -->
+  <script>
+    /* ---------- 工具函数 ---------- */
+    const $ = s => document.querySelector(s),
+          $$ = s => document.querySelectorAll(s),
+          store = (k, v) => v === undefined ? JSON.parse(localStorage.getItem(k) || 'null') : localStorage.setItem(k, JSON.stringify(v));
+  
+    /* ---------- 全局数据 ---------- */
+    let posts = store('posts') || [];
+    let currentUser = store('currentUser') || null;
+    function readKey() { return 'readIds_' + currentUser; }
+    let readIds = new Set(store(readKey()) || []);
+  
+    /* ---------- 显示名称函数 ----------
+       如果 localStorage 中没有存储 displayName，则默认返回 uid（如“离”）
+    */
+    const displayName = uid => store('displayName_' + uid) || uid;
+  
+    /* ---------- 登录 & 退出 ---------- */
+    document.getElementById('loginModal').addEventListener('click', e => {
+      const ava = e.target.closest('.avatar'); 
+      if (!ava) return;
+      currentUser = ava.dataset.user;
+      store('currentUser', currentUser);
+      document.getElementById('loginModal').classList.remove('show');
+      readIds = new Set(store(readKey()) || []);
+      initAfterLogin();
+      syncNameInput();  // 初始化昵称同步
     });
-  });
-  albumEmpty.classList.toggle('hidden',demoPhotos.length>0);
-}
-renderAlbum();$$('.album-tabs button').forEach(b=>b.onclick=()=>{$$('.album-tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');renderAlbum(b.dataset.tab)});
-
-/* ---------- Modal ---------- */
-function showModal(src,meta){$('#mImg').src=src;$('#mMeta').textContent=meta;$('#photoModal').classList.add('show')}
-function hideModal(){$('#photoModal').classList.remove('show')}
-</script>
+    if (currentUser) document.getElementById('loginModal').classList.remove('show');
+    document.getElementById('logout').onclick = () => { localStorage.removeItem('currentUser'); location.reload(); };
+  
+    /* ---------- 主题设置 ---------- */
+    const body = document.body,
+          themeT = document.getElementById('theme-toggle'),
+          sun = document.getElementById('sun'),
+          moon = document.getElementById('moon');
+    function setTheme(dark) {
+      body.classList.toggle('dark', dark);
+      themeT.checked = dark;
+      sun.classList.toggle('hidden', dark);
+      moon.classList.toggle('hidden', !dark);
+      localStorage.theme = dark ? 'dark' : 'light';
+    }
+    setTheme(localStorage.theme === 'dark');
+    document.getElementById('themeBtn').onclick = () => setTheme(!body.classList.contains('dark'));
+    themeT.onchange = () => setTheme(themeT.checked);
+  
+    /* ---------- 平滑滚动 & 高亮 ---------- */
+    $$('nav .menu a[href^="#"]').forEach(a => a.onclick = e => {
+      e.preventDefault();
+      document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+    });
+    const sections = ['moments', 'album', 'settings'].map(id => document.getElementById(id));
+    const menuLinks = { moments: document.getElementById('nav-moments'), album: document.querySelector('a[href="#album"]'), settings: document.querySelector('a[href="#settings"]') };
+    window.addEventListener('scroll', () => {
+      const top = scrollY + 80;
+      sections.forEach(sec => {
+        const active = top >= sec.offsetTop && top < sec.offsetTop + sec.offsetHeight;
+        menuLinks[sec.id].classList.toggle('on', active);
+      });
+    });
+  
+    /* ---------- 桌宠设置 ---------- */
+    function lockPetFields() {
+      const on = document.getElementById('pet-toggle').checked;
+      ['pet-type', 'ai-toggle', 'pet-prompt'].forEach(id => document.getElementById(id).disabled = !on);
+    }
+    document.getElementById('pet-toggle').onchange = lockPetFields;
+    lockPetFields();
+  
+    document.getElementById('avatar-input').onchange = e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      const url = URL.createObjectURL(f);
+      store('avatar-' + currentUser, url);
+      renderAvatars();
+      renderPosts();
+    };
+    function renderAvatars() {
+      $$ ('.avatar').forEach(a => {
+        const saved = store('avatar-' + a.dataset.user);
+        if (saved) a.querySelector('img').src = saved;
+      });
+    }
+    renderAvatars();
+  
+    /* ---------- 桌宠代码（略） ---------- */
+    const pet = document.getElementById('pet');
+    function petSVG(type) {
+      return type === 'bird'
+        ? `<svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="55" fill="#cdeffd" stroke="#333" stroke-width="3"/>
+              <path d="M40 70 Q60 90 80 70" stroke="#333" stroke-width="5" fill="none" stroke-linecap="round"/>
+              <circle cx="45" cy="55" r="8"/>
+              <circle cx="75" cy="55" r="8"/>
+            </svg>`
+        : `<svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="55" fill="#ffe4e1" stroke="#333" stroke-width="3"/>
+              <circle cx="45" cy="50" r="10"/>
+              <circle cx="75" cy="50" r="10"/>
+              <path d="M45 80 Q60 95 75 80" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/>
+            </svg>`;
+    }
+    function syncPet() {
+      pet.style.display = document.getElementById('pet-toggle').checked ? 'block' : 'none';
+      pet.innerHTML = petSVG(document.getElementById('pet-type').value);
+    }
+    document.getElementById('pet-toggle').onchange = syncPet;
+    document.getElementById('pet-type').onchange = syncPet;
+    syncPet();
+    let ox, oy;
+    pet.onmousedown = e => {
+      ox = e.offsetX; oy = e.offsetY;
+      document.onmousemove = ev => { pet.style.left = ev.pageX - ox + 'px'; pet.style.top = ev.pageY - oy + 'px'; };
+      document.onmouseup = () => document.onmousemove = null;
+    };
+  
+    /* ---------- 上传 / 发布 ---------- */
+    const postImg = document.getElementById('post-img'),
+          preview = document.getElementById('preview'),
+          publishBtn = document.getElementById('publish');
+    let draftImgs = [];
+    postImg.onchange = e => {
+      preview.innerHTML = '';
+      draftImgs = [];
+      [...e.target.files].slice(0, 3).forEach(f => {
+        const url = URL.createObjectURL(f);
+        draftImgs.push(url);
+        preview.innerHTML += `<img src="${url}">`;
+      });
+    };
+    publishBtn.onclick = () => {
+      if (!currentUser) return alert('请先登录');
+      const txt = document.getElementById('post-text').value.trim(), place = document.getElementById('post-place').value;
+      if (!txt && draftImgs.length === 0) return alert('写点文字或选张图片吧~');
+      addPost({
+        id: Date.now(),
+        uid: currentUser,
+        txt,
+        place,
+        imgs: [...draftImgs],
+        ts: Date.now(),
+        views: 0,
+        cmts: []
+      });
+      document.getElementById('post-text').value = '';
+      draftImgs = [];
+      preview.innerHTML = '';
+      document.getElementById('post-place').value = '';
+      savePosts();
+    };
+  
+    /* ---------- 动态核心 ---------- */
+    function savePosts() {
+      const toSave = posts.map(p => ({ ...p, imgs: [] }));
+      store('posts', toSave);
+      store(readKey(), [...readIds]);
+    }
+    function addPost(p) {
+      posts.unshift(p);
+      if (p.uid === currentUser) readIds.add(p.id);
+      renderPosts();
+      renderAlbum(currentAlbumMode);
+    }
+    const MAX_LEN = 120;
+    function renderPosts() {
+      const list = document.getElementById('moments-list');
+      list.innerHTML = '';
+      posts.forEach(p => {
+        const unread = !readIds.has(p.id) && p.uid !== currentUser,
+              isMine = p.uid === currentUser,
+              isLong = p.txt.length > MAX_LEN,
+              shortTxt = p.txt.slice(0, MAX_LEN) + ' …';
+        const card = document.createElement('div');
+        card.className = 'post card';
+        card.dataset.id = p.id;
+        card.innerHTML = `
+          <div class="head" style="display:flex;justify-content:space-between;align-items:center">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="width:34px;height:34px;border-radius:50%;background:url('${store('avatar-' + p.uid) || 'https://placehold.co/60'}') center/cover"></div>
+              <b>${displayName(p.uid)}</b>${badgeHTML(p.uid)}${unread ? '<span class="red"></span>' : ''}
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:12px">${new Date(p.ts).toLocaleTimeString()}</span>
+              ${isMine ? '<span class="more del-post">⋯</span>' : ''}
+            </div>
+          </div>
+          <div class="body">
+            <p class="post-txt ${isLong ? 'folded' : ''}">${isLong ? shortTxt : p.txt}</p>
+            ${isLong ? '<span class="toggle">展开</span>' : ''}
+            <small>${new Date(p.ts).toLocaleDateString()}${p.place ? ' · ' + p.place : ''}</small>
+          </div>
+          <div class="photos">${p.imgs.map(u => `<img src="${u}">`).join('')}</div>
+          <div class="actions">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/>
+            </svg>
+            <span>${p.views}</span>
+          </div>
+          <div class="comments">
+            ${p.cmts.map((c, i) => `<div class="c" data-idx="${i}" style="display:flex;justify-content:space-between">
+                <span>${c.who === 'pet' ? '🐱' : '我'}：${c.txt}</span>
+                ${isMine && c.who !== 'pet' ? '<span class="more del-c">×</span>' : ''}
+              </div>`).join('')}
+            <div class="c-input" style="display:flex;gap:8px;margin-top:8px">
+              <input placeholder="评论..." style="flex:1;border-radius:var(--radius);border:var(--glass-border);padding:6px;background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2))">
+              <button class="btn-publish" style="padding:6px 14px;font-size:13px">发送</button>
+            </div>
+          </div>`;
+  
+        if (isMine) {
+          card.querySelector('.del-post').onclick = () => {
+            if (confirm('撤回这条动态？')) {
+              posts = posts.filter(x => x.id !== p.id);
+              renderPosts();
+              renderAlbum(currentAlbumMode);
+              savePosts();
+            }
+          };
+          card.querySelectorAll('.del-c').forEach(el => el.onclick = () => {
+            const idx = +el.parentNode.dataset.idx;
+            p.cmts.splice(idx, 1);
+            renderPosts();
+            savePosts();
+          });
+        }
+  
+        const ci = card.querySelector('.c-input input'),
+              cb = card.querySelector('.c-input button');
+        cb.onclick = () => {
+          const v = ci.value.trim();
+          if (!v) return;
+          p.cmts.push({ who: 'me', txt: v });
+          ci.value = '';
+          renderPosts();
+          savePosts();
+        };
+  
+        if (isLong) {
+          card.querySelector('.toggle').onclick = ({ target }) => {
+            const pEl = target.previousElementSibling;
+            const folded = pEl.classList.toggle('folded');
+            pEl.textContent = folded ? shortTxt : p.txt;
+            target.textContent = folded ? '展开' : '收起';
+          };
+        }
+  
+        list.appendChild(card);
+      });
+      observePosts();
+      renderNavDot();
+    }
+  
+    let io;
+    function observePosts() {
+      if (io) io.disconnect();
+      io = new IntersectionObserver(es => {
+        es.forEach(en => {
+          if (en.isIntersecting) {
+            const id = +en.target.dataset.id,
+                  p = posts.find(x => x.id === id);
+            if (p && !readIds.has(id)) {
+              readIds.add(id);
+              p.views++;
+              savePosts();
+              renderPosts();
+            }
+          }
+        });
+      }, { threshold: .6 });
+      $$ ('.post').forEach(c => io.observe(c));
+    }
+    function renderNavDot() {
+      const unread = posts.some(p => !readIds.has(p.id) && p.uid !== currentUser);
+      document.getElementById('nav-dot').classList.toggle('hidden', !unread);
+    }
+  
+    /* ---------- 相册部分 ---------- */
+    const albumGrid = document.getElementById('album-grid'),
+          albumEmpty = document.getElementById('album-empty');
+    let currentAlbumMode = 'time';
+    function getAllPhotos() {
+      const arr = [];
+      posts.forEach(p => p.imgs.forEach(u => arr.push({ url: u, place: p.place || '未知', date: new Date(p.ts).toISOString().slice(0, 10) })));
+      return arr;
+    }
+    function renderAlbum(mode = 'time') {
+      currentAlbumMode = mode;
+      const photos = getAllPhotos();
+      albumGrid.innerHTML = '';
+      const grouped = {};
+      photos.forEach(p => {
+        const k = mode === 'time' ? p.date.slice(0, 7) : p.place;
+        (grouped[k] = grouped[k] || []).push(p);
+      });
+      Object.entries(grouped).forEach(([k, arr]) => {
+        albumGrid.innerHTML += `<h4 style="grid-column:1/-1;margin:4px 0 6px">${k}</h4>`;
+        arr.forEach(p => {
+          const div = document.createElement('div');
+          div.className = 'photo';
+          div.innerHTML = `<img src="${p.url}"><span>${p.place}</span>`;
+          div.onclick = () => showModal(p.url, `${p.date} · ${p.place}`);
+          albumGrid.appendChild(div);
+        });
+      });
+      albumEmpty.classList.toggle('hidden', photos.length > 0);
+    }
+    renderAlbum();
+    $$ ('.album-tabs button').forEach(b => b.onclick = () => {
+      $$ ('.album-tabs button').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      renderAlbum(b.dataset.tab);
+    });
+  
+    /* ---------- Modal ---------- */
+    function showModal(src, meta) {
+      document.getElementById('mImg').src = src;
+      document.getElementById('mMeta').textContent = meta;
+      document.getElementById('photoModal').classList.add('show');
+    }
+    function hideModal() { document.getElementById('photoModal').classList.remove('show'); }
+    document.getElementById('photoModal').addEventListener('click', e => { if (e.target.id === 'photoModal') hideModal(); });
+  
+    /* ---------- 勋章 Modal & 管理 ---------- */
+    const BADGES = [
+      { id: 'none',    name: '不佩戴',         color: '' },
+      { id: 'best',    name: '最好的大佬',     color: 'linear-gradient(135deg,#3fa7ff,#ff9e3f)', owner: '离' },
+      { id: 'catgirl', name: '你才是猫娘',     color: 'linear-gradient(135deg,pink,white)' }
+    ];
+    function badgeHTML(uid) {
+      const id = store('wear_' + uid);
+      if (!id || id === 'none') return '';
+      const b = BADGES.find(x => x.id === id);
+      if (!b) return '';
+      const extraClass = id === 'catgirl' ? 'catgirl' : '';
+      return `<span class="badge ${extraClass}" style="background:${b.color}">${b.name}</span>`;
+    }
+    function showBadgeModal() {
+      renderBadgeOptions();
+      document.getElementById('badgeModal').classList.add('show');
+    }
+    function hideBadgeModal() {
+      document.getElementById('badgeModal').classList.remove('show');
+    }
+    function renderBadgeOptions() {
+      const container = document.getElementById('badgeOptions');
+      const allowedBadges = BADGES.filter(b => {
+        if (b.id === 'best') {
+          return currentUser === '离';
+        }
+        return true;
+      });
+      container.innerHTML = allowedBadges.map(b => {
+        const checked = (store('wear_' + currentUser) === b.id) ||
+                        (!store('wear_' + currentUser) && b.id === 'none') ? 'checked' : '';
+        return `<label style="display:flex;align-items:center;gap:6px;margin:4px 0">
+                  <input type="radio" name="wear" value="${b.id}" ${checked}>
+                  <span class="badge ${b.id === 'catgirl' ? 'catgirl' : ''}" style="background:${b.color}">${b.name}</span>
+                </label>`;
+      }).join('');
+    }
+    document.getElementById('confirmBadge').onclick = () => {
+      const selected = document.querySelector('input[name="wear"]:checked');
+      if (selected) {
+        store('wear_' + currentUser, selected.value);
+        renderPosts();
+        updateCurrentBadgeDisplay();
+      }
+      hideBadgeModal();
+    };
+    function updateCurrentBadgeDisplay() {
+      const disp = document.getElementById('currentBadgeDisplay');
+      let storedBadge = store('wear_' + currentUser) || 'none';
+      if (storedBadge === 'best' && currentUser !== '离') {
+        storedBadge = 'none';
+        store('wear_' + currentUser, storedBadge);
+      }
+      const b = BADGES.find(x => x.id === storedBadge);
+      if (b && b.id !== 'none') {
+        disp.innerHTML = `<span class="badge ${b.id === 'catgirl' ? 'catgirl' : ''}" style="background:${b.color}">${b.name}</span>
+                            <button id="changeBadgeBtn" class="btn-ghost" style="margin-left:12px;">更换勋章</button>`;
+      } else {
+        disp.innerHTML = `暂无勋章 <button id="changeBadgeBtn" class="btn-ghost" style="margin-left:12px;">更换勋章</button>`;
+      }
+      document.getElementById('changeBadgeBtn').onclick = showBadgeModal;
+    }
+  
+    /* ---------- 昵称输入框与 displayName 的双向绑定 ---------- */
+    const nameInput = document.getElementById('name-me');
+    function syncNameInput() {
+      const currentName = displayName(currentUser);
+      nameInput.value = currentName;
+      const headerNameEl = document.getElementById('header-name');
+      if (headerNameEl) {
+        headerNameEl.textContent = currentName;
+      }
+      renderPosts();
+    }
+    nameInput.addEventListener('input', () => {
+      const newName = nameInput.value.trim();
+      store('displayName_' + currentUser, newName);
+      const headerNameEl = document.getElementById('header-name');
+      if (headerNameEl) {
+        headerNameEl.textContent = newName;
+      }
+      renderPosts();
+    });
+  
+    /* ---------- 初始化示例 & 登录后初始化 ---------- */
+    function initAfterLogin() {
+      if (!posts.length) {
+        addPost({
+          id: 1,
+          uid: 'Furinya',
+          txt: '欢迎大佬~',
+          place: '蒙德城',
+          imgs: [],
+          ts: Date.now() - 86400000,
+          views: 0,
+          cmts: []
+        });
+        savePosts();
+      }
+      renderPosts();
+      renderAlbum(currentAlbumMode);
+      updateCurrentBadgeDisplay();
+      syncNameInput();
+    }
+    if (currentUser) initAfterLogin();
+  </script>
 </body>
 </html>
