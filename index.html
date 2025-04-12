@@ -119,8 +119,8 @@
     }
     /* “你才是猫娘”：使用粉白渐变，文字颜色调整为黑色保证阅读性 */
     .badge.catgirl {
-      background: linear-gradient(135deg, #ead0dd, #ffb6c1);
-      color: #fffbfb;
+      background: linear-gradient(135deg, #e261a1, #ffb6c1);
+      color: #ffffff;
     }
     /* “最好的大佬”：动画时长延长至10s，不加粗 */
     .badge.best {
@@ -157,6 +157,7 @@
       padding: 18px;
     }
     h2.big { margin: 70px 0 22px; font-size: 26px; padding-left: 0; }
+    /* ===== 投稿区域 ===== */
     #moments { padding: 40px 8%; }
     #new-post textarea {
       resize: none; height: 78px;
@@ -167,6 +168,7 @@
       padding: 10px; font-size: 14px; width: 100%;
     }
     #preview img { width: 70px; height: 50px; border-radius: 8px; object-fit: cover; }
+    /* ===== 动态列表 ===== */
     #moments-list { display: flex; flex-direction: column; gap: 26px; }
     .post .photos { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; }
     .post .photos img { width: 96px; height: 68px; border-radius: 8px; object-fit: cover; }
@@ -178,6 +180,7 @@
     .more:hover { background: rgba(0, 0, 0, .08); }
     .post-txt.folded { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .toggle { color: var(--primary); cursor: pointer; font-size: 13px; margin-left: 6px; }
+    /* ===== 相册 ===== */
     #album { padding: 40px 8%; }
     .album-tabs { display: flex; gap: 16px; margin-bottom: 18px; }
     .album-tabs button {
@@ -192,6 +195,7 @@
     .photo img { width: 100%; height: 120px; object-fit: cover; transition: .3s transform; }
     .photo:hover img { transform: scale(1.05); }
     .photo span { position: absolute; bottom: 6px; left: 6px; background: rgba(0, 0, 0, .45); color: #fff; font-size: 12px; padding: 2px 6px; border-radius: 8px; }
+    /* ===== 设置 ===== */
     #settings { padding: 40px 8%; }
     fieldset { border: none; padding: 0; margin: 0 0 24px; }
     legend { font-weight: 600; font-size: 15px; margin-bottom: 8px; }
@@ -213,6 +217,7 @@
       background-repeat: no-repeat; background-position: right 10px center;
       backdrop-filter: blur(calc(var(--blur) / 2));
     }
+    /* ===== Modal ===== */
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,.55);
       display: flex; justify-content: center; align-items: center;
@@ -223,7 +228,6 @@
       opacity: 1;
       visibility: visible;
     }
-    /* 统一 Modal 内容盒样式 */
     .box {
       background: var(--card-light); backdrop-filter: blur(var(--blur));
       border: var(--glass-border); border-radius: var(--radius);
@@ -231,13 +235,13 @@
       overflow: auto; padding: 20px; position: relative;
     }
     body.dark .box { background: var(--card-dark); }
-    /* 针对勋章 Modal 取消弹出动画（避免闪烁） */
     #badgeModal .box { animation: none; }
     .close { position: absolute; top: 10px; right: 16px; font-size: 24px; cursor: pointer; }
+    /* ===== 桌宠 ===== */
     #pet { position: fixed; right: 24px; bottom: 24px; width: 90px; user-select: none; cursor: move; z-index: 90; }
     #pet svg { width: 100%; animation: breathe 3s ease-in-out infinite; }
     @keyframes breathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-    /* 暗黑模式下输入框、文本域和下拉菜单样式 */
+    /* ===== 暗黑模式下 ===== */
     body.dark input,
     body.dark textarea,
     body.dark select {
@@ -266,7 +270,77 @@
     }
     #bubble.show { opacity: 1; transform: translateY(0); }
 
-    /* ================ 登录 Modal（与整体主题搭配） ================ */
+    /* ============ 新增：评论区域样式 ============ */
+    .comments {
+      margin-top: 8px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    .comment {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 4px 0;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.03);
+      font-size: 13px;
+    }
+    .comment-left {
+      flex: 1;
+    }
+    .comment-right {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .comment-author {
+      font-weight: 600;
+    }
+    .comment-edit,
+    .comment-delete {
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+    .comment-edit:hover,
+    .comment-delete:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    .c-input {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .c-input input {
+      flex: 1;
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      border: var(--glass-border);
+      background: var(--card-light);
+      backdrop-filter: blur(calc(var(--blur) / 2));
+      font-size: 14px;
+      transition: box-shadow 0.2s;
+    }
+    .c-input input:focus {
+      box-shadow: 0 0 5px rgba(0,0,0,0.15);
+    }
+    .c-input button {
+      padding: 6px 14px;
+      font-size: 13px;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--ai-btn-bg);
+      color: var(--ai-btn-color);
+      cursor: pointer;
+      transition: background 0.25s;
+    }
+    .c-input button:hover {
+      background: var(--ai-btn-hover-bg);
+    }
+
+    /* ============ 登录 Modal 样式 ============ */
     #loginModal {
       display: flex;
       align-items: center;
@@ -335,9 +409,9 @@
     #loginModal .btn-publish:hover {
       background: #66baff;
     }
-    /* ===== 勋章 Modal ===== */
+    /* ============ 勋章 Modal ============ */
     #badgeModal .box { animation: none; }
-    /* ===== 反馈 Toast ===== */
+    /* ============ 反馈 Toast ============ */
     #badgeToast {
       position: fixed;
       bottom: 80px;
@@ -370,7 +444,7 @@
     </div>
   </nav>
   
-  <!-- ===== 动态 ===== -->
+  <!-- ===== 动态（投稿与动态列表） ===== -->
   <section id="moments">
     <h2 class="big">投稿</h2>
     <div id="new-post" class="card" style="display:flex;flex-direction:column;gap:12px">
@@ -466,7 +540,6 @@
       </fieldset>
       <fieldset id="badge-field">
         <legend>勋章</legend>
-        <!-- 仅显示更换按钮 -->
         <div id="currentBadgeDisplay" class="setting-item" style="flex-direction: row; align-items: center;">
           <button id="changeBadgeBtn" class="btn-ghost">更换勋章</button>
         </div>
@@ -730,7 +803,7 @@
       renderAlbum(currentAlbumMode);
     }
     const MAX_LEN = 120;
-    // badgeHTML：用于动态帖子中同步显示用户勋章
+    // badgeHTML：用于同步显示用户勋章
     function badgeHTML(uid) {
       const m = store('wear_' + uid);
       if (!m || m === 'none') return '';
@@ -779,13 +852,24 @@
             <span>${p.views}</span>
           </div>
           <div class="comments">
-            ${p.cmts.map((c, i) => `<div class="c" data-idx="${i}" style="display:flex;justify-content:space-between">
-                <span>${c.who === 'pet' ? '🐱' : '我'}：${c.txt}</span>
-                ${isMine && c.who !== 'pet' ? '<span class="more del-c">×</span>' : ''}
-              </div>`).join('')}
-            <div class="c-input" style="display:flex;gap:8px;margin-top:8px">
-              <input placeholder="评论..." style="flex:1;border-radius:var(--radius);border:var(--glass-border);padding:6px;background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2))">
-              <button class="btn-publish" style="padding:6px 14px;font-size:13px">发送</button>
+            ${p.cmts.map((c, i) => {
+              const canEdit = c.who === currentUser;
+              return `
+                <div class="comment" data-idx="${i}">
+                  <div class="comment-left">
+                    <span class="comment-text">${c.txt}</span>
+                  </div>
+                  <div class="comment-right">
+                    ${ canEdit 
+                        ? `<span class="comment-edit" title="编辑">✎</span><span class="comment-delete" title="撤回">×</span>`
+                        : `<span class="comment-author">${c.who}</span>` }
+                  </div>
+                </div>
+              `;
+            }).join('')}
+            <div class="c-input">
+              <input type="text" placeholder="评论...">
+              <button class="btn-publish" style="font-size:13px">发送</button>
             </div>
           </div>`;
         if (isMine) {
@@ -797,23 +881,7 @@
               savePosts();
             }
           };
-          card.querySelectorAll('.del-c').forEach(el => el.onclick = () => {
-            const idx = +el.parentNode.dataset.idx;
-            p.cmts.splice(idx, 1);
-            renderPosts();
-            savePosts();
-          });
         }
-        const ci = card.querySelector('.c-input input'),
-              cb = card.querySelector('.c-input button');
-        cb.onclick = () => {
-          const v = ci.value.trim();
-          if (!v) return;
-          p.cmts.push({ who: 'me', txt: v });
-          ci.value = '';
-          renderPosts();
-          savePosts();
-        };
         if (isLong) {
           card.querySelector('.toggle').onclick = ({ target }) => {
             const pEl = target.previousElementSibling;
@@ -822,6 +890,39 @@
             target.textContent = folded ? '展开' : '收起';
           };
         }
+        const ci = card.querySelector('.c-input input'),
+              cb = card.querySelector('.c-input button');
+        cb.onclick = () => {
+          const v = ci.value.trim();
+          if (!v) return;
+          p.cmts.push({ who: currentUser, txt: v });
+          ci.value = '';
+          renderPosts();
+          savePosts();
+        };
+        card.querySelectorAll('.comment-delete').forEach(btn => {
+          btn.onclick = function() {
+            const idx = +this.parentNode.parentNode.dataset.idx;
+            if (confirm('确定撤回该评论吗？')) {
+              p.cmts.splice(idx, 1);
+              renderPosts();
+              savePosts();
+            }
+          };
+        });
+        card.querySelectorAll('.comment-edit').forEach(btn => {
+          btn.onclick = function() {
+            const idx = +this.parentNode.parentNode.dataset.idx;
+            const commentEl = this.parentNode.parentNode.querySelector('.comment-text');
+            const oldText = commentEl.textContent;
+            const newText = prompt('编辑评论：', oldText);
+            if (newText !== null && newText.trim() !== '' && newText !== oldText) {
+              p.cmts[idx].txt = newText.trim();
+              renderPosts();
+              savePosts();
+            }
+          };
+        });
         list.appendChild(card);
       });
       observePosts();
@@ -903,7 +1004,6 @@
       { id: 'best',    name: '最好的大佬',     color: '' },
       { id: 'catgirl', name: '你才是猫娘',     color: 'linear-gradient(135deg,pink,white)' }
     ];
-    // 用于 renderPosts() 内 badgeHTML(uid) 同步显示
     function showBadgeModal() {
       renderBadgeOptions();
       document.getElementById('badgeModal').classList.add('show');
@@ -911,7 +1011,6 @@
     function hideBadgeModal() {
       document.getElementById('badgeModal').classList.remove('show');
     }
-    // 输出勋章 Modal 内选项
     function renderBadgeOptions() {
       const container = document.getElementById('badgeOptions');
       const allowedBadges = BADGES.filter(b => {
@@ -941,7 +1040,6 @@
       const selected = document.querySelector('input[name="wear"]:checked');
       if (selected) {
         store('wear_' + currentUser, selected.value);
-        // 反馈提示：显示 toast 信息
         const toast = document.getElementById('badgeToast');
         toast.style.display = 'block';
         setTimeout(() => { toast.style.display = 'none'; }, 2000);
@@ -949,7 +1047,6 @@
       }
       hideBadgeModal();
     };
-    // 使用事件委托为设置页的“更换勋章”按钮绑定点击事件
     document.getElementById('badge-field').addEventListener('click', function(e) {
       if (e.target && e.target.id === 'changeBadgeBtn') {
         showBadgeModal();
