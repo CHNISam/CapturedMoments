@@ -7,7 +7,7 @@
   <style>
     :root {
       --bg-light: #f5f7fa;
-      --bg-dark: #1e1f24;
+      --bg-dark: #0a0a1a; /* 更新后的夜间背景，深蓝色 */
       --card-light: #ffffff33;
       --card-dark: #2b2d3133;
       --blur: 16px;
@@ -21,6 +21,7 @@
       --radius: 14px;
       --glass-border: 1px solid rgba(255, 255, 255, .25);
       --select-arrow: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3e%3cpath fill='%23666' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+      --select-arrow-dark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3e%3cpath fill='%23ddd' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
       /* 登录窗口专用变量 */
       --login-bg: #f5f7fa;
       --login-text: #222;
@@ -31,6 +32,7 @@
       --login-text: #ddd;
       --login-border: #3a3f47;
     }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -52,6 +54,22 @@
       cursor: pointer;
     }
     .hidden { display: none; }
+
+    /* 星空背景 canvas */
+    #starCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      display: none;
+    }
+    /* 仅在暗黑模式下显示星空 */
+    body.dark #starCanvas {
+      display: block;
+    }
+
     /* ===== 顶栏 ===== */
     nav {
       position: fixed;
@@ -117,12 +135,10 @@
       min-width: 40px;
       text-align: center;
     }
-    /* “你才是猫娘”：使用粉白渐变，文字颜色调整为黑色保证阅读性 */
     .badge.catgirl {
       background: linear-gradient(135deg, #e261a1, #ffb6c1);
       color: #ffffff;
     }
-    /* “最好的大佬”：动画时长延长至10s，不加粗 */
     .badge.best {
       background: linear-gradient(270deg, #3fa7ff, #ff9e3f, #3fa7ff);
       background-size: 400% 400%;
@@ -138,7 +154,6 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-    /* “不佩戴”样式 */
     .badge.badge-none {
       background: none;
       border: 1px dashed #aaa;
@@ -210,13 +225,22 @@
       color: inherit;
     }
     select {
-      appearance: none; padding: 8px 34px 8px 12px; font-size: 14px;
-      border-radius: var(--radius); border: var(--glass-border);
-      background: var(--card-light); color: inherit; max-width: 160px;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      padding: 6px 34px 6px 12px;
+      font-size: 14px;
+      border-radius: var(--radius);
+      border: var(--glass-border);
+      background: var(--card-light);
+      color: inherit;
+      max-width: 160px;
       background-image: var(--select-arrow);
-      background-repeat: no-repeat; background-position: right 10px center;
+      background-repeat: no-repeat;
+      background-position: right 10px center;
       backdrop-filter: blur(calc(var(--blur) / 2));
     }
+    select::-ms-expand { display: none; }
     /* ===== Modal ===== */
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,.55);
@@ -244,11 +268,9 @@
     /* ===== 暗黑模式下 ===== */
     body.dark input,
     body.dark textarea,
-    body.dark select {
+    body.dark select option {
       background-color: var(--card-dark);
-      border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--text-dark);
-      transition: border-color 0.2s ease;
     }
     body.dark input:focus,
     body.dark textarea:focus {
@@ -269,8 +291,7 @@
       opacity: 0; transform: translateY(10px); z-index: 95;
     }
     #bubble.show { opacity: 1; transform: translateY(0); }
-
-    /* ============ 新增：评论区域样式 ============ */
+    /* ============ 评论区域样式 ============ */
     .comments {
       margin-top: 8px;
       padding-top: 4px;
@@ -339,7 +360,6 @@
     .c-input button:hover {
       background: var(--ai-btn-hover-bg);
     }
-
     /* ============ 登录 Modal 样式 ============ */
     #loginModal {
       display: flex;
@@ -428,6 +448,9 @@
   </style>
 </head>
 <body>
+  <!-- 星空背景，仅在暗黑模式下显示 -->
+  <canvas id="starCanvas"></canvas>
+  
   <!-- ===== 顶栏 ===== -->
   <nav>
     <div class="logo">把回忆拼好给你</div>
@@ -456,6 +479,7 @@
           <option>璃月</option>
           <option>稻妻</option>
           <option>须弥</option>
+          <option>枫丹</option>
           <option>纳塔</option>
         </select>
         <label class="btn-ghost upload-btn">
@@ -1127,6 +1151,201 @@
       syncNameInput();
     }
     if (currentUser) initAfterLogin();
+
+    function initStarCanvas() {
+  const canvas = document.getElementById('starCanvas');
+  const ctx = canvas.getContext('2d');
+
+  let stars = [];
+  let meteor = null;  // 当前唯一的流星
+  let lastMeteorTime = Date.now();
+
+  // 混合模式变量：
+  // astronomyBlend：0 表示完全随机漂移；1 表示完全天文旋转模式。
+  // targetAstronomy：目标状态，偶尔随机触发为0或1，过渡由blendSpeed平滑进行
+  let astronomyBlend = 0;
+  let targetAstronomy = 0;
+
+  // 天文模式旋转速度（弧度/帧）—稍微调低，使旋转平缓
+  const rotationSpeed = 0.00015;
+
+  // 利用网格+随机抖动生成星星，
+  // 每颗星保存两套数据：随机漂移的基础位置与运动速度，以及天文模式所需的极坐标（相对于固定天文中心）。
+  function initStars(numStars = 400) {
+    stars = [];
+    const width = canvas.width;
+    const height = canvas.height;
+    const gridCount = Math.round(Math.sqrt(numStars));
+    const cellW = width / gridCount;
+    const cellH = height / gridCount;
+    // 固定天文旋转中心（例如水平中心，上部25%位置）
+    const astroCenter = { x: width / 2, y: height * 0.25 };
+    for (let i = 0; i < gridCount; i++) {
+      for (let j = 0; j < gridCount; j++) {
+        // 每个格子内随机一个初始位置
+        let rx = j * cellW + Math.random() * cellW;
+        let ry = i * cellH + Math.random() * cellH;
+        // 用于随机模式：保存基本位置，并设定非常慢的漂移速度（较原来降低约10倍）
+        const randomX = rx;
+        const randomY = ry;
+        const dx = (Math.random() - 0.5) * 0.005;
+        const dy = (Math.random() - 0.5) * 0.005;
+        // 用于天文模式：计算以astroCenter为圆心的极坐标
+        const dX = rx - astroCenter.x, dY = ry - astroCenter.y;
+        const distance = Math.sqrt(dX * dX + dY * dY);
+        const astroAngle = Math.atan2(dY, dX);
+        stars.push({
+          // 随机模式数据
+          randomX: randomX,
+          randomY: randomY,
+          dx: dx,
+          dy: dy,
+          // 天文模式数据
+          distance: distance,
+          astroAngle: astroAngle,
+          // 最终绘制位置 (x,y) 初始化取随机模式
+          x: randomX,
+          y: randomY,
+          // 外观参数
+          radius: Math.random() * 1.5 + 0.5,
+          baseAlpha: Math.random() * 0.5 + 0.5,
+          amplitude: Math.random() * 0.3,
+          phase: Math.random() * Math.PI * 2,
+          brightnessSpeed: Math.random() * 0.001 + 0.0005
+        });
+      }
+    }
+    meteor = null;
+    lastMeteorTime = Date.now();
+  }
+
+  // 单颗流星：从上部随机位置发出，角度约在20°～40°之间（以右下方向为例），
+  // 速度较高、拖尾长，使得流星非常明显。
+  function spawnMeteor() {
+    const width = canvas.width, height = canvas.height;
+    const x0 = Math.random() * width;
+    const y0 = Math.random() * height * 0.2;
+    const angle = (Math.random() * 20 + 20) * Math.PI / 180;
+    meteor = {
+      x: x0,
+      y: y0,
+      len: Math.random() * 80 + 80,   // 拖尾长些
+      speed: Math.random() * 5 + 12,    // 初始速度高一些
+      acceleration: Math.random() * 0.15 + 0.1,
+      angle: angle,
+      life: 0,
+      maxLife: Math.random() * 300 + 500,
+      // 轻微曲线扰动，保证整体直线，但看起来自然
+      curveAmplitude: Math.random() * 1 + 0.5,
+      curveFrequency: Math.random() * 0.002 + 0.001,
+      curvePhase: Math.random() * Math.PI * 2
+    };
+  }
+
+  // 当窗口大小变化时，调整canvas尺寸并重新生成星空数据
+  function resize() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+    initStars(400);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // 更新模式：每帧小概率随机切换目标状态（0或1），再平滑更新混合系数；
+  // 混合系数用于平滑过渡：0为纯随机漂移，1为完全天文模式。
+  function updateMode() {
+    // 低概率触发目标更新
+    if (Math.random() < 0.0005) {
+      targetAstronomy = 1;
+    } else if (Math.random() < 0.0005) {
+      targetAstronomy = 0;
+    }
+    // 每帧按小步长平滑插值调整，blendSpeed决定过渡速度（这里取 0.002，比较缓慢）
+    const blendSpeed = 0.002;
+    astronomyBlend += (targetAstronomy - astronomyBlend) * blendSpeed;
+  }
+
+  // 动画循环
+  function animate() {
+    const width = canvas.width, height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+    const time = Date.now();
+    updateMode();
+    // 固定天文模式旋转中心（例如水平中心，上部25%）
+    const astroCenter = { x: width / 2, y: height * 0.25 };
+
+    stars.forEach(star => {
+      // 随机模式更新：缓慢漂移
+      star.randomX += star.dx;
+      star.randomY += star.dy;
+      if (star.randomX < 0) star.randomX = width;
+      if (star.randomX > width) star.randomX = 0;
+      if (star.randomY < 0) star.randomY = height;
+      if (star.randomY > height) star.randomY = 0;
+
+      // 天文模式更新：以固定旋转中心绕行，角度逐帧加 rotationSpeed
+      star.astroAngle += rotationSpeed;
+      let astroX = astroCenter.x + star.distance * Math.cos(star.astroAngle);
+      let astroY = astroCenter.y + star.distance * Math.sin(star.astroAngle);
+
+      // 计算最终绘制位置，两种模式按 astronomyBlend 混合
+      star.x = (1 - astronomyBlend) * star.randomX + astronomyBlend * astroX;
+      star.y = (1 - astronomyBlend) * star.randomY + astronomyBlend * astroY;
+
+      // 计算闪烁透明度
+      const alpha = star.baseAlpha + star.amplitude * Math.sin(time * star.brightnessSpeed + star.phase);
+      const gradient = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.radius * 3);
+      gradient.addColorStop(0, `rgba(255,255,255,${alpha})`);
+      gradient.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 流星生成：如果当前无流星且距离上一次生成超过15秒，以一定概率生成一颗明显的流星
+    if (!meteor && time - lastMeteorTime > 15000 && Math.random() < 0.005) {
+      spawnMeteor();
+      lastMeteorTime = time;
+    }
+    if (meteor) {
+      meteor.life += 16.67; // 模拟60fps，每帧约16.67ms
+      const progress = meteor.life / meteor.maxLife;
+      if (progress > 1) {
+        meteor = null;
+      } else {
+        // 更新流星速度
+        meteor.speed += meteor.acceleration;
+        // 主直线运动
+        meteor.x += Math.cos(meteor.angle) * meteor.speed;
+        meteor.y += Math.sin(meteor.angle) * meteor.speed;
+        // 加入轻微曲线扰动（保持整体直线感）
+        const offset = meteor.curveAmplitude * Math.sin(meteor.life * meteor.curveFrequency + meteor.curvePhase);
+        meteor.x += -Math.sin(meteor.angle) * offset;
+        meteor.y += Math.cos(meteor.angle) * offset;
+
+        // 绘制流星拖尾：线性渐变从不透明到透明
+        ctx.beginPath();
+        const tailX = meteor.x - Math.cos(meteor.angle) * meteor.len;
+        const tailY = meteor.y - Math.sin(meteor.angle) * meteor.len;
+        const grad = ctx.createLinearGradient(meteor.x, meteor.y, tailX, tailY);
+        grad.addColorStop(0, `rgba(255,255,255,${1 - progress})`);
+        grad.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 2;
+        ctx.moveTo(meteor.x, meteor.y);
+        ctx.lineTo(tailX, tailY);
+        ctx.stroke();
+      }
+    }
+
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+window.addEventListener('load', initStarCanvas);
+
   </script>
 </body>
 </html>
