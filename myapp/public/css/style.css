@@ -1,0 +1,189 @@
+/* style.css */
+:root {
+    --bg-light: #f5f7fa;
+    --bg-dark: #1e1f24;
+    --card-light: rgba(255, 255, 255, 0.85);
+    --card-dark: #2b2d3133;
+    --primary: #3fa7ff;
+    --accent: #ff9e3f;
+    --radius: 10px;
+    --shadow: 0 4px 20px rgba(0,0,0,0.2);
+  }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-light);
+    color: #333;
+  }
+  
+  /* 顶栏 */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    box-shadow: var(--shadow);
+    z-index: 100;
+  }
+  nav .logo {
+    font-weight: bold;
+    font-size: 20px;
+  }
+  nav .menu a,
+  nav .menu button {
+    margin-left: 10px;
+    padding: 6px 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+  nav .menu a:hover,
+  nav .menu button:hover {
+    background: rgba(0,0,0,0.1);
+    border-radius: var(--radius);
+  }
+  
+  /* 区域标题 */
+  h2.big {
+    margin-top: 80px;
+    font-size: 24px;
+    padding: 0 8%;
+  }
+  
+  /* 卡片 */
+  .card {
+    background: var(--card-light);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 20px 8%;
+    box-shadow: var(--shadow);
+  }
+  
+  /* 登录 Modal 科技感样式 */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 200;
+  }
+  .modal.show {
+    visibility: visible;
+    opacity: 1;
+  }
+  .box {
+    background: var(--card-light);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+  }
+  .login-box {
+    background: linear-gradient(135deg, #0d47a1, #1976d2);
+    color: #fff;
+  }
+  .login-box h2 {
+    margin-bottom: 20px;
+    font-size: 28px;
+  }
+  .login-users {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 20px;
+  }
+  .login-users .avatar {
+    cursor: pointer;
+    text-align: center;
+  }
+  .login-users .avatar img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    transition: transform 0.3s;
+  }
+  .login-users .avatar:hover img {
+    transform: scale(1.1);
+  }
+  .login-users .avatar span {
+    display: block;
+    margin-top: 8px;
+  }
+  
+  /* 表单输入 */
+  input[type="text"],
+  input[type="password"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: var(--radius);
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+  
+  /* 按钮 */
+  .btn-publish,
+  .btn-ghost {
+    cursor: pointer;
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius);
+    transition: background 0.3s;
+  }
+  .btn-publish {
+    background: var(--primary);
+    color: #fff;
+  }
+  .btn-publish:hover {
+    background: var(--accent);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: inherit;
+  }
+  .btn-ghost:hover {
+    background: rgba(0,0,0,0.1);
+  }
+  
+  /* 其它细节 */
+  .setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+  }
+  .avatar-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 10px;
+  }
+  
+  /* 页脚 */
+  footer {
+    text-align: center;
+    padding: 20px 0;
+    color: #777;
+  }
+  
+  /* 其它区域样式、动态列表、相册等，可按需要扩展 */
+  

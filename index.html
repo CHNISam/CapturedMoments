@@ -1,4 +1,4 @@
-k<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -21,6 +21,15 @@ k<!DOCTYPE html>
       --radius: 14px;
       --glass-border: 1px solid rgba(255, 255, 255, .25);
       --select-arrow: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3e%3cpath fill='%23666' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
+      /* 登录窗口专用变量 */
+      --login-bg: #f5f7fa;
+      --login-text: #222;
+      --login-border: rgba(0,0,0,0.2);
+    }
+    body.dark {
+      --login-bg: #1e1f24;
+      --login-text: #ddd;
+      --login-border: #3a3f47;
     }
     html, body {
       margin: 0;
@@ -45,25 +54,23 @@ k<!DOCTYPE html>
     .hidden { display: none; }
     /* ===== 顶栏 ===== */
     nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 22px;
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(var(--blur));
-    border-bottom: var(--glass-border);
-  }
-
-  .logo {
-    font-weight: 700;
-    font-size: 20px;
-    letter-spacing: .5px;
-    text-align: left;
-  }
-
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 22px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(var(--blur));
+      border-bottom: var(--glass-border);
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: .5px;
+      text-align: left;
+    }
     .menu { display: flex; gap: 18px; align-items: center; }
     .menu a {
       padding: 6px 12px;
@@ -99,15 +106,48 @@ k<!DOCTYPE html>
     .btn-publish:hover { background: var(--ai-btn-hover-bg); }
     .upload-btn { position: relative; overflow: hidden; }
     .upload-btn input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    /* 通用 badge 样式：统一整体尺寸 */
     .badge {
-      font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      margin-left: 6px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
+      font-size: 10px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      margin-left: 4px;
       color: #fff;
+      display: inline-block;
+      min-width: 40px;
+      text-align: center;
     }
-    .badge.catgirl { color: #333; }
+    /* “你才是猫娘”：使用粉白渐变，文字颜色调整为黑色保证阅读性 */
+    .badge.catgirl {
+      background: linear-gradient(135deg, #ead0dd, #ffb6c1);
+      color: #fffbfb;
+    }
+    /* “最好的大佬”：动画时长延长至10s，不加粗 */
+    .badge.best {
+      background: linear-gradient(270deg, #3fa7ff, #ff9e3f, #3fa7ff);
+      background-size: 400% 400%;
+      animation: gradientAnimation 10s ease infinite;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: normal;
+      font-size: 10px;
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    /* “不佩戴”样式 */
+    .badge.badge-none {
+      background: none;
+      border: 1px dashed #aaa;
+      color: #aaa;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 10px;
+      min-width: 40px;
+    }
     .card {
       background: var(--card-light);
       backdrop-filter: blur(calc(var(--blur) / 2));
@@ -176,9 +216,14 @@ k<!DOCTYPE html>
     .modal {
       position: fixed; inset: 0; background: rgba(0,0,0,.55);
       display: flex; justify-content: center; align-items: center;
-      opacity: 0; visibility: hidden; transition: .25s;
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.25s ease;
     }
-    .modal.show { opacity: 1; visibility: visible; }
+    .modal.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    /* 统一 Modal 内容盒样式 */
     .box {
       background: var(--card-light); backdrop-filter: blur(var(--blur));
       border: var(--glass-border); border-radius: var(--radius);
@@ -186,34 +231,31 @@ k<!DOCTYPE html>
       overflow: auto; padding: 20px; position: relative;
     }
     body.dark .box { background: var(--card-dark); }
+    /* 针对勋章 Modal 取消弹出动画（避免闪烁） */
+    #badgeModal .box { animation: none; }
     .close { position: absolute; top: 10px; right: 16px; font-size: 24px; cursor: pointer; }
     #pet { position: fixed; right: 24px; bottom: 24px; width: 90px; user-select: none; cursor: move; z-index: 90; }
     #pet svg { width: 100%; animation: breathe 3s ease-in-out infinite; }
     @keyframes breathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
     /* 暗黑模式下输入框、文本域和下拉菜单样式 */
-body.dark input,
-body.dark textarea,
-body.dark select {
-  background-color: var(--card-dark); /* 使用暗黑模式下的卡片背景 */
-  border: 1px solid rgba(255, 255, 255, 0.1); /* 边框颜色更柔和 */
-  color: var(--text-dark); /* 明确指定文字颜色 */
-  transition: border-color 0.2s ease;
-}
-
-/* 调整输入框和文本域获取焦点时的样式 */
-body.dark input:focus,
-body.dark textarea:focus {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.15);
-  outline: none;
-}
-
-/* 调整下拉菜单获取焦点时的样式 */
-body.dark select:focus {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
+    body.dark input,
+    body.dark textarea,
+    body.dark select {
+      background-color: var(--card-dark);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-dark);
+      transition: border-color 0.2s ease;
+    }
+    body.dark input:focus,
+    body.dark textarea:focus {
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 5px rgba(255, 255, 255, 0.15);
+      outline: none;
+    }
+    body.dark select:focus {
+      outline: none;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
     #bubble {
       position: fixed; right: 110px; bottom: 110px; max-width: 220px;
       background: var(--card-light); backdrop-filter: blur(calc(var(--blur) / 2));
@@ -223,6 +265,92 @@ body.dark select:focus {
       opacity: 0; transform: translateY(10px); z-index: 95;
     }
     #bubble.show { opacity: 1; transform: translateY(0); }
+
+    /* ================ 登录 Modal（与整体主题搭配） ================ */
+    #loginModal {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.5);
+    }
+    #loginModal .box {
+      background: var(--login-bg);
+      color: var(--login-text);
+      border: 1px solid var(--login-border);
+      box-shadow: 0 0 20px rgba(63, 167, 255, 0.4);
+      border-radius: 10px;
+      padding: 30px 20px;
+      text-align: center;
+      width: 350px;
+    }
+    #loginModal h3 {
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-family: 'Roboto', sans-serif;
+    }
+    #loginModal .avatar {
+      margin: 0 10px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: border-color 0.3s;
+    }
+    #loginModal .avatar:hover {
+      border-color: var(--primary);
+    }
+    #loginModal .avatar img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+    }
+    #loginModal .avatar + .avatar {
+      margin-left: 20px;
+    }
+    #loginModal [data-user] {
+      cursor: pointer;
+    }
+    #loginModal #loginPasswordDiv {
+      margin-top: 20px;
+    }
+    #loginModal input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #555;
+      background: #2b2d31;
+      color: #ddd;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    #loginModal .btn-publish {
+      font-size: 16px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    #loginModal .btn-publish:hover {
+      background: #66baff;
+    }
+    /* ===== 勋章 Modal ===== */
+    #badgeModal .box { animation: none; }
+    /* ===== 反馈 Toast ===== */
+    #badgeToast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      display: none;
+      z-index: 200;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -233,7 +361,6 @@ body.dark select:focus {
       <a href="#moments" id="nav-moments">动态<span id="nav-dot" class="red hidden"></span></a>
       <a href="#album">相册</a>
       <a href="#settings">设置</a>
-      <!-- 可以在此处增加显示当前用户名的额外区域，例如 -->
       <span id="header-name" style="font-weight:600;"></span>
       <a id="logout" class="btn-ghost">退出</a>
       <button id="themeBtn" class="btn-ghost">
@@ -330,15 +457,18 @@ body.dark select:focus {
         </div>
         <div class="setting-item">
           <span>我的昵称</span>
-          <!-- 此输入框与 displayName 双向绑定 -->
           <input id="name-me">
         </div>
+        <div class="setting-item">
+          <span>更改密码</span>
+          <button id="changePasswordBtn" class="btn-ghost">更改密码</button>
+        </div>
       </fieldset>
-      <!-- 勋章设置：显示当前徽章和更换勋章按钮 -->
       <fieldset id="badge-field">
         <legend>勋章</legend>
+        <!-- 仅显示更换按钮 -->
         <div id="currentBadgeDisplay" class="setting-item" style="flex-direction: row; align-items: center;">
-          暂无勋章 <button id="changeBadgeBtn" class="btn-ghost" style="margin-left:12px;">更换勋章</button>
+          <button id="changeBadgeBtn" class="btn-ghost">更换勋章</button>
         </div>
       </fieldset>
     </div>
@@ -357,13 +487,19 @@ body.dark select:focus {
   <div id="loginModal" class="modal show">
     <div class="box" style="text-align:center;max-width:340px">
       <h3>选择登录身份</h3>
-      <div style="display:flex;justify-content:center;gap:40px">
+      <div class="avatar-container" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 20px;">
         <div class="avatar" data-user="Furinya">
           <img src="https://placehold.co/90x90?text=F" alt="Furinya">
+          <div>Furinya</div>
         </div>
         <div class="avatar" data-user="离">
           <img src="https://placehold.co/90x90?text=离" alt="离">
+          <div>离</div>
         </div>
+      </div>
+      <div id="loginPasswordDiv" class="hidden">
+        <input type="password" id="loginPassword" placeholder="请输入密码" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;">
+        <button id="loginConfirmBtn" class="btn-publish" style="margin-top:12px;">登录</button>
       </div>
     </div>
   </div>
@@ -378,9 +514,26 @@ body.dark select:focus {
     </div>
   </div>
   
+  <!-- ===== 更改密码 Modal ===== -->
+  <div id="passwordModal" class="modal">
+    <div class="box" style="text-align:center;max-width:340px">
+      <span class="close" onclick="hidePasswordModal()">×</span>
+      <h3>更改密码</h3>
+      <div style="margin-top:16px;">
+        <input type="password" id="oldPassword" placeholder="旧密码" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;">
+        <input type="password" id="newPassword" placeholder="新密码" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;">
+        <input type="password" id="confirmPassword" placeholder="确认新密码" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;">
+        <button id="confirmChangePasswordBtn" class="btn-publish" style="margin-top:12px;">确认更改</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- ===== 桌宠 & 气泡 ===== -->
   <div id="pet"></div>
   <div id="bubble" class="hidden"></div>
+  
+  <!-- ===== 反馈 Toast ===== -->
+  <div id="badgeToast">勋章已更换</div>
   
   <footer style="text-align:center;padding:24px 0;font-size:13px;color:#777">
     © 2025 把回忆拼好给你
@@ -392,32 +545,53 @@ body.dark select:focus {
     const $ = s => document.querySelector(s),
           $$ = s => document.querySelectorAll(s),
           store = (k, v) => v === undefined ? JSON.parse(localStorage.getItem(k) || 'null') : localStorage.setItem(k, JSON.stringify(v));
-  
+
     /* ---------- 全局数据 ---------- */
     let posts = store('posts') || [];
     let currentUser = store('currentUser') || null;
     function readKey() { return 'readIds_' + currentUser; }
     let readIds = new Set(store(readKey()) || []);
-  
-    /* ---------- 显示名称函数 ----------
-       如果 localStorage 中没有存储 displayName，则默认返回 uid（如“离”）
-    */
+    
+    /* ---------- 显示名称函数 ---------- */
     const displayName = uid => store('displayName_' + uid) || uid;
-  
-    /* ---------- 登录 & 退出 ---------- */
-    document.getElementById('loginModal').addEventListener('click', e => {
-      const ava = e.target.closest('.avatar'); 
-      if (!ava) return;
-      currentUser = ava.dataset.user;
-      store('currentUser', currentUser);
-      document.getElementById('loginModal').classList.remove('show');
-      readIds = new Set(store(readKey()) || []);
-      initAfterLogin();
-      syncNameInput();  // 初始化昵称同步
+
+    /* ---------- 用户登录 ---------- */
+    let selectedUser = null;
+    $$ ('#loginModal .avatar').forEach(ava => {
+      ava.addEventListener('click', () => {
+        selectedUser = ava.dataset.user;
+        document.getElementById('loginPassword').value = "";
+        document.getElementById('loginPasswordDiv').classList.remove('hidden');
+      });
     });
-    if (currentUser) document.getElementById('loginModal').classList.remove('show');
-    document.getElementById('logout').onclick = () => { localStorage.removeItem('currentUser'); location.reload(); };
-  
+    document.getElementById('loginConfirmBtn').onclick = () => {
+      const inputPwd = document.getElementById('loginPassword').value;
+      let storedPwd = store('password_' + selectedUser);
+      if (!storedPwd) {
+        storedPwd = "123456";
+        store('password_' + selectedUser, storedPwd);
+      }
+      if (inputPwd === storedPwd) {
+        currentUser = selectedUser;
+        store('currentUser', currentUser);
+        document.getElementById('loginModal').classList.remove('show');
+        readIds = new Set(store(readKey()) || []);
+        initAfterLogin();
+        syncNameInput();
+      } else {
+        alert("密码不正确，请重试！");
+      }
+    };
+
+    if (currentUser) {
+      document.getElementById('loginModal').classList.remove('show');
+    }
+
+    document.getElementById('logout').onclick = () => { 
+      localStorage.removeItem('currentUser'); 
+      location.reload(); 
+    };
+
     /* ---------- 主题设置 ---------- */
     const body = document.body,
           themeT = document.getElementById('theme-toggle'),
@@ -433,7 +607,7 @@ body.dark select:focus {
     setTheme(localStorage.theme === 'dark');
     document.getElementById('themeBtn').onclick = () => setTheme(!body.classList.contains('dark'));
     themeT.onchange = () => setTheme(themeT.checked);
-  
+
     /* ---------- 平滑滚动 & 高亮 ---------- */
     $$('nav .menu a[href^="#"]').forEach(a => a.onclick = e => {
       e.preventDefault();
@@ -448,7 +622,7 @@ body.dark select:focus {
         menuLinks[sec.id].classList.toggle('on', active);
       });
     });
-  
+
     /* ---------- 桌宠设置 ---------- */
     function lockPetFields() {
       const on = document.getElementById('pet-toggle').checked;
@@ -456,14 +630,18 @@ body.dark select:focus {
     }
     document.getElementById('pet-toggle').onchange = lockPetFields;
     lockPetFields();
-  
+    // 修改头像上传，使用 FileReader 转换为 Data URL 存储
     document.getElementById('avatar-input').onchange = e => {
       const f = e.target.files[0];
       if (!f) return;
-      const url = URL.createObjectURL(f);
-      store('avatar-' + currentUser, url);
-      renderAvatars();
-      renderPosts();
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const url = e.target.result;
+        store('avatar-' + currentUser, url);
+        renderAvatars();
+        renderPosts();
+      };
+      reader.readAsDataURL(f);
     };
     function renderAvatars() {
       $$ ('.avatar').forEach(a => {
@@ -472,7 +650,7 @@ body.dark select:focus {
       });
     }
     renderAvatars();
-  
+
     /* ---------- 桌宠代码（略） ---------- */
     const pet = document.getElementById('pet');
     function petSVG(type) {
@@ -503,7 +681,7 @@ body.dark select:focus {
       document.onmousemove = ev => { pet.style.left = ev.pageX - ox + 'px'; pet.style.top = ev.pageY - oy + 'px'; };
       document.onmouseup = () => document.onmousemove = null;
     };
-  
+
     /* ---------- 上传 / 发布 ---------- */
     const postImg = document.getElementById('post-img'),
           preview = document.getElementById('preview'),
@@ -538,7 +716,7 @@ body.dark select:focus {
       document.getElementById('post-place').value = '';
       savePosts();
     };
-  
+
     /* ---------- 动态核心 ---------- */
     function savePosts() {
       const toSave = posts.map(p => ({ ...p, imgs: [] }));
@@ -552,6 +730,20 @@ body.dark select:focus {
       renderAlbum(currentAlbumMode);
     }
     const MAX_LEN = 120;
+    // badgeHTML：用于动态帖子中同步显示用户勋章
+    function badgeHTML(uid) {
+      const m = store('wear_' + uid);
+      if (!m || m === 'none') return '';
+      const badge = BADGES.find(b => b.id === m);
+      if (!badge) return '';
+      if (badge.id === 'best') {
+        return `<span class="badge best">${badge.name}</span>`;
+      } else if (badge.id === 'catgirl') {
+        return `<span class="badge catgirl">${badge.name}</span>`;
+      } else {
+        return `<span class="badge">${badge.name}</span>`;
+      }
+    }
     function renderPosts() {
       const list = document.getElementById('moments-list');
       list.innerHTML = '';
@@ -596,7 +788,6 @@ body.dark select:focus {
               <button class="btn-publish" style="padding:6px 14px;font-size:13px">发送</button>
             </div>
           </div>`;
-  
         if (isMine) {
           card.querySelector('.del-post').onclick = () => {
             if (confirm('撤回这条动态？')) {
@@ -613,7 +804,6 @@ body.dark select:focus {
             savePosts();
           });
         }
-  
         const ci = card.querySelector('.c-input input'),
               cb = card.querySelector('.c-input button');
         cb.onclick = () => {
@@ -624,7 +814,6 @@ body.dark select:focus {
           renderPosts();
           savePosts();
         };
-  
         if (isLong) {
           card.querySelector('.toggle').onclick = ({ target }) => {
             const pEl = target.previousElementSibling;
@@ -633,13 +822,11 @@ body.dark select:focus {
             target.textContent = folded ? '展开' : '收起';
           };
         }
-  
         list.appendChild(card);
       });
       observePosts();
       renderNavDot();
     }
-  
     let io;
     function observePosts() {
       if (io) io.disconnect();
@@ -663,7 +850,7 @@ body.dark select:focus {
       const unread = posts.some(p => !readIds.has(p.id) && p.uid !== currentUser);
       document.getElementById('nav-dot').classList.toggle('hidden', !unread);
     }
-  
+
     /* ---------- 相册部分 ---------- */
     const albumGrid = document.getElementById('album-grid'),
           albumEmpty = document.getElementById('album-empty');
@@ -700,7 +887,7 @@ body.dark select:focus {
       b.classList.add('on');
       renderAlbum(b.dataset.tab);
     });
-  
+
     /* ---------- Modal ---------- */
     function showModal(src, meta) {
       document.getElementById('mImg').src = src;
@@ -709,21 +896,14 @@ body.dark select:focus {
     }
     function hideModal() { document.getElementById('photoModal').classList.remove('show'); }
     document.getElementById('photoModal').addEventListener('click', e => { if (e.target.id === 'photoModal') hideModal(); });
-  
+    
     /* ---------- 勋章 Modal & 管理 ---------- */
     const BADGES = [
       { id: 'none',    name: '不佩戴',         color: '' },
-      { id: 'best',    name: '最好的大佬',     color: 'linear-gradient(135deg,#3fa7ff,#ff9e3f)', owner: '离' },
+      { id: 'best',    name: '最好的大佬',     color: '' },
       { id: 'catgirl', name: '你才是猫娘',     color: 'linear-gradient(135deg,pink,white)' }
     ];
-    function badgeHTML(uid) {
-      const id = store('wear_' + uid);
-      if (!id || id === 'none') return '';
-      const b = BADGES.find(x => x.id === id);
-      if (!b) return '';
-      const extraClass = id === 'catgirl' ? 'catgirl' : '';
-      return `<span class="badge ${extraClass}" style="background:${b.color}">${b.name}</span>`;
-    }
+    // 用于 renderPosts() 内 badgeHTML(uid) 同步显示
     function showBadgeModal() {
       renderBadgeOptions();
       document.getElementById('badgeModal').classList.add('show');
@@ -731,20 +911,29 @@ body.dark select:focus {
     function hideBadgeModal() {
       document.getElementById('badgeModal').classList.remove('show');
     }
+    // 输出勋章 Modal 内选项
     function renderBadgeOptions() {
       const container = document.getElementById('badgeOptions');
       const allowedBadges = BADGES.filter(b => {
-        if (b.id === 'best') {
-          return currentUser === '离';
-        }
+        if (b.id === 'best') { return currentUser === '离'; }
         return true;
       });
       container.innerHTML = allowedBadges.map(b => {
+        let badgeHTMLContent = "";
+        if (b.id === 'none') {
+          badgeHTMLContent = `<span class="badge badge-none">${b.name}</span>`;
+        } else if (b.id === 'best') {
+          badgeHTMLContent = `<span class="badge best">${b.name}</span>`;
+        } else if (b.id === 'catgirl') {
+          badgeHTMLContent = `<span class="badge catgirl">${b.name}</span>`;
+        } else {
+          badgeHTMLContent = `<span class="badge" style="background:${b.color}">${b.name}</span>`;
+        }
         const checked = (store('wear_' + currentUser) === b.id) ||
                         (!store('wear_' + currentUser) && b.id === 'none') ? 'checked' : '';
         return `<label style="display:flex;align-items:center;gap:6px;margin:4px 0">
                   <input type="radio" name="wear" value="${b.id}" ${checked}>
-                  <span class="badge ${b.id === 'catgirl' ? 'catgirl' : ''}" style="background:${b.color}">${b.name}</span>
+                  ${badgeHTMLContent}
                 </label>`;
       }).join('');
     }
@@ -752,28 +941,21 @@ body.dark select:focus {
       const selected = document.querySelector('input[name="wear"]:checked');
       if (selected) {
         store('wear_' + currentUser, selected.value);
+        // 反馈提示：显示 toast 信息
+        const toast = document.getElementById('badgeToast');
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2000);
         renderPosts();
-        updateCurrentBadgeDisplay();
       }
       hideBadgeModal();
     };
-    function updateCurrentBadgeDisplay() {
-      const disp = document.getElementById('currentBadgeDisplay');
-      let storedBadge = store('wear_' + currentUser) || 'none';
-      if (storedBadge === 'best' && currentUser !== '离') {
-        storedBadge = 'none';
-        store('wear_' + currentUser, storedBadge);
+    // 使用事件委托为设置页的“更换勋章”按钮绑定点击事件
+    document.getElementById('badge-field').addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'changeBadgeBtn') {
+        showBadgeModal();
       }
-      const b = BADGES.find(x => x.id === storedBadge);
-      if (b && b.id !== 'none') {
-        disp.innerHTML = `<span class="badge ${b.id === 'catgirl' ? 'catgirl' : ''}" style="background:${b.color}">${b.name}</span>
-                            <button id="changeBadgeBtn" class="btn-ghost" style="margin-left:12px;">更换勋章</button>`;
-      } else {
-        disp.innerHTML = `暂无勋章 <button id="changeBadgeBtn" class="btn-ghost" style="margin-left:12px;">更换勋章</button>`;
-      }
-      document.getElementById('changeBadgeBtn').onclick = showBadgeModal;
-    }
-  
+    });
+
     /* ---------- 昵称输入框与 displayName 的双向绑定 ---------- */
     const nameInput = document.getElementById('name-me');
     function syncNameInput() {
@@ -794,7 +976,40 @@ body.dark select:focus {
       }
       renderPosts();
     });
-  
+    
+    /* ---------- 更改密码功能 ---------- */
+    document.getElementById('changePasswordBtn').onclick = () => {
+      document.getElementById('passwordModal').classList.add('show');
+      document.getElementById('oldPassword').value = "";
+      document.getElementById('newPassword').value = "";
+      document.getElementById('confirmPassword').value = "";
+    };
+    document.getElementById('confirmChangePasswordBtn').onclick = () => {
+      const oldPwd = document.getElementById('oldPassword').value;
+      const newPwd = document.getElementById('newPassword').value;
+      const confirmPwd = document.getElementById('confirmPassword').value;
+      let storedPwd = store('password_' + currentUser);
+      if (!storedPwd) storedPwd = "123456";
+      if (oldPwd !== storedPwd) {
+        alert("旧密码不正确！");
+        return;
+      }
+      if (newPwd !== confirmPwd) {
+        alert("两次输入的新密码不一致！");
+        return;
+      }
+      if (!newPwd) {
+         alert("新密码不能为空！");
+         return;
+      }
+      store('password_' + currentUser, newPwd);
+      alert("密码修改成功！");
+      document.getElementById('passwordModal').classList.remove('show');
+    };
+    function hidePasswordModal() {
+      document.getElementById('passwordModal').classList.remove('show');
+    }
+    
     /* ---------- 初始化示例 & 登录后初始化 ---------- */
     function initAfterLogin() {
       if (!posts.length) {
@@ -812,7 +1027,6 @@ body.dark select:focus {
       }
       renderPosts();
       renderAlbum(currentAlbumMode);
-      updateCurrentBadgeDisplay();
       syncNameInput();
     }
     if (currentUser) initAfterLogin();
