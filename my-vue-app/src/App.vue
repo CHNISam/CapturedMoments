@@ -12,7 +12,7 @@
         </a>
         <a href="#album" @click.prevent="scrollTo('album')">相册</a>
         <a href="#settings" @click.prevent="scrollTo('settings')">设置</a>
-        <span id="header-name" style="font-weight:600;">{{ displayName }}</span>
+        <span id="header-name" style="font-weight:600;">{{ localDisplayName }}</span>
         <a id="logout" class="btn-ghost" @click="logout">退出</a>
         <button id="themeBtn" class="btn-ghost" @click="toggleTheme">
           <svg v-if="theme==='light'" id="sun" viewBox="0 0 24 24">
@@ -79,8 +79,15 @@
         <div v-for="post in posts" :key="post.id" class="post card">
           <div class="head" style="display:flex; justify-content:space-between; align-items:center;">
             <div style="display:flex; align-items:center; gap:8px;">
-              <div style="width:34px; height:34px; border-radius:50%; background:url(getAvatar(post.uid)) center/cover"></div>
+              <div :style="{
+                width: '34px',
+                height: '34px',
+                borderRadius: '50%',
+                background: 'url(' + getAvatar(post.uid) + ') center/cover'
+              }"></div>
+
               <b>{{ getDisplayName(post.uid) }}</b>
+              <span v-html="badgeHTML(post.uid)"></span>
               <span class="red" v-if="!isRead(post.id) && post.uid !== currentUser"></span>
             </div>
             <div style="display:flex; align-items:center; gap:10px;">
@@ -351,6 +358,28 @@ export default {
     }
   },
   methods: {
+    badgeHTML(uid) {
+    // 获取对应徽章的值，注意 localStorage 里存的是字符串
+    const m = localStorage.getItem('wear_' + uid);
+    if (!m || m === '"none"' || m === 'none') return "";
+    // 注意：如果你之前存的是通过 JSON.stringify 保存的，那么获取时会带双引号，需要解析
+    let badgeValue = m;
+    try {
+      badgeValue = JSON.parse(m);
+    } catch(e) {
+      // 解析失败时直接用原值
+    }
+    // 查找 BADGES 数组中对应的徽章对象（假设 BADGES 已在 data 中定义）
+    const badge = this.BADGES.find(b => b.id === badgeValue);
+    if (!badge) return "";
+    if (badge.id === 'best') {
+      return `<span class="badge best">${badge.name}</span>`;
+    } else if (badge.id === 'catgirl') {
+      return `<span class="badge catgirl">${badge.name}</span>`;
+    } else {
+      return `<span class="badge">${badge.name}</span>`;
+    }
+  },
     storeSet(key, value) {
       localStorage.setItem(key, JSON.stringify(value));
     },
@@ -1069,6 +1098,7 @@ body.dark .setting-item + .setting-item {
 .setting-item input[type=text],
 .setting-item textarea {
   width: 60%;
+  max-width: fit-content;
   padding: 6px;
   border-radius: var(--radius);
   border: var(--glass-border);
