@@ -1,175 +1,197 @@
 <template>
   <div>
-    <div :class="{ blurred: !currentUser }">
-      <div>
-        <!-- 星空背景，仅在暗黑模式下显示 -->
-        <canvas id="starCanvas" ref="starCanvas"></canvas>
-        
-        <!-- 导航栏 -->
-        <nav>
-          <div class="logo">把回忆拼好给你</div>
-          <div class="menu">
-            <a href="#moments" id="nav-moments" @click.prevent="scrollTo('moments')">
-              动态<span id="nav-dot" class="red" :class="{ hidden: !hasUnread }"></span>
-            </a>
-            <a href="#album" @click.prevent="scrollTo('album')">相册</a>
-            <a href="#settings" @click.prevent="scrollTo('settings')">设置</a>
-            <span id="header-name" style="font-weight:600;">{{ localDisplayName }}</span>
-            <a id="logout" class="btn-ghost" @click="logout">退出</a>
-            <button id="themeBtn" class="btn-ghost" @click="toggleTheme">
-              <svg v-if="theme==='light'" id="sun" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="5"/>
-              </svg>
-              <svg v-else id="moon" viewBox="0 0 24 24">
-                <path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/>
-              </svg>
-            </button>
+    <!-- 未登录状态下只渲染登录 Modal -->
+    <transition name="fade">
+      <div v-if="!currentUser" id="loginModal" class="modal show">
+        <div class="box" style="text-align:center; max-width:340px">
+          <h3>选择登录身份</h3>
+          <div class="avatar-container" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 20px;">
+            <div class="avatar" @click="selectUser('Furinya')">
+              <img src="https://placehold.co/90x90?text=F" alt="Furinya">
+              <div>Furinya</div>
+            </div>
+            <div class="avatar" @click="selectUser('离')">
+              <img src="https://placehold.co/90x90?text=离" alt="离">
+              <div>离</div>
+            </div>
           </div>
-        </nav>
+          <div v-if="selectedUser">
+            <input type="password" v-model="loginPassword" placeholder="请输入密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+            <button id="loginConfirmBtn" class="btn-publish" style="margin-top:12px;" @click="confirmLogin">登录</button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- 登录后渲染主要内容，退出时 DOM 被销毁 -->
+    <div v-if="currentUser">
+      <!-- 星空背景，仅在暗黑模式下显示 -->
+      <canvas id="starCanvas" ref="starCanvas"></canvas>
+      
+      <!-- 导航栏 -->
+      <nav>
+        <div class="logo">把回忆拼好给你</div>
+        <div class="menu">
+          <a href="#moments" id="nav-moments" @click.prevent="scrollTo('moments')">
+            动态<span id="nav-dot" class="red" :class="{ hidden: !hasUnread }"></span>
+          </a>
+          <a href="#album" @click.prevent="scrollTo('album')">相册</a>
+          <a href="#settings" @click.prevent="scrollTo('settings')">设置</a>
+          <span id="header-name" style="font-weight:600;">{{ localDisplayName }}</span>
+          <a id="logout" class="btn-ghost" @click="logout">退出</a>
+          <button id="themeBtn" class="btn-ghost" @click="toggleTheme">
+            <svg v-if="theme==='light'" id="sun" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="5"/>
+            </svg>
+            <svg v-else id="moon" viewBox="0 0 24 24">
+              <path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/>
+            </svg>
+          </button>
+        </div>
+      </nav>
+      
+      <!-- 投稿区域 -->
+      <section id="moments">
+        <h2 class="big">投稿</h2>
+        <div id="new-post" class="card" style="display:flex; flex-direction:column; gap:12px;">
+          <textarea v-model="newPostText" placeholder="说点什么…"></textarea>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <!-- 下拉菜单：选择地点 -->
+            <select v-model="newPostPlace">
+              <option value="">无地点</option>
+              <option>蒙德</option>
+              <option>璃月</option>
+              <option>稻妻</option>
+              <option>须弥</option>
+              <option>枫丹</option>
+              <option>纳塔</option>
+            </select>
+            <label class="btn-ghost upload-btn">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <input type="file" accept="image/*" multiple @change="handlePostImages">
+            </label>
+            <button id="publish" class="btn-publish" @click="publishPost">发布</button>
+          </div>
+          <div id="preview" style="display:flex; gap:8px; overflow-x:auto;">
+            <img v-for="(img, i) in draftImgs" :key="i" :src="img">
+          </div>
+        </div>
         
-        
-        
-        <!-- 投稿区域 -->
-        <section id="moments">
-          <h2 class="big">投稿</h2>
-          <div id="new-post" class="card" style="display:flex; flex-direction:column; gap:12px;">
-            <textarea v-model="newPostText" placeholder="说点什么…"></textarea>
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-              <!-- 下拉菜单：选择地点 -->
-              <select v-model="newPostPlace">
-                <option value="">无地点</option>
-                <option>蒙德</option>
-                <option>璃月</option>
-                <option>稻妻</option>
-                <option>须弥</option>
-                <option>枫丹</option>
-                <option>纳塔</option>
+        <h2 class="big">动态</h2>
+        <div id="moments-list">
+          <div v-for="post in posts" :key="post.id" class="post card">
+            <div class="head" style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div :style="{
+                  width: '34px',
+                  height: '34px',
+                  borderRadius: '50%',
+                  background: 'url(' + getAvatar(post.uid) + ') center/cover'
+                }"></div>
+                <b>{{ getDisplayName(post.uid) }}</b>
+                <span v-html="badgeHTML(post.uid)"></span>
+                <span class="red" v-if="!isRead(post.id) && post.uid !== currentUser"></span>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:12px">{{ new Date(post.ts).toLocaleTimeString() }}</span>
+                <span v-if="post.uid === currentUser" class="more" @click="deletePost(post)">⋯</span>
+              </div>
+            </div>
+            <div class="body">
+              <p>{{ post.txt }}</p>
+              <small>{{ new Date(post.ts).toLocaleDateString() }}{{ post.place ? ' · ' + post.place : '' }}</small>
+            </div>
+            <div class="photos">
+              <img v-for="(img, i) in post.imgs" :key="i" :src="img" @click="openModal(img, formatMeta(post))">
+            </div>
+            <div class="actions">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/>
+              </svg>
+              <span>{{ post.views }}</span>
+            </div>
+            <div class="comments">
+              <div v-for="(c, idx) in post.cmts" :key="idx" class="comment">
+                <div class="comment-left">
+                  <span class="comment-text">{{ c.txt }}</span>
+                </div>
+                <div class="comment-right">
+                  <span v-if="c.who === currentUser" class="comment-edit" @click="editComment(post, idx)">✎</span>
+                  <span v-if="c.who === currentUser" class="comment-delete" @click="deleteComment(post, idx)">×</span>
+                  <span v-else class="comment-author">{{ c.who }}</span>
+                </div>
+              </div>
+              <div class="c-input">
+                <input type="text" v-model="newComment[post.id]" placeholder="评论...">
+                <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 相册区域 -->
+      <section id="album">
+        <h2 class="big">相册</h2>
+        <div class="album-tabs">
+          <button :class="{ on: albumMode==='time' }" @click="albumMode='time'">按时间</button>
+          <button :class="{ on: albumMode==='region' }" @click="albumMode='region'">按地区</button>
+        </div>
+        <div id="album-grid" class="grid">
+          <template v-for="(group, key) in groupedPhotos" :key="key">
+            <h4 style="grid-column:1/-1; margin:4px 0 6px">{{ key }}</h4>
+            <div v-for="(photo, i) in group" :key="i" class="photo" @click="openModal(photo.url, photo.meta)">
+              <img :src="photo.url">
+              <span>{{ photo.place }}</span>
+            </div>
+          </template>
+        </div>
+        <div id="album-empty" class="hidden" style="text-align:center; margin-top:30px; color:#888" v-if="allPhotos.length===0">
+          暂无照片，快去上传吧~
+        </div>
+      </section>
+      
+      <!-- 设置区域 -->
+      <section id="settings">
+        <h2 class="big">设置</h2>
+        <div class="card">
+          <fieldset>
+            <legend>外观</legend>
+            <div class="setting-item">
+              <span>暗黑模式</span>
+              <input type="checkbox" id="theme-toggle" :checked="theme==='dark'" @change="toggleTheme">
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>桌宠 / LLM</legend>
+            <div class="setting-item">
+              <span>显示桌宠</span>
+              <input type="checkbox" id="pet-toggle" v-model="petEnabled">
+            </div>
+            <div class="setting-item">
+              <span>桌宠类型</span>
+              <!-- 下拉菜单：选择桌宠类型 -->
+              <select id="pet-type" v-model="petType">
+                <option value="cat">猫娘</option>
+                <option value="bird">魈鸟</option>
               </select>
-              <label class="btn-ghost upload-btn">
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <input type="file" accept="image/*" multiple @change="handlePostImages">
-              </label>
-              <button id="publish" class="btn-publish" @click="publishPost">发布</button>
             </div>
-            <div id="preview" style="display:flex; gap:8px; overflow-x:auto;">
-              <img v-for="(img, i) in draftImgs" :key="i" :src="img">
+            <div class="setting-item">
+              <span>启用 LLM</span>
+              <input type="checkbox" id="ai-toggle" v-model="llmEnabled">
             </div>
-          </div>
-          
-          <h2 class="big">动态</h2>
-          <div id="moments-list">
-            <div v-for="post in posts" :key="post.id" class="post card">
-              <div class="head" style="display:flex; justify-content:space-between; align-items:center;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <div :style="{
-                    width: '34px',
-                    height: '34px',
-                    borderRadius: '50%',
-                    background: 'url(' + getAvatar(post.uid) + ') center/cover'
-                  }"></div>
-                  <b>{{ getDisplayName(post.uid) }}</b>
-                  <span v-html="badgeHTML(post.uid)"></span>
-                  <span class="red" v-if="!isRead(post.id) && post.uid !== currentUser"></span>
-                </div>
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <span style="font-size:12px">{{ new Date(post.ts).toLocaleTimeString() }}</span>
-                  <span v-if="post.uid === currentUser" class="more" @click="deletePost(post)">⋯</span>
-                </div>
-              </div>
-              <div class="body">
-                <p>{{ post.txt }}</p>
-                <small>{{ new Date(post.ts).toLocaleDateString() }}{{ post.place ? ' · ' + post.place : '' }}</small>
-              </div>
-              <div class="photos">
-                <img v-for="(img, i) in post.imgs" :key="i" :src="img" @click="openModal(img, formatMeta(post))">
-              </div>
-              <div class="actions">
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/>
-                </svg>
-                <span>{{ post.views }}</span>
-              </div>
-              <div class="comments">
-                <div v-for="(c, idx) in post.cmts" :key="idx" class="comment">
-                  <div class="comment-left">
-                    <span class="comment-text">{{ c.txt }}</span>
-                  </div>
-                  <div class="comment-right">
-                    <span v-if="c.who === currentUser" class="comment-edit" @click="editComment(post, idx)">✎</span>
-                    <span v-if="c.who === currentUser" class="comment-delete" @click="deleteComment(post, idx)">×</span>
-                    <span v-else class="comment-author">{{ c.who }}</span>
-                  </div>
-                </div>
-                <div class="c-input">
-                  <input type="text" v-model="newComment[post.id]" placeholder="评论...">
-                  <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
-                </div>
-              </div>
+            <div class="setting-item">
+              <span id="prompt-label">桌宠 Prompt</span>
+              <input id="pet-prompt" v-model="petPrompt">
             </div>
-          </div>
-        </section>
-        
-        <!-- 相册区域 -->
-        <section id="album">
-          <h2 class="big">相册</h2>
-          <div class="album-tabs">
-            <button :class="{ on: albumMode==='time' }" @click="albumMode='time'">按时间</button>
-            <button :class="{ on: albumMode==='region' }" @click="albumMode='region'">按地区</button>
-          </div>
-          <div id="album-grid" class="grid">
-            <template v-for="(group, key) in groupedPhotos" :key="key">
-              <h4 style="grid-column:1/-1; margin:4px 0 6px">{{ key }}</h4>
-              <div v-for="(photo, i) in group" :key="i" class="photo" @click="openModal(photo.url, photo.meta)">
-                <img :src="photo.url">
-                <span>{{ photo.place }}</span>
-              </div>
-            </template>
-          </div>
-          <div id="album-empty" class="hidden" style="text-align:center; margin-top:30px; color:#888" v-if="allPhotos.length===0">
-            暂无照片，快去上传吧~
-          </div>
-        </section>
-        
-        <!-- 设置区域 -->
-        <section id="settings">
-          <h2 class="big">设置</h2>
-          <div class="card">
-            <fieldset>
-              <legend>外观</legend>
-              <div class="setting-item">
-                <span>暗黑模式</span>
-                <input type="checkbox" id="theme-toggle" :checked="theme==='dark'" @change="toggleTheme">
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend>桌宠 / LLM</legend>
-              <div class="setting-item">
-                <span>显示桌宠</span>
-                <input type="checkbox" id="pet-toggle" v-model="petEnabled">
-              </div>
-              <div class="setting-item">
-                <span>桌宠类型</span>
-                <!-- 下拉菜单：选择桌宠类型 -->
-                <select id="pet-type" v-model="petType">
-                  <option value="cat">猫娘</option>
-                  <option value="bird">魈鸟</option>
-                </select>
-              </div>
-              <div class="setting-item">
-                <span>启用 LLM</span>
-                <input type="checkbox" id="ai-toggle" v-model="llmEnabled">
-              </div>
-              <div class="setting-item">
-                <span id="prompt-label">桌宠 Prompt</span>
-                <input id="pet-prompt" v-model="petPrompt">
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend>账户</legend>
-              <div class="setting-item">
-                <span>头像</span>
+          </fieldset>
+          <fieldset>
+            <legend>账户</legend>
+            <div class="setting-item">
+              <span>头像</span>
+              <div class="avatar-group">
                 <label class="btn-ghost upload-btn">
                   <svg viewBox="0 0 24 24">
                     <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/>
@@ -178,88 +200,68 @@
                 </label>
                 <img :src="getAvatar(currentUser)" alt="Avatar" style="width:40px; height:40px; border-radius:50%;">
               </div>
-              <div class="setting-item">
-                <span>我的昵称</span>
-                <input id="name-me" type="text" v-model="localDisplayName" @input="updateDisplayName">
-              </div>
-              <div class="setting-item">
-                <span>更改密码</span>
-                <button id="changePasswordBtn" class="btn-ghost" @click="openPasswordModal">更改密码</button>
-              </div>
-            </fieldset>
-            <fieldset id="badge-field">
-              <legend>勋章</legend>
-              <div id="currentBadgeDisplay" class="setting-item" style="flex-direction: row; align-items: center;">
-                <button id="changeBadgeBtn" class="btn-ghost" @click="openBadgeModal">更换勋章</button>
-              </div>
-            </fieldset>
-          </div>
-        </section>
-        
-        <!-- 勋章 Modal -->
-        <div v-if="showBadgeModal" id="badgeModal" class="modal show">
-          <div class="box">
-            <span class="close" @click="closeBadgeModal">×</span>
-            <h3>选择勋章</h3>
-            <div id="badgeOptions" style="margin:10px 0;">
-              <label v-for="badge in allowedBadges" :key="badge.id" style="display:flex; align-items:center; gap:6px; margin:4px 0">
-                <input type="radio" name="wear" :value="badge.id" v-model="selectedBadge">
-                <span v-if="badge.id==='none'" class="badge badge-none">{{ badge.name }}</span>
-                <span v-else-if="badge.id==='best'" class="badge best">{{ badge.name }}</span>
-                <span v-else-if="badge.id==='catgirl'" class="badge catgirl">{{ badge.name }}</span>
-                <span v-else class="badge">{{ badge.name }}</span>
-              </label>
             </div>
-            <button id="confirmBadge" class="btn-publish" style="margin-top:12px;" @click="confirmBadge">确认</button>
-          </div>
-        </div>
-        
-        <!-- 密码修改 Modal -->
-        <div v-if="showPasswordModal" id="passwordModal" class="modal show">
-          <div class="box" style="text-align:center; max-width:340px">
-            <span class="close" @click="closePasswordModal">×</span>
-            <h3>更改密码</h3>
-            <div style="margin-top:16px;">
-              <input type="password" v-model="oldPassword" placeholder="旧密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
-              <input type="password" v-model="newPassword" placeholder="新密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
-              <input type="password" v-model="confirmPassword" placeholder="确认新密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
-              <button id="confirmChangePasswordBtn" class="btn-publish" style="margin-top:12px;" @click="changePassword">确认更改</button>
+            <div class="setting-item">
+              <span>我的昵称</span>
+              <input id="name-me" type="text" v-model="localDisplayName" @input="updateDisplayName">
             </div>
+            <div class="setting-item">
+              <span>更改密码</span>
+              <button id="changePasswordBtn" class="btn-ghost" @click="openPasswordModal">更改密码</button>
+            </div>
+          </fieldset>
+          <fieldset id="badge-field">
+            <legend>勋章</legend>
+            <div id="currentBadgeDisplay" class="setting-item" style="flex-direction: row; align-items: center;">
+              <button id="changeBadgeBtn" class="btn-ghost" @click="openBadgeModal">更换勋章</button>
+            </div>
+          </fieldset>
+        </div>
+      </section>
+      
+      <!-- 勋章 Modal -->
+      <div v-if="showBadgeModal" id="badgeModal" class="modal show">
+        <div class="box">
+          <span class="close" @click="closeBadgeModal">×</span>
+          <h3>选择勋章</h3>
+          <div id="badgeOptions" style="margin:10px 0;">
+            <label v-for="badge in allowedBadges" :key="badge.id" style="display:flex; align-items:center; gap:6px; margin:4px 0">
+              <input type="radio" name="wear" :value="badge.id" v-model="selectedBadge">
+              <span v-if="badge.id==='none'" class="badge badge-none">{{ badge.name }}</span>
+              <span v-else-if="badge.id==='best'" class="badge best">{{ badge.name }}</span>
+              <span v-else-if="badge.id==='catgirl'" class="badge catgirl">{{ badge.name }}</span>
+              <span v-else class="badge">{{ badge.name }}</span>
+            </label>
           </div>
+          <button id="confirmBadge" class="btn-publish" style="margin-top:12px;" @click="confirmBadge">确认</button>
         </div>
-        
-        <!-- 桌宠 -->
-        <div id="pet" ref="pet" v-if="petEnabled"
-            style="position: fixed; right: 24px; bottom: 24px; width: 90px; user-select: none; cursor: move; z-index: 90;"
-            @mousedown="dragPet">
-          <div v-html="petSVG"></div>
-        </div>
-        
-        <footer style="text-align:center; padding:24px 0; font-size:13px; color:#777">
-          © 2025 把回忆拼好给你
-        </footer>
       </div>
-    </div>
-    <!-- 如果未登录，显示登录 Modal -->
-    <div v-if="!currentUser" id="loginModal" class="modal show">
-          <div class="box" style="text-align:center; max-width:340px">
-            <h3>选择登录身份</h3>
-            <div class="avatar-container" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 20px;">
-              <div class="avatar" @click="selectUser('Furinya')">
-                <img src="https://placehold.co/90x90?text=F" alt="Furinya">
-                <div>Furinya</div>
-              </div>
-              <div class="avatar" @click="selectUser('离')">
-                <img src="https://placehold.co/90x90?text=离" alt="离">
-                <div>离</div>
-              </div>
-            </div>
-            <div v-if="selectedUser">
-              <input type="password" v-model="loginPassword" placeholder="请输入密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
-              <button id="loginConfirmBtn" class="btn-publish" style="margin-top:12px;" @click="confirmLogin">登录</button>
-            </div>
+      
+      <!-- 密码修改 Modal -->
+      <div v-if="showPasswordModal" id="passwordModal" class="modal show">
+        <div class="box" style="text-align:center; max-width:340px">
+          <span class="close" @click="closePasswordModal">×</span>
+          <h3>更改密码</h3>
+          <div style="margin-top:16px;">
+            <input type="password" v-model="oldPassword" placeholder="旧密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
+            <input type="password" v-model="newPassword" placeholder="新密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
+            <input type="password" v-model="confirmPassword" placeholder="确认新密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
+            <button id="confirmChangePasswordBtn" class="btn-publish" style="margin-top:12px;" @click="changePassword">确认更改</button>
           </div>
         </div>
+      </div>
+      
+      <!-- 桌宠 -->
+      <div id="pet" ref="pet" v-if="petEnabled"
+           style="position: fixed; right: 24px; bottom: 24px; width: 90px; user-select: none; cursor: move; z-index: 90;"
+           @mousedown="dragPet">
+        <div v-html="petSVG"></div>
+      </div>
+      
+      <footer style="text-align:center; padding:24px 0; font-size:13px; color:#777">
+        © 2025 把回忆拼好给你
+      </footer>
+    </div>
   </div>
 </template>
 
@@ -268,7 +270,7 @@ export default {
   name: "App",
   data() {
     return {
-      // 全局数据
+      // 全局数据（注意：仅在用户登录后才需要保留）
       posts: JSON.parse(localStorage.getItem('posts') || '[]'),
       currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null'),
       theme: localStorage.getItem('theme') || 'light',
@@ -306,7 +308,9 @@ export default {
       // 已读标记
       readIds: new Set(JSON.parse(localStorage.getItem('readIds_' + (JSON.parse(localStorage.getItem('currentUser')) || '')) || '[]')),
       // 相册模式
-      albumMode: 'time'
+      albumMode: 'time',
+      // 新增安全状态：退出动画标识（可根据需要使用）
+      isLoggingOut: false
     }
   },
   computed: {
@@ -395,9 +399,19 @@ export default {
       return localStorage.getItem('displayName_' + uid) || uid;
     },
     logout() {
-      localStorage.removeItem('currentUser');
-      this.currentUser = null;
-      location.reload();
+      // 触发退出动画（如果需要）后再清理敏感数据
+      this.isLoggingOut = true;
+      setTimeout(() => {
+        localStorage.removeItem('currentUser');
+        // 可清理更多存储于 localStorage 中的用户相关数据
+        // 如：localStorage.removeItem('displayName_' + this.currentUser)
+        this.currentUser = null;
+        // 清理内存中的敏感数据
+        this.posts = [];
+        this.localDisplayName = '';
+        this.readIds = new Set();
+        this.isLoggingOut = false;
+      }, 300); // 300 毫秒，与 CSS 过渡时间一致
     },
     selectUser(user) {
       this.selectedUser = user;
@@ -700,9 +714,12 @@ export default {
     }
   },
   mounted() {
-    this.localDisplayName = this.displayName;
-    document.body.classList.toggle('dark', this.theme === 'dark');
-    this.initStarCanvas();
+    // 仅当用户已登录时初始化敏感内容
+    if (this.currentUser) {
+      this.localDisplayName = this.displayName;
+      document.body.classList.toggle('dark', this.theme === 'dark');
+      this.initStarCanvas();
+    }
   }
 }
 </script>
@@ -733,7 +750,6 @@ body.dark {
   --login-border: rgba(255, 255, 255, 0.1);
 }
 
-/* 基础样式及全局重置 */
 html, body {
   margin: 0;
   padding: 0;
@@ -863,7 +879,7 @@ body.dark .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
-/* 发布按钮 —— 简约科技风：平面、低饱和、尺寸与其他控件一致 */
+/* 发布按钮 */
 .btn-publish {
   display: inline-flex;
   align-items: center;
@@ -924,22 +940,38 @@ select::-ms-expand {
   display: none;
 }
 body.dark select {
-  background: var(--card-dark);
-  color: var(--text-dark);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23cccccc' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background: #333333;
+  color: #f5f5f5;
+  border: 1px solid #555;
+  border-radius: var(--radius);
+  padding: 6px 30px 6px 12px;
+  font-size: 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23f5f5f5' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 10px 6px;
   backdrop-filter: blur(calc(var(--blur) / 2));
 }
-select option {
-  padding: 6px;
-  background: var(--card-light);
-  color: var(--text-light);
-}
 body.dark select option {
-  background: var(--card-dark);
-  color: var(--text-dark);
+  background: #333333;
+  color: #f5f5f5;
+}
+body.dark .upload-btn {
+  background: #333333;
+  color: #f5f5f5;
+  border: 1px solid #555;
+  border-radius: var(--radius);
+  padding: 6px 14px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(calc(var(--blur) / 2));
+  cursor: pointer;
+  transition: background 0.25s;
+}
+body.dark .upload-btn:hover {
+  background: #444444;
 }
 
 /* 勋章样式 */
@@ -1422,9 +1454,13 @@ body.dark select:focus {
   font-size: 14px;
 }
 
-/* 模糊背景效果 */
-.blurred {
-  filter: blur(5px);
-  pointer-events: none;
+/* 过渡动画 */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease;
 }
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+/* 此处不再使用仅靠 blur 实现安全，敏感内容完全在 v-if 控制下销毁 */
 </style>
