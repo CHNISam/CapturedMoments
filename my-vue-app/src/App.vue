@@ -1,259 +1,265 @@
 <template>
   <div>
-    <!-- 星空背景，仅在暗黑模式下显示 -->
-    <canvas id="starCanvas" ref="starCanvas"></canvas>
-    
-    <!-- 导航栏 -->
-    <nav>
-      <div class="logo">把回忆拼好给你</div>
-      <div class="menu">
-        <a href="#moments" id="nav-moments" @click.prevent="scrollTo('moments')">
-          动态<span id="nav-dot" class="red" :class="{ hidden: !hasUnread }"></span>
-        </a>
-        <a href="#album" @click.prevent="scrollTo('album')">相册</a>
-        <a href="#settings" @click.prevent="scrollTo('settings')">设置</a>
-        <span id="header-name" style="font-weight:600;">{{ localDisplayName }}</span>
-        <a id="logout" class="btn-ghost" @click="logout">退出</a>
-        <button id="themeBtn" class="btn-ghost" @click="toggleTheme">
-          <svg v-if="theme==='light'" id="sun" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="5"/>
-          </svg>
-          <svg v-else id="moon" viewBox="0 0 24 24">
-            <path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/>
-          </svg>
-        </button>
+    <div :class="{ blurred: !currentUser }">
+      <div>
+        <!-- 星空背景，仅在暗黑模式下显示 -->
+        <canvas id="starCanvas" ref="starCanvas"></canvas>
+        
+        <!-- 导航栏 -->
+        <nav>
+          <div class="logo">把回忆拼好给你</div>
+          <div class="menu">
+            <a href="#moments" id="nav-moments" @click.prevent="scrollTo('moments')">
+              动态<span id="nav-dot" class="red" :class="{ hidden: !hasUnread }"></span>
+            </a>
+            <a href="#album" @click.prevent="scrollTo('album')">相册</a>
+            <a href="#settings" @click.prevent="scrollTo('settings')">设置</a>
+            <span id="header-name" style="font-weight:600;">{{ localDisplayName }}</span>
+            <a id="logout" class="btn-ghost" @click="logout">退出</a>
+            <button id="themeBtn" class="btn-ghost" @click="toggleTheme">
+              <svg v-if="theme==='light'" id="sun" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5"/>
+              </svg>
+              <svg v-else id="moon" viewBox="0 0 24 24">
+                <path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/>
+              </svg>
+            </button>
+          </div>
+        </nav>
+        
+        
+        
+        <!-- 投稿区域 -->
+        <section id="moments">
+          <h2 class="big">投稿</h2>
+          <div id="new-post" class="card" style="display:flex; flex-direction:column; gap:12px;">
+            <textarea v-model="newPostText" placeholder="说点什么…"></textarea>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+              <!-- 下拉菜单：选择地点 -->
+              <select v-model="newPostPlace">
+                <option value="">无地点</option>
+                <option>蒙德</option>
+                <option>璃月</option>
+                <option>稻妻</option>
+                <option>须弥</option>
+                <option>枫丹</option>
+                <option>纳塔</option>
+              </select>
+              <label class="btn-ghost upload-btn">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input type="file" accept="image/*" multiple @change="handlePostImages">
+              </label>
+              <button id="publish" class="btn-publish" @click="publishPost">发布</button>
+            </div>
+            <div id="preview" style="display:flex; gap:8px; overflow-x:auto;">
+              <img v-for="(img, i) in draftImgs" :key="i" :src="img">
+            </div>
+          </div>
+          
+          <h2 class="big">动态</h2>
+          <div id="moments-list">
+            <div v-for="post in posts" :key="post.id" class="post card">
+              <div class="head" style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div :style="{
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '50%',
+                    background: 'url(' + getAvatar(post.uid) + ') center/cover'
+                  }"></div>
+                  <b>{{ getDisplayName(post.uid) }}</b>
+                  <span v-html="badgeHTML(post.uid)"></span>
+                  <span class="red" v-if="!isRead(post.id) && post.uid !== currentUser"></span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <span style="font-size:12px">{{ new Date(post.ts).toLocaleTimeString() }}</span>
+                  <span v-if="post.uid === currentUser" class="more" @click="deletePost(post)">⋯</span>
+                </div>
+              </div>
+              <div class="body">
+                <p>{{ post.txt }}</p>
+                <small>{{ new Date(post.ts).toLocaleDateString() }}{{ post.place ? ' · ' + post.place : '' }}</small>
+              </div>
+              <div class="photos">
+                <img v-for="(img, i) in post.imgs" :key="i" :src="img" @click="openModal(img, formatMeta(post))">
+              </div>
+              <div class="actions">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/>
+                </svg>
+                <span>{{ post.views }}</span>
+              </div>
+              <div class="comments">
+                <div v-for="(c, idx) in post.cmts" :key="idx" class="comment">
+                  <div class="comment-left">
+                    <span class="comment-text">{{ c.txt }}</span>
+                  </div>
+                  <div class="comment-right">
+                    <span v-if="c.who === currentUser" class="comment-edit" @click="editComment(post, idx)">✎</span>
+                    <span v-if="c.who === currentUser" class="comment-delete" @click="deleteComment(post, idx)">×</span>
+                    <span v-else class="comment-author">{{ c.who }}</span>
+                  </div>
+                </div>
+                <div class="c-input">
+                  <input type="text" v-model="newComment[post.id]" placeholder="评论...">
+                  <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        <!-- 相册区域 -->
+        <section id="album">
+          <h2 class="big">相册</h2>
+          <div class="album-tabs">
+            <button :class="{ on: albumMode==='time' }" @click="albumMode='time'">按时间</button>
+            <button :class="{ on: albumMode==='region' }" @click="albumMode='region'">按地区</button>
+          </div>
+          <div id="album-grid" class="grid">
+            <template v-for="(group, key) in groupedPhotos" :key="key">
+              <h4 style="grid-column:1/-1; margin:4px 0 6px">{{ key }}</h4>
+              <div v-for="(photo, i) in group" :key="i" class="photo" @click="openModal(photo.url, photo.meta)">
+                <img :src="photo.url">
+                <span>{{ photo.place }}</span>
+              </div>
+            </template>
+          </div>
+          <div id="album-empty" class="hidden" style="text-align:center; margin-top:30px; color:#888" v-if="allPhotos.length===0">
+            暂无照片，快去上传吧~
+          </div>
+        </section>
+        
+        <!-- 设置区域 -->
+        <section id="settings">
+          <h2 class="big">设置</h2>
+          <div class="card">
+            <fieldset>
+              <legend>外观</legend>
+              <div class="setting-item">
+                <span>暗黑模式</span>
+                <input type="checkbox" id="theme-toggle" :checked="theme==='dark'" @change="toggleTheme">
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>桌宠 / LLM</legend>
+              <div class="setting-item">
+                <span>显示桌宠</span>
+                <input type="checkbox" id="pet-toggle" v-model="petEnabled">
+              </div>
+              <div class="setting-item">
+                <span>桌宠类型</span>
+                <!-- 下拉菜单：选择桌宠类型 -->
+                <select id="pet-type" v-model="petType">
+                  <option value="cat">猫娘</option>
+                  <option value="bird">魈鸟</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <span>启用 LLM</span>
+                <input type="checkbox" id="ai-toggle" v-model="llmEnabled">
+              </div>
+              <div class="setting-item">
+                <span id="prompt-label">桌宠 Prompt</span>
+                <input id="pet-prompt" v-model="petPrompt">
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>账户</legend>
+              <div class="setting-item">
+                <span>头像</span>
+                <label class="btn-ghost upload-btn">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  <input id="avatar-input" type="file" accept="image/*" @change="changeAvatar">
+                </label>
+                <img :src="getAvatar(currentUser)" alt="Avatar" style="width:40px; height:40px; border-radius:50%;">
+              </div>
+              <div class="setting-item">
+                <span>我的昵称</span>
+                <input id="name-me" type="text" v-model="localDisplayName" @input="updateDisplayName">
+              </div>
+              <div class="setting-item">
+                <span>更改密码</span>
+                <button id="changePasswordBtn" class="btn-ghost" @click="openPasswordModal">更改密码</button>
+              </div>
+            </fieldset>
+            <fieldset id="badge-field">
+              <legend>勋章</legend>
+              <div id="currentBadgeDisplay" class="setting-item" style="flex-direction: row; align-items: center;">
+                <button id="changeBadgeBtn" class="btn-ghost" @click="openBadgeModal">更换勋章</button>
+              </div>
+            </fieldset>
+          </div>
+        </section>
+        
+        <!-- 勋章 Modal -->
+        <div v-if="showBadgeModal" id="badgeModal" class="modal show">
+          <div class="box">
+            <span class="close" @click="closeBadgeModal">×</span>
+            <h3>选择勋章</h3>
+            <div id="badgeOptions" style="margin:10px 0;">
+              <label v-for="badge in allowedBadges" :key="badge.id" style="display:flex; align-items:center; gap:6px; margin:4px 0">
+                <input type="radio" name="wear" :value="badge.id" v-model="selectedBadge">
+                <span v-if="badge.id==='none'" class="badge badge-none">{{ badge.name }}</span>
+                <span v-else-if="badge.id==='best'" class="badge best">{{ badge.name }}</span>
+                <span v-else-if="badge.id==='catgirl'" class="badge catgirl">{{ badge.name }}</span>
+                <span v-else class="badge">{{ badge.name }}</span>
+              </label>
+            </div>
+            <button id="confirmBadge" class="btn-publish" style="margin-top:12px;" @click="confirmBadge">确认</button>
+          </div>
+        </div>
+        
+        <!-- 密码修改 Modal -->
+        <div v-if="showPasswordModal" id="passwordModal" class="modal show">
+          <div class="box" style="text-align:center; max-width:340px">
+            <span class="close" @click="closePasswordModal">×</span>
+            <h3>更改密码</h3>
+            <div style="margin-top:16px;">
+              <input type="password" v-model="oldPassword" placeholder="旧密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
+              <input type="password" v-model="newPassword" placeholder="新密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
+              <input type="password" v-model="confirmPassword" placeholder="确认新密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
+              <button id="confirmChangePasswordBtn" class="btn-publish" style="margin-top:12px;" @click="changePassword">确认更改</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 桌宠 -->
+        <div id="pet" ref="pet" v-if="petEnabled"
+            style="position: fixed; right: 24px; bottom: 24px; width: 90px; user-select: none; cursor: move; z-index: 90;"
+            @mousedown="dragPet">
+          <div v-html="petSVG"></div>
+        </div>
+        
+        <footer style="text-align:center; padding:24px 0; font-size:13px; color:#777">
+          © 2025 把回忆拼好给你
+        </footer>
       </div>
-    </nav>
-    
+    </div>
     <!-- 如果未登录，显示登录 Modal -->
     <div v-if="!currentUser" id="loginModal" class="modal show">
-      <div class="box" style="text-align:center; max-width:340px">
-        <h3>选择登录身份</h3>
-        <div class="avatar-container" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 20px;">
-          <div class="avatar" @click="selectUser('Furinya')">
-            <img src="https://placehold.co/90x90?text=F" alt="Furinya">
-            <div>Furinya</div>
-          </div>
-          <div class="avatar" @click="selectUser('离')">
-            <img src="https://placehold.co/90x90?text=离" alt="离">
-            <div>离</div>
-          </div>
-        </div>
-        <div v-if="selectedUser">
-          <input type="password" v-model="loginPassword" placeholder="请输入密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
-          <button id="loginConfirmBtn" class="btn-publish" style="margin-top:12px;" @click="confirmLogin">登录</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 投稿区域 -->
-    <section id="moments">
-      <h2 class="big">投稿</h2>
-      <div id="new-post" class="card" style="display:flex; flex-direction:column; gap:12px;">
-        <textarea v-model="newPostText" placeholder="说点什么…"></textarea>
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <select v-model="newPostPlace">
-            <option value="">无地点</option>
-            <option>蒙德</option>
-            <option>璃月</option>
-            <option>稻妻</option>
-            <option>须弥</option>
-            <option>枫丹</option>
-            <option>纳塔</option>
-          </select>
-          <label class="btn-ghost upload-btn">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <input type="file" accept="image/*" multiple @change="handlePostImages">
-          </label>
-          <button id="publish" class="btn-publish" @click="publishPost">发布</button>
-        </div>
-        <div id="preview" style="display:flex; gap:8px; overflow-x:auto;">
-          <img v-for="(img, i) in draftImgs" :key="i" :src="img">
-        </div>
-      </div>
-      
-      <h2 class="big">动态</h2>
-      <div id="moments-list">
-        <div v-for="post in posts" :key="post.id" class="post card">
-          <div class="head" style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <div :style="{
-                width: '34px',
-                height: '34px',
-                borderRadius: '50%',
-                background: 'url(' + getAvatar(post.uid) + ') center/cover'
-              }"></div>
-
-              <b>{{ getDisplayName(post.uid) }}</b>
-              <span v-html="badgeHTML(post.uid)"></span>
-              <span class="red" v-if="!isRead(post.id) && post.uid !== currentUser"></span>
-            </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-              <span style="font-size:12px">{{ new Date(post.ts).toLocaleTimeString() }}</span>
-              <span v-if="post.uid === currentUser" class="more" @click="deletePost(post)">⋯</span>
-            </div>
-          </div>
-          <div class="body">
-            <p>{{ post.txt }}</p>
-            <small>{{ new Date(post.ts).toLocaleDateString() }}{{ post.place ? ' · ' + post.place : '' }}</small>
-          </div>
-          <div class="photos">
-            <img v-for="(img, i) in post.imgs" :key="i" :src="img" @click="openModal(img, formatMeta(post))">
-          </div>
-          <div class="actions">
-            <svg viewBox="0 0 24 24">
-              <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/>
-            </svg>
-            <span>{{ post.views }}</span>
-          </div>
-          <div class="comments">
-            <div v-for="(c, idx) in post.cmts" :key="idx" class="comment">
-              <div class="comment-left">
-                <span class="comment-text">{{ c.txt }}</span>
+          <div class="box" style="text-align:center; max-width:340px">
+            <h3>选择登录身份</h3>
+            <div class="avatar-container" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 20px;">
+              <div class="avatar" @click="selectUser('Furinya')">
+                <img src="https://placehold.co/90x90?text=F" alt="Furinya">
+                <div>Furinya</div>
               </div>
-              <div class="comment-right">
-                <span v-if="c.who === currentUser" class="comment-edit" @click="editComment(post, idx)">✎</span>
-                <span v-if="c.who === currentUser" class="comment-delete" @click="deleteComment(post, idx)">×</span>
-                <span v-else class="comment-author">{{ c.who }}</span>
+              <div class="avatar" @click="selectUser('离')">
+                <img src="https://placehold.co/90x90?text=离" alt="离">
+                <div>离</div>
               </div>
             </div>
-            <div class="c-input">
-              <input type="text" v-model="newComment[post.id]" placeholder="评论...">
-              <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
+            <div v-if="selectedUser">
+              <input type="password" v-model="loginPassword" placeholder="请输入密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc;">
+              <button id="loginConfirmBtn" class="btn-publish" style="margin-top:12px;" @click="confirmLogin">登录</button>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-    
-    <!-- 相册区域 -->
-    <section id="album">
-      <h2 class="big">相册</h2>
-      <div class="album-tabs">
-        <button :class="{ on: albumMode==='time' }" @click="albumMode='time'">按时间</button>
-        <button :class="{ on: albumMode==='region' }" @click="albumMode='region'">按地区</button>
-      </div>
-      <div id="album-grid" class="grid">
-        <template v-for="(group, key) in groupedPhotos" :key="key">
-          <h4 style="grid-column:1/-1; margin:4px 0 6px">{{ key }}</h4>
-          <div v-for="(photo, i) in group" :key="i" class="photo" @click="openModal(photo.url, photo.meta)">
-            <img :src="photo.url">
-            <span>{{ photo.place }}</span>
-          </div>
-        </template>
-      </div>
-      <div id="album-empty" class="hidden" style="text-align:center; margin-top:30px; color:#888" v-if="allPhotos.length===0">
-        暂无照片，快去上传吧~
-      </div>
-    </section>
-    
-    <!-- 设置区域 -->
-    <section id="settings">
-      <h2 class="big">设置</h2>
-      <div class="card">
-        <fieldset>
-          <legend>外观</legend>
-          <div class="setting-item">
-            <span>暗黑模式</span>
-            <input type="checkbox" id="theme-toggle" :checked="theme==='dark'" @change="toggleTheme">
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>桌宠 / LLM</legend>
-          <div class="setting-item">
-            <span>显示桌宠</span>
-            <input type="checkbox" id="pet-toggle" v-model="petEnabled">
-          </div>
-          <div class="setting-item">
-            <span>桌宠类型</span>
-            <select id="pet-type" v-model="petType">
-              <option value="cat">猫娘</option>
-              <option value="bird">魈鸟</option>
-            </select>
-          </div>
-          <div class="setting-item">
-            <span>启用 LLM</span>
-            <input type="checkbox" id="ai-toggle" v-model="llmEnabled">
-          </div>
-          <div class="setting-item">
-            <span id="prompt-label">桌宠 Prompt</span>
-            <input id="pet-prompt" v-model="petPrompt">
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>账户</legend>
-          <div class="setting-item">
-            <span>头像</span>
-            <label class="btn-ghost upload-btn">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/>
-              </svg>
-              <input id="avatar-input" type="file" accept="image/*" @change="changeAvatar">
-            </label>
-            <img :src="getAvatar(currentUser)" alt="Avatar" style="width:40px; height:40px; border-radius:50%;">
-          </div>
-          <div class="setting-item">
-            <span>我的昵称</span>
-            <input id="name-me" type="text" v-model="localDisplayName" @input="updateDisplayName">
-          </div>
-          <div class="setting-item">
-            <span>更改密码</span>
-            <button id="changePasswordBtn" class="btn-ghost" @click="openPasswordModal">更改密码</button>
-          </div>
-        </fieldset>
-        <fieldset id="badge-field">
-          <legend>勋章</legend>
-          <div id="currentBadgeDisplay" class="setting-item" style="flex-direction: row; align-items: center;">
-            <button id="changeBadgeBtn" class="btn-ghost" @click="openBadgeModal">更换勋章</button>
-          </div>
-        </fieldset>
-      </div>
-    </section>
-    
-    <!-- 勋章 Modal -->
-    <div v-if="showBadgeModal" id="badgeModal" class="modal show">
-      <div class="box">
-        <span class="close" @click="closeBadgeModal">×</span>
-        <h3>选择勋章</h3>
-        <div id="badgeOptions" style="margin:10px 0;">
-          <label v-for="badge in allowedBadges" :key="badge.id" style="display:flex; align-items:center; gap:6px; margin:4px 0">
-            <input type="radio" name="wear" :value="badge.id" v-model="selectedBadge">
-            <span v-if="badge.id==='none'" class="badge badge-none">{{ badge.name }}</span>
-            <span v-else-if="badge.id==='best'" class="badge best">{{ badge.name }}</span>
-            <span v-else-if="badge.id==='catgirl'" class="badge catgirl">{{ badge.name }}</span>
-            <span v-else class="badge">{{ badge.name }}</span>
-          </label>
-        </div>
-        <button id="confirmBadge" class="btn-publish" style="margin-top:12px;" @click="confirmBadge">确认</button>
-      </div>
-    </div>
-    
-    <!-- 密码修改 Modal -->
-    <div v-if="showPasswordModal" id="passwordModal" class="modal show">
-      <div class="box" style="text-align:center; max-width:340px">
-        <span class="close" @click="closePasswordModal">×</span>
-        <h3>更改密码</h3>
-        <div style="margin-top:16px;">
-          <input type="password" v-model="oldPassword" placeholder="旧密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
-          <input type="password" v-model="newPassword" placeholder="新密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
-          <input type="password" v-model="confirmPassword" placeholder="确认新密码" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;">
-          <button id="confirmChangePasswordBtn" class="btn-publish" style="margin-top:12px;" @click="changePassword">确认更改</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 桌宠 -->
-    <div id="pet" ref="pet" v-if="petEnabled"
-         style="position: fixed; right: 24px; bottom: 24px; width: 90px; user-select: none; cursor: move; z-index: 90;"
-         @mousedown="dragPet">
-      <div v-html="petSVG"></div>
-    </div>
-    
-    <footer style="text-align:center; padding:24px 0; font-size:13px; color:#777">
-      © 2025 把回忆拼好给你
-    </footer>
   </div>
 </template>
 
@@ -359,27 +365,22 @@ export default {
   },
   methods: {
     badgeHTML(uid) {
-    // 获取对应徽章的值，注意 localStorage 里存的是字符串
-    const m = localStorage.getItem('wear_' + uid);
-    if (!m || m === '"none"' || m === 'none') return "";
-    // 注意：如果你之前存的是通过 JSON.stringify 保存的，那么获取时会带双引号，需要解析
-    let badgeValue = m;
-    try {
-      badgeValue = JSON.parse(m);
-    } catch(e) {
-      // 解析失败时直接用原值
-    }
-    // 查找 BADGES 数组中对应的徽章对象（假设 BADGES 已在 data 中定义）
-    const badge = this.BADGES.find(b => b.id === badgeValue);
-    if (!badge) return "";
-    if (badge.id === 'best') {
-      return `<span class="badge best">${badge.name}</span>`;
-    } else if (badge.id === 'catgirl') {
-      return `<span class="badge catgirl">${badge.name}</span>`;
-    } else {
-      return `<span class="badge">${badge.name}</span>`;
-    }
-  },
+      const m = localStorage.getItem('wear_' + uid);
+      if (!m || m === '"none"' || m === 'none') return "";
+      let badgeValue = m;
+      try {
+        badgeValue = JSON.parse(m);
+      } catch(e) { }
+      const badge = this.BADGES.find(b => b.id === badgeValue);
+      if (!badge) return "";
+      if (badge.id === 'best') {
+        return `<span class="badge best">${badge.name}</span>`;
+      } else if (badge.id === 'catgirl') {
+        return `<span class="badge catgirl">${badge.name}</span>`;
+      } else {
+        return `<span class="badge">${badge.name}</span>`;
+      }
+    },
     storeSet(key, value) {
       localStorage.setItem(key, JSON.stringify(value));
     },
@@ -699,9 +700,7 @@ export default {
     }
   },
   mounted() {
-    // 初始化昵称输入框值
     this.localDisplayName = this.displayName;
-    // 根据本地存储的 theme 值设置 body 的 class
     document.body.classList.toggle('dark', this.theme === 'dark');
     this.initStarCanvas();
   }
@@ -709,33 +708,32 @@ export default {
 </script>
 
 <style>
-/* 以下样式直接取自原有 CSS 说明，管理整体风格、导航栏、设置区域、卡片、Modal 等 */
+/* 全局变量：简约科技风，采用中性灰调 */
 :root {
-  --bg-light: #f5f7fa;
-  --bg-dark: #0a0a1a;
-  --card-light: #ffffff33;
-  --card-dark: #2b2d3122;
-  --blur: 16px;
-  --text-light: #222;
-  --text-dark: #ddd;
-  --primary: #3fa7ff;
-  --accent: #ff9e3f;
-  --ai-btn-bg: #555;
-  --ai-btn-hover-bg: #777;
-  --ai-btn-color: #fff;
+  --bg-light: #f5f5f5;              /* 明亮背景 */
+  --bg-dark: #1c1c1c;               /* 暗黑背景 */
+  --card-light: #ffffff;            /* 卡片明亮背景 */
+  --card-dark: #2c2c2c;             /* 卡片暗黑背景 */
+  --text-light: #333333;            /* 明亮文字色 */
+  --text-dark: #cccccc;             /* 暗黑文字色 */
+  --primary: #4a90e2;              /* 少量使用：科技蓝色 */
+  --accent: #e91e63;               /* 辅助色（只做点缀，不作为主要元素） */
   --radius: 14px;
-  --glass-border: 1px solid rgba(255, 255, 255, 0.25);
-  --select-arrow: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3e%3cpath fill='%23666' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
-  --select-arrow-dark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3e%3cpath fill='%23ddd' d='M0 0l5 6 5-6z'/%3e%3c/svg%3e");
-  --login-bg: #f5f7fa;
-  --login-text: #222;
-  --login-border: rgba(0, 0, 0, 0.2);
+  --glass-border: 1px solid rgba(0, 0, 0, 0.1);
+  --blur: 16px;
+  --login-bg: #f5f5f5;
+  --login-text: #333333;
+  --login-border: rgba(0, 0, 0, 0.1);
 }
 body.dark {
-  --login-bg: rgba(30,31,36,0.8);
-  --login-text: #ddd;
-  --login-border: rgba(58,63,71,0.6);
+  background: var(--bg-dark);
+  color: var(--text-dark);
+  --login-bg: #1c1c1c;
+  --login-text: #cccccc;
+  --login-border: rgba(255, 255, 255, 0.1);
 }
+
+/* 基础样式及全局重置 */
 html, body {
   margin: 0;
   padding: 0;
@@ -759,6 +757,8 @@ a {
 .hidden {
   display: none;
 }
+
+/* 星空 Canvas */
 #starCanvas {
   position: fixed;
   top: 0;
@@ -771,6 +771,8 @@ a {
 body.dark #starCanvas {
   display: block;
 }
+
+/* 导航栏 */
 nav {
   position: fixed;
   top: 0;
@@ -786,14 +788,19 @@ nav {
   border-bottom: var(--glass-border);
 }
 body.dark nav {
-  background: rgba(10, 10, 26, 0.15);
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* LOGO */
 .logo {
   font-weight: 700;
   font-size: 20px;
   letter-spacing: 0.5px;
   text-align: left;
 }
+
+/* 菜单 */
 .menu {
   display: flex;
   gap: 18px;
@@ -801,7 +808,7 @@ body.dark nav {
 }
 .menu a {
   padding: 6px 12px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   transition: 0.25s background;
 }
 .menu a:hover {
@@ -814,13 +821,17 @@ body.dark .menu a {
   font-weight: 700;
   text-decoration: underline;
 }
+
+/* 小红点提示 */
 .red {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #e74c3c;
+  background: var(--accent);
   margin-left: 4px;
 }
+
+/* Ghost 按钮 */
 .btn-ghost {
   display: inline-flex;
   align-items: center;
@@ -844,27 +855,41 @@ body.dark .menu a {
   background: rgba(0, 0, 0, 0.08);
 }
 body.dark .btn-ghost {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-dark);
 }
 body.dark .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.15);
 }
+
+/* 发布按钮 —— 简约科技风：平面、低饱和、尺寸与其他控件一致 */
 .btn-publish {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 20px;
+  padding: 6px 20px;
   font-size: 14px;
   border-radius: var(--radius);
-  background: var(--ai-btn-bg);
-  color: var(--ai-btn-color);
   border: none;
   cursor: pointer;
-  transition: 0.25s background;
+  transition: 0.25s background, 0.25s transform;
+  background: #333333;
+  color: #ffffff;
 }
 .btn-publish:hover {
-  background: var(--ai-btn-hover-bg);
+  transform: scale(1.03);
+  background: #2a2a2a;
 }
+body.dark .btn-publish {
+  background: #444444;
+  color: #ffffff;
+}
+body.dark .btn-publish:hover {
+  background: #3a3a3a;
+}
+
+/* 文件上传按钮 */
 .upload-btn {
   position: relative;
   overflow: hidden;
@@ -875,6 +900,49 @@ body.dark .btn-ghost:hover {
   opacity: 0;
   cursor: pointer;
 }
+
+/* select 下拉菜单及 option */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 6px 30px 6px 12px;
+  font-size: 14px;
+  border-radius: var(--radius);
+  border: var(--glass-border);
+  background: var(--card-light);
+  color: var(--text-light);
+  max-width: 160px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23666' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 6px;
+  outline: none;
+  backdrop-filter: blur(calc(var(--blur) / 2));
+}
+select::-ms-expand {
+  display: none;
+}
+body.dark select {
+  background: var(--card-dark);
+  color: var(--text-dark);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23cccccc' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 6px;
+  backdrop-filter: blur(calc(var(--blur) / 2));
+}
+select option {
+  padding: 6px;
+  background: var(--card-light);
+  color: var(--text-light);
+}
+body.dark select option {
+  background: var(--card-dark);
+  color: var(--text-dark);
+}
+
+/* 勋章样式 */
 .badge {
   font-size: 10px;
   padding: 2px 4px;
@@ -886,11 +954,10 @@ body.dark .btn-ghost:hover {
   text-align: center;
 }
 .badge.catgirl {
-  background: linear-gradient(135deg, #e261a1, #ffb6c1);
-  color: #ffffff;
+  background: linear-gradient(135deg, #ff87c3, #ffb6c1);
 }
 .badge.best {
-  background: linear-gradient(270deg, #3fa7ff, #ff9e3f, #3fa7ff);
+  background: linear-gradient(270deg, #4a90e2, #e91e63, #4a90e2);
   background-size: 400% 400%;
   animation: gradientAnimation 10s ease infinite;
   font-family: 'Orbitron', sans-serif;
@@ -912,23 +979,31 @@ body.dark .btn-ghost:hover {
   border-radius: 4px;
   font-size: 10px;
   min-width: 40px;
+  text-align: center;
 }
+
+/* 卡片 */
 .card {
   background: var(--card-light);
   backdrop-filter: blur(calc(var(--blur) / 2));
   border-radius: var(--radius);
   border: var(--glass-border);
-  box-shadow: 0 6px 18px #0001;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
   padding: 18px;
 }
 body.dark .card {
   background: var(--card-dark);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
 }
+
+/* 页面标题 */
 h2.big {
   margin: 70px 0 22px;
   font-size: 26px;
   padding-left: 0;
 }
+
+/* 投稿区域 */
 #moments {
   padding: 40px 8%;
 }
@@ -943,7 +1018,7 @@ h2.big {
   font-size: 14px;
   width: 100%;
 }
-body.dark textarea {
+body.dark #new-post textarea {
   background: var(--card-dark);
   color: var(--text-dark);
 }
@@ -1004,227 +1079,8 @@ body.dark textarea {
 .more:hover {
   background: rgba(0, 0, 0, 0.08);
 }
-.post-txt.folded {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.toggle {
-  color: var(--primary);
-  cursor: pointer;
-  font-size: 13px;
-  margin-left: 6px;
-}
-#album {
-  padding: 40px 8%;
-}
-.album-tabs {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-.album-tabs button {
-  background: none;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 15px;
-  padding: 6px 10px;
-  border-radius: 8px;
-  transition: 0.25s background;
-}
-.album-tabs .on {
-  background: rgba(0, 0, 0, 0.08);
-}
-body.dark .album-tabs button {
-  color: var(--text-dark);
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 18px;
-}
-.photo {
-  border-radius: var(--radius);
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-}
-.photo img {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
-  transition: 0.3s transform;
-}
-.photo:hover img {
-  transform: scale(1.05);
-}
-.photo span {
-  position: absolute;
-  bottom: 6px;
-  left: 6px;
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
-  font-size: 12px;
-  padding: 2px 6px;
-  border-radius: 8px;
-}
-#settings {
-  padding: 40px 8%;
-}
-fieldset {
-  border: none;
-  padding: 0;
-  margin: 0 0 24px;
-}
-legend {
-  font-weight: 600;
-  font-size: 15px;
-  margin-bottom: 8px;
-}
-.setting-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 12px 0;
-}
-.setting-item + .setting-item {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  padding-top: 12px;
-}
-body.dark .setting-item + .setting-item {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-.setting-item input[type=text],
-.setting-item textarea {
-  width: 60%;
-  max-width: fit-content;
-  padding: 6px;
-  border-radius: var(--radius);
-  border: var(--glass-border);
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur) / 2));
-  color: inherit;
-}
-body.dark .setting-item input[type=text],
-body.dark .setting-item textarea {
-  background: var(--card-dark);
-  color: var(--text-dark);
-}
-select {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  padding: 6px 34px 6px 12px;
-  font-size: 14px;
-  border-radius: var(--radius);
-  border: var(--glass-border);
-  background: var(--card-light);
-  color: inherit;
-  max-width: 160px;
-  background-image: var(--select-arrow);
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  backdrop-filter: blur(calc(var(--blur) / 2));
-}
-select::-ms-expand {
-  display: none;
-}
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.25s ease;
-}
-.modal.show {
-  opacity: 1;
-  visibility: visible;
-}
-.box {
-  background: var(--card-light);
-  backdrop-filter: blur(var(--blur));
-  border: var(--glass-border);
-  border-radius: var(--radius);
-  max-width: 600px;
-  width: 90%;
-  max-height: 90vh;
-  overflow: auto;
-  padding: 20px;
-  position: relative;
-}
-body.dark .box {
-  background: var(--card-dark);
-}
-#badgeModal .box {
-  animation: none;
-}
-.close {
-  position: absolute;
-  top: 10px;
-  right: 16px;
-  font-size: 24px;
-  cursor: pointer;
-}
-#pet {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  width: 90px;
-  user-select: none;
-  cursor: move;
-  z-index: 90;
-}
-#pet svg {
-  width: 100%;
-  animation: breathe 3s ease-in-out infinite;
-}
-@keyframes breathe {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-body.dark input,
-body.dark textarea,
-body.dark select option {
-  background-color: var(--card-dark);
-  color: var(--text-dark);
-}
-body.dark input:focus,
-body.dark textarea:focus {
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.15);
-  outline: none;
-}
-body.dark select:focus {
-  outline: none;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-#bubble {
-  position: fixed;
-  right: 110px;
-  bottom: 110px;
-  max-width: 220px;
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur) / 2));
-  border: var(--glass-border);
-  border-radius: var(--radius);
-  padding: 12px;
-  font-size: 14px;
-  line-height: 1.45;
-  box-shadow: 0 4px 12px #0003;
-  transition: opacity 0.4s, transform 0.4s;
-  opacity: 0;
-  transform: translateY(10px);
-  z-index: 95;
-}
-#bubble.show {
-  opacity: 1;
-  transform: translateY(0);
-}
+
+/* 评论区域 */
 .comments {
   margin-top: 8px;
   padding-top: 4px;
@@ -1239,6 +1095,9 @@ body.dark select:focus {
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.03);
   font-size: 13px;
+}
+body.dark .comment {
+  background: rgba(255, 255, 255, 0.05);
 }
 .comment-left {
   flex: 1;
@@ -1277,6 +1136,10 @@ body.dark select:focus {
   font-size: 14px;
   transition: box-shadow 0.2s;
 }
+body.dark .c-input input {
+  background: var(--card-dark);
+  color: var(--text-dark);
+}
 .c-input input:focus {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.15);
 }
@@ -1293,6 +1156,183 @@ body.dark select:focus {
 .c-input button:hover {
   background: var(--ai-btn-hover-bg);
 }
+
+/* 相册区域 */
+#album {
+  padding: 40px 8%;
+}
+.album-tabs {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.album-tabs button {
+  background: none;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 15px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  transition: 0.25s background;
+}
+.album-tabs .on {
+  background: rgba(0, 0, 0, 0.08);
+}
+body.dark .album-tabs button {
+  color: var(--text-dark);
+}
+body.dark .album-tabs button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 18px;
+}
+.photo {
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+.photo img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  transition: 0.3s transform;
+}
+.photo:hover img {
+  transform: scale(1.05);
+}
+.photo span {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: var(--radius);
+}
+
+/* 设置区域 */
+#settings {
+  padding: 40px 8%;
+}
+fieldset {
+  border: none;
+  padding: 0;
+  margin: 0 0 24px;
+}
+legend {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 12px 0;
+}
+.setting-item + .setting-item {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding-top: 12px;
+}
+body.dark .setting-item + .setting-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.setting-item input[type=text],
+.setting-item textarea {
+  width: 60%;
+  max-width: fit-content;
+  padding: 6px;
+  border-radius: var(--radius);
+  border: var(--glass-border);
+  background: var(--card-light);
+  backdrop-filter: blur(calc(var(--blur) / 2));
+  color: inherit;
+}
+body.dark .setting-item input[type=text],
+body.dark .setting-item textarea {
+  background: var(--card-dark);
+  color: var(--text-dark);
+}
+
+/* Modal 窗口 */
+.modal {
+  z-index: 9999;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease;
+}
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+.box {
+  background: var(--card-light);
+  backdrop-filter: blur(var(--blur));
+  border: var(--glass-border);
+  border-radius: var(--radius);
+  max-width: 600px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+  padding: 20px;
+  position: relative;
+}
+body.dark .box {
+  background: var(--card-dark);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.close {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* 桌宠 / LLM */
+#pet {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 90px;
+  user-select: none;
+  cursor: move;
+  z-index: 90;
+}
+#pet svg {
+  width: 100%;
+  animation: breathe 3s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* 表单控件焦点状态 */
+body.dark input:focus,
+body.dark textarea:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  outline: none;
+}
+body.dark select:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* 登录 Modal */
 #loginModal {
   display: flex;
   align-items: center;
@@ -1303,7 +1343,7 @@ body.dark select:focus {
   background: var(--login-bg);
   color: var(--login-text);
   border: 1px solid var(--login-border);
-  box-shadow: 0 0 20px rgba(63, 167, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
   border-radius: 10px;
   padding: 30px 20px;
   text-align: center;
@@ -1343,8 +1383,8 @@ body.dark select:focus {
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  background: #2b2d31;
-  color: #ddd;
+  background: #f5f5f5;
+  color: #333;
   font-size: 14px;
   margin-bottom: 12px;
 }
@@ -1359,11 +1399,15 @@ body.dark select:focus {
   transition: background 0.3s;
 }
 #loginModal .btn-publish:hover {
-  background: #66baff;
+  background: #357abd;
 }
+
+/* 勋章 Modal */
 #badgeModal .box {
   animation: none;
 }
+
+/* 勋章 Toast */
 #badgeToast {
   position: fixed;
   bottom: 80px;
@@ -1376,5 +1420,11 @@ body.dark select:focus {
   display: none;
   z-index: 200;
   font-size: 14px;
+}
+
+/* 模糊背景效果 */
+.blurred {
+  filter: blur(5px);
+  pointer-events: none;
 }
 </style>
