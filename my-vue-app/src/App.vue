@@ -63,6 +63,7 @@
             placeholder="说点什么…"
             maxlength="2000"
             @input="autoResize($event)"
+            @keydown.enter="handlePostEnter($event)"
           ></textarea>
           <div class="np-toolbar">
             <span class="char-count">{{ newPostText.length }}/2000</span>
@@ -119,7 +120,7 @@
                 </div>
               </div>
               <div class="c-input">
-                <input type="text" v-model="newComment[post.id]" placeholder="评论..."/>
+                <input type="text" v-model="newComment[post.id]" placeholder="评论..."@keydown.enter.prevent="handleCommentEnter($event, post)"/>
                 <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
               </div>
             </div>
@@ -372,7 +373,7 @@ export default {
       this.posts=[];this.localDisplayName='';this.readIds=new Set();
     },
     /* 投稿 */
-    handlePostImages(e){this.draftImgs=[];Array.from(e.target.files).slice(0,3).forEach(f=>this.draftImgs.push(URL.createObjectURL(f)));},
+    handlePostImages(e){this.draftImgs=[];Array.from(e.target.files).slice(0,30).forEach(f=>this.draftImgs.push(URL.createObjectURL(f)));},
     removeDraft(i){this.draftImgs.splice(i,1);},
     autoResize(e){e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';},
     publishPost(){
@@ -383,6 +384,12 @@ export default {
       localStorage.setItem('posts',JSON.stringify(this.posts.map(p=>({...p,imgs:[]}))));
       this.newPostText='';this.newPostPlace='';this.draftImgs=[];
     },
+    handlePostEnter(e) {
+      if (!e.shiftKey) {
+      e.preventDefault();
+      this.publishPost();
+    }
+  },
     deletePost(p){
       if(confirm('撤回这条动态？')){
         this.posts=this.posts.filter(x=>x.id!==p.id);
@@ -397,6 +404,11 @@ export default {
     sendComment(p){const t=this.newComment[p.id];if(t&&t.trim()){p.cmts.push({who:this.currentUser,txt:t.trim()});this.newComment[p.id]='';}},
     deleteComment(p,i){if(confirm('确定撤回该评论吗？')) p.cmts.splice(i,1);},
     editComment(p,i){const old=p.cmts[i].txt,neo=prompt('编辑评论：',old);if(neo!==null&&neo.trim()&&neo!==old)p.cmts[i].txt=neo.trim();},
+    handleCommentEnter(e, post) {
+    if (e.shiftKey) return
+    // enter → 发送评论
+    this.sendComment(post)
+    },
     /* 背景 */
     changeBackground(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{this.bgSrc=ev.target.result;localStorage.setItem('bgSrc',this.bgSrc)};r.readAsDataURL(f);},
     saveBgOpacity(){localStorage.setItem('bgOpacity',this.bgOpacity);},
