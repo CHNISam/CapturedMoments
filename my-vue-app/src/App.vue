@@ -1,37 +1,37 @@
 <template>
   <div>
-    <!-- 登录状态判断 -->
+    <!-- ========== 未登录 ========== -->
     <div v-if="!currentUser">
       <transition name="fade">
         <div id="loginModal" class="modal show">
-          <div class="box" style="text-align:center;max-width:340px">
-            <h3>选择登录身份</h3>
-            <div class="avatar-container"
-                 style="display:flex;justify-content:center;align-items:center;gap:20px;margin-bottom:20px;">
-              <div class="avatar" @click="selectUser('Furinya')">
-                <img src="https://placehold.co/90x90?text=F" alt="Furinya" />
-                <div>Furinya</div>
-              </div>
-              <div class="avatar" @click="selectUser('离')">
-                <img src="https://placehold.co/90x90?text=%E7%A6%BB" alt="离" />
-                <div>离</div>
-              </div>
-            </div>
-            <div v-if="selectedUser">
-              <input
-                type="password"
-                v-model="loginPassword"
-                placeholder="请输入密码"
-                style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;"
-              />
-              <button class="btn-publish" style="margin-top:12px" @click="confirmLogin">登录</button>
-            </div>
+          <div class="box login-box" style="text-align:center;max-width:340px;">
+            <h3 style="margin-bottom:16px">登录 Captured&nbsp;Moments</h3>
+
+            <!-- 输入 UID -->
+            <input
+              type="text"
+              v-model.trim="uidInput"
+              placeholder="请输入原神 UID"
+              style="width:100%;padding:8px;margin-bottom:10px;border-radius:8px;border:1px solid #ccc;"
+            />
+
+            <!-- 输入 / 首次设置密码 -->
+            <input
+              type="password"
+              v-model="loginPassword"
+              placeholder="密码（首次输入将被保存）"
+              style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;"
+            />
+
+            <button class="btn-publish" style="margin-top:12px;width:100%;" @click="confirmLogin">
+              进入
+            </button>
           </div>
         </div>
       </transition>
     </div>
 
-    <!-- 已登录主界面 -->
+    <!-- ========== 已登录主界面 ========== -->
     <div v-else>
       <!-- 用户自定义背景 -->
       <div id="bgLayer" :style="bgStyle"></div>
@@ -43,18 +43,18 @@
           <a href="#moments" @click.prevent="scrollTo('moments')">
             动态 <span class="red" :class="{ hidden: !hasUnread }"></span>
           </a>
-          <a href="#album" @click.prevent="scrollTo('album')">相册</a>
+          <a href="#album"    @click.prevent="scrollTo('album')">相册</a>
           <a href="#settings" @click.prevent="scrollTo('settings')">设置</a>
-          <span style="font-weight:600">{{ localDisplayName }}</span>
+          <span style="font-weight:600">{{ currentUser }}</span>
           <a class="btn-ghost" @click="logout">退出</a>
           <button class="btn-ghost" @click="toggleTheme">
             <svg v-if="theme==='light'" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
-            <svg v-else viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+            <svg v-else             viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
           </button>
         </div>
       </nav>
 
-      <!-- 投稿区 -->
+      <!-- ======================== 投稿区 ======================== -->
       <section id="moments">
         <h2 class="big">投稿</h2>
         <div class="np-top">
@@ -65,25 +65,32 @@
             @input="autoResize($event)"
             @keydown.enter="handlePostEnter($event)"
           ></textarea>
+
           <div class="np-toolbar">
             <span class="char-count">{{ newPostText.length }}/2000</span>
             <select v-model="newPostPlace">
               <option value="">无地点</option>
-              <option>蒙德</option><option>璃月</option><option>稻妻</option><option>须弥</option><option>枫丹</option><option>纳塔</option>
+              <option>蒙德</option><option>璃月</option><option>稻妻</option>
+              <option>须弥</option><option>枫丹</option><option>纳塔</option>
             </select>
+
             <label class="btn-ghost upload-btn">
               <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               <input type="file" accept="image/*" multiple @change="handlePostImages"/>
             </label>
+
             <button class="btn-publish" @click="publishPost">发布</button>
           </div>
         </div>
+
+        <!-- 图片草稿预览 -->
         <div v-if="draftImgs.length" class="np-preview">
           <div v-for="(img,i) in draftImgs" :key="i" class="thumb">
             <img :src="img"/><span class="remove" @click="removeDraft(i)">×</span>
           </div>
         </div>
 
+        <!-- 动态列表 -->
         <h2 class="big">动态</h2>
         <div id="moments-list">
           <div v-for="post in posts" :key="post.id" class="post card">
@@ -99,28 +106,40 @@
                 <span v-if="post.uid===currentUser" class="more" @click="deletePost(post)">⋯</span>
               </div>
             </div>
+
             <div class="body">
               <p>{{ post.txt }}</p>
               <small>{{ new Date(post.ts).toLocaleDateString() }}{{ post.place?' · '+post.place:'' }}</small>
             </div>
+
             <div class="photos">
               <img v-for="(img,i) in post.imgs" :key="i" :src="img" @click="openModal(img, formatMeta(post))"/>
             </div>
+
             <div class="actions">
               <svg viewBox="0 0 24 24"><path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/></svg>
               <span>{{ post.views }}</span>
             </div>
+
             <div class="comments">
               <div v-for="(c,idx) in post.cmts" :key="idx" class="comment">
-                <div class="comment-left"><span class="comment-display">{{ c.who }}: {{ c.txt }}</span></div>
+                <div class="comment-left">
+                  <span class="comment-display">{{ getDisplayName(c.who) }}: {{ c.txt }}</span>
+                </div>
                 <div class="comment-right">
-                  <span v-if="c.who===currentUser" class="comment-edit" @click="editComment(post,idx)">✎</span>
+                  <span v-if="c.who===currentUser" class="comment-edit"   @click="editComment(post,idx)">✎</span>
                   <span v-if="c.who===currentUser" class="comment-delete" @click="deleteComment(post,idx)">×</span>
-                  <span v-else class="comment-author">{{ c.who }}</span>
+                  <span v-else class="comment-author">{{ getDisplayName(c.who) }}</span>
                 </div>
               </div>
+
               <div class="c-input">
-                <input type="text" v-model="newComment[post.id]" placeholder="评论..."@keydown.enter.prevent="handleCommentEnter($event, post)"/>
+                <input
+                  type="text"
+                  v-model="newComment[post.id]"
+                  placeholder="评论..."
+                  @keydown.enter.prevent="handleCommentEnter($event, post)"
+                />
                 <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
               </div>
             </div>
@@ -128,31 +147,42 @@
         </div>
       </section>
 
-      <!-- 相册 -->
+      <!-- ======================== 相册 ======================== -->
       <section id="album">
         <h2 class="big">相册</h2>
         <div class="album-tabs">
-          <button :class="{on:albumMode==='time'}" @click="albumMode='time'">按时间</button>
+          <button :class="{on:albumMode==='time'}"   @click="albumMode='time'">按时间</button>
           <button :class="{on:albumMode==='region'}" @click="albumMode='region'">按地区</button>
         </div>
+
         <div id="album-grid" class="grid">
           <template v-for="(group,key) in groupedPhotos" :key="key">
             <h4 style="grid-column:1/-1;margin:4px 0 6px">{{ key }}</h4>
-            <div v-for="(photo,i) in group" :key="i" class="photo" @click="openModal(photo.url,photo.meta)">
+            <div
+              v-for="(photo,i) in group"
+              :key="i"
+              class="photo"
+              @click="openModal(photo.url,photo.meta)"
+            >
               <img :src="photo.url"/><span>{{ photo.place }}</span>
             </div>
           </template>
         </div>
-        <div v-if="allPhotos.length===0" style="text-align:center;margin-top:30px;color:#888">暂无照片，快去上传吧~</div>
+
+        <div v-if="allPhotos.length===0" style="text-align:center;margin-top:30px;color:#888">
+          暂无照片，快去上传吧~
+        </div>
       </section>
 
-      <!-- 设置 -->
+      <!-- ======================== 设置 ======================== -->
       <section id="settings">
         <h2 class="big">设置</h2>
         <div class="card">
           <fieldset>
             <legend>外观</legend>
-            <div class="setting-item"><span>暗黑模式</span><input type="checkbox" :checked="theme==='dark'" @change="toggleTheme"/></div>
+            <div class="setting-item">
+              <span>暗黑模式</span><input type="checkbox" :checked="theme==='dark'" @change="toggleTheme"/>
+            </div>
             <div class="setting-item">
               <span>上传背景</span>
               <label class="btn-ghost upload-btn">
@@ -163,13 +193,19 @@
             <div class="setting-item"><span>背景透明度</span><input type="range" min="0" max="1" step="0.05" v-model.number="bgOpacity"/></div>
             <div class="setting-item"><span>背景模糊</span><input type="range" min="0" max="20" step="1" v-model.number="bgBlur"/></div>
           </fieldset>
+
           <fieldset>
             <legend>桌宠 / LLM</legend>
             <div class="setting-item"><span>显示桌宠</span><input type="checkbox" v-model="petEnabled"/></div>
-            <div class="setting-item"><span>桌宠类型</span><select v-model="petType"><option value="cat">猫娘</option><option value="bird">魈鸟</option></select></div>
-            <div class="setting-item"><span>启用 LLM</span><input type="checkbox" v-model="llmEnabled"/></div>
-            <div class="setting-item"><span>桌宠 Prompt</span><input v-model="petPrompt"/></div>
+            <div class="setting-item"><span>桌宠类型</span>
+              <select v-model="petType">
+                <option value="cat">猫娘</option><option value="bird">魈鸟</option>
+              </select>
+            </div>
+            <div class="setting-item"><span>启用 LLM</span><input type="checkbox" v-model="llmEnabled"/></div>
+            <div class="setting-item"><span>桌宠 Prompt</span><input v-model="petPrompt"/></div>
           </fieldset>
+
           <fieldset>
             <legend>账户</legend>
             <div class="setting-item">
@@ -185,6 +221,7 @@
             <div class="setting-item"><span>我的昵称</span><input type="text" v-model="localDisplayName" @input="updateDisplayName"/></div>
             <div class="setting-item"><span>更改密码</span><button class="btn-ghost" @click="openPasswordModal">更改密码</button></div>
           </fieldset>
+
           <fieldset id="badge-field">
             <legend>勋章</legend>
             <div class="setting-item" style="flex-direction:row;align-items:center;">
@@ -226,82 +263,103 @@
           <span class="close" @click="closePasswordModal">×</span>
           <h3>更改密码</h3>
           <div style="margin-top:16px;">
-            <input type="password" v-model="oldPassword" placeholder="旧密码"
-                   style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;"/>
-            <input type="password" v-model="newPassword" placeholder="新密码"
-                   style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;"/>
-            <input type="password" v-model="confirmPassword" placeholder="确认新密码"
-                   style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;"/>
+            <input type="password" v-model="oldPassword"     placeholder="旧密码"     style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;"/>
+            <input type="password" v-model="newPassword"     placeholder="新密码"     style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;"/>
+            <input type="password" v-model="confirmPassword" placeholder="确认新密码" style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;"/>
             <button class="btn-publish" style="margin-top:12px" @click="changePassword">确认更改</button>
           </div>
         </div>
       </div>
 
       <!-- 桌宠 -->
-      <div id="pet" v-if="petEnabled" ref="pet"
-           style="position:fixed;right:24px;bottom:24px;width:90px;user-select:none;cursor:move;z-index:90;"
-           @mousedown="dragPet">
+      <div
+        id="pet"
+        v-if="petEnabled"
+        ref="pet"
+        style="position:fixed;right:24px;bottom:24px;width:90px;user-select:none;cursor:move;z-index:90;"
+        @mousedown="dragPet"
+      >
         <div v-html="petSVG"></div>
       </div>
 
       <footer style="text-align:center;padding:24px 0;font-size:13px;color:#777">
-        © 2025 把回忆拼好给你
+        © 2025 把回忆拼好给你
       </footer>
     </div>
   </div>
 </template>
 
 <script>
+/* ===== 登录白名单 & 常量 ===== */
+const ALLOWED_UIDS      = ['217122260', '246490729'];  // 允许登录的原神 UID
+const BEST_BADGE_UID    = '246490729';                 // 佩戴「最好的大佬」勋章的 UID
+const DEFAULT_PASSWORD  = '123456';                    // 若从未设置密码，修改/登录前先给默认
+
 export default {
   name: 'App',
+
   /* ---------- data ---------- */
   data() {
+    const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
     return {
-      posts: JSON.parse(localStorage.getItem('posts') || '[]'),
-      currentUser: JSON.parse(localStorage.getItem('currentUser') || 'null'),
-      theme: localStorage.getItem('theme') || 'light',
       /* 登录 */
-      selectedUser: null,
+      uidInput: '',
       loginPassword: '',
-      /* 背景 */
+      currentUser: storedUser,
+
+      /* 业务数据 */
+      posts: JSON.parse(localStorage.getItem('posts') || '[]'),
+
+      /* 主题 / 外观 */
+      theme: localStorage.getItem('theme') || 'light',
       bgSrc: localStorage.getItem('bgSrc') || '',
       bgOpacity: parseFloat(localStorage.getItem('bgOpacity') || 0.35),
       bgBlur: parseInt(localStorage.getItem('bgBlur') || 4),
+
       /* 投稿 */
       newPostText: '',
       newPostPlace: '',
       draftImgs: [],
+
       /* 评论 */
       newComment: {},
+
       /* Modals */
       showBadgeModal: false,
       showPasswordModal: false,
       showModal: false,
       modalSrc: '',
       modalMeta: '',
+
       /* 设置 */
       petEnabled: true,
       petType: 'cat',
       llmEnabled: true,
       petPrompt: '喵～ 记得喝水喔！',
-      localDisplayName: '',
+      localDisplayName: localStorage.getItem('displayName_' + (storedUser || '')) || '',
+
       /* 勋章 */
-      selectedBadge: localStorage.getItem('wear_' + (JSON.parse(localStorage.getItem('currentUser')) || '')) || 'none',
       BADGES: [
-        { id: 'none',    name: '不佩戴' },
-        { id: 'best',    name: '最好的大佬' },
-        { id: 'catgirl', name: '你才是猫娘' }
+        { id: 'none',    name: '不佩戴'        },
+        { id: 'best',    name: '最好的大佬'    },
+        { id: 'catgirl', name: '你才是猫娘'    }
       ],
+      selectedBadge: localStorage.getItem('wear_' + (storedUser || '')) || 'none',
+
       /* 密码 */
       oldPassword: '',
       newPassword: '',
       confirmPassword: '',
+
       /* 已读 */
-      readIds: new Set(JSON.parse(localStorage.getItem('readIds_' + (JSON.parse(localStorage.getItem('currentUser')) || '')) || '[]')),
+      readIds: new Set(JSON.parse(localStorage.getItem('readIds_' + (storedUser || '')) || '[]')),
+
       /* 相册 */
       albumMode: 'time'
     };
   },
+
   /* ---------- computed ---------- */
   computed: {
     displayName() {
@@ -325,121 +383,200 @@ export default {
       return g;
     },
     allowedBadges() {
-      return this.BADGES.filter(b => (b.id === 'best' ? this.currentUser === '离' : true));
+      return this.BADGES.filter(b => (b.id === 'best' ? this.currentUser === BEST_BADGE_UID : true));
     },
     hasUnread() {
       return this.posts.some(p => !this.readIds.has(p.id) && p.uid !== this.currentUser);
     },
     bgStyle() {
-      return { backgroundImage: this.bgSrc ? `url(${this.bgSrc})` : 'none', opacity: this.bgOpacity, filter: `blur(${this.bgBlur}px)` };
+      return {
+        backgroundImage: this.bgSrc ? `url(${this.bgSrc})` : 'none',
+        opacity: this.bgOpacity,
+        filter: `blur(${this.bgBlur}px)`
+      };
     },
     petSVG() {
       return this.petType === 'bird'
-        ? `<svg viewBox=\"0 0 120 120\"><circle cx=\"60\" cy=\"60\" r=\"55\" fill=\"#cdeffd\" stroke=\"#333\" stroke-width=\"3\"/><path d=\"M40 70 Q60 90 80 70\" stroke=\"#333\" stroke-width=\"5\" fill=\"none\" stroke-linecap=\"round\"/><circle cx=\"45\" cy=\"55\" r=\"8\"/><circle cx=\"75\" cy=\"55\" r=\"8\"/></svg>`
-        : `<svg viewBox=\"0 0 120 120\"><circle cx=\"60\" cy=\"60\" r=\"55\" fill=\"#ffe4e1\" stroke=\"#333\" stroke-width=\"3\"/><circle cx=\"45\" cy=\"50\" r=\"10\"/><circle cx=\"75\" cy=\"50\" r=\"10\"/><path d=\"M45 80 Q60 95 75 80\" stroke=\"#333\" stroke-width=\"4\" fill=\"none\" stroke-linecap=\"round\"/></svg>`;
+        ? `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="#cdeffd" stroke="#333" stroke-width="3"/><path d="M40 70 Q60 90 80 70" stroke="#333" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="45" cy="55" r="8"/><circle cx="75" cy="55" r="8"/></svg>`
+        : `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="#ffe4e1" stroke="#333" stroke-width="3"/><circle cx="45" cy="50" r="10"/><circle cx="75" cy="50" r="10"/><path d="M45 80 Q60 95 75 80" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`;
     }
   },
+
   watch: {
     bgOpacity: 'saveBgOpacity',
     bgBlur: 'saveBgBlur'
   },
+
   /* ---------- methods ---------- */
   methods: {
-    /* 工具 */
+    /* ========== 登录 ========== */
+    confirmLogin() {
+      const uid = this.uidInput.trim();
+
+      /* 1. UID 白名单校验 */
+      if (!ALLOWED_UIDS.includes(uid)) {
+        alert('用户不存在');
+        return;
+      }
+
+      const key = 'password_' + uid;
+      const stored = localStorage.getItem(key);
+
+      /* 2. 首次登录：要求输入非空密码并保存 */
+      if (!stored) {
+        if (!this.loginPassword.trim()) {
+          alert('首次使用请先设置密码！');
+          return;
+        }
+        localStorage.setItem(key, JSON.stringify(this.loginPassword));
+        alert('密码已保存，下次请使用同一密码登录');
+      }
+      /* 3. 再次登录：校验密码 */
+      else if (this.loginPassword !== JSON.parse(stored)) {
+        alert('密码不正确，请重试！');
+        return;
+      }
+
+      /* 4. 登录成功：初始化状态 */
+      this.currentUser = uid;
+      localStorage.setItem('currentUser', JSON.stringify(uid));
+      this.readIds = new Set(JSON.parse(localStorage.getItem('readIds_' + uid) || '[]'));
+
+      /* 5. 清空输入框 */
+      this.uidInput = '';
+      this.loginPassword = '';
+    },
+
+    logout() {
+      localStorage.removeItem('currentUser');
+      this.currentUser = null;
+      this.posts = [];
+      this.localDisplayName = '';
+      this.readIds = new Set();
+    },
+
+    /* ========== 工具函数 ========== */
     formatMeta(post) { return `${new Date(post.ts).toISOString().slice(0,10)} · ${post.place || '未知'}`; },
     badgeHTML(uid) {
       const raw = localStorage.getItem('wear_' + uid);
-      if (!raw || raw === '\"none\"' || raw === 'none') return '';
-      const val = (() => { try { return JSON.parse(raw); } catch { return raw; } })();
-      const badge = this.BADGES.find(b => b.id === val); if (!badge) return '';
-      const cls = badge.id === 'best' ? 'badge best' : badge.id === 'catgirl' ? 'badge catgirl' : badge.id === 'none' ? 'badge-none' : 'badge';
-      return `<span class=\"${cls}\">${badge.name}</span>`;
+      if (!raw || raw === '"none"' || raw === 'none') return '';
+      const val  = (() => { try { return JSON.parse(raw); } catch { return raw; } })();
+      const cls  = val === 'best' ? 'badge best'
+                 : val === 'catgirl' ? 'badge catgirl'
+                 : val === 'none' ? 'badge-none' : 'badge';
+      const name = this.BADGES.find(b => b.id === val)?.name || '';
+      return `<span class="${cls}">${name}</span>`;
     },
     scrollTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); },
-    getAvatar(uid){return uid?localStorage.getItem('avatar-'+uid)||'https://placehold.co/60':''},
-    getDisplayName(uid){return localStorage.getItem('displayName_'+uid)||uid},
-    /* 登录 */
-    selectUser(u){this.selectedUser=u;this.loginPassword='';},
-    confirmLogin(){
-      let pwd=localStorage.getItem('password_'+this.selectedUser)||'\"123456\"';
-      if(this.loginPassword===JSON.parse(pwd)){
-        this.currentUser=this.selectedUser;
-        localStorage.setItem('currentUser',JSON.stringify(this.currentUser));
-        this.readIds=new Set(JSON.parse(localStorage.getItem('readIds_'+this.currentUser)||'[]'));
-      }else alert('密码不正确，请重试！');
-    },
-    logout(){
-      localStorage.removeItem('currentUser');this.currentUser=null;
-      this.posts=[];this.localDisplayName='';this.readIds=new Set();
-    },
-    /* 投稿 */
-    handlePostImages(e){this.draftImgs=[];Array.from(e.target.files).slice(0,30).forEach(f=>this.draftImgs.push(URL.createObjectURL(f)));},
-    removeDraft(i){this.draftImgs.splice(i,1);},
-    autoResize(e){e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';},
+    getAvatar(uid){ return uid ? localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60' : '' },
+    getDisplayName(uid){ return localStorage.getItem('displayName_' + uid) || uid },
+
+    /* ========== 投稿 ========== */
+    handlePostImages(e){ this.draftImgs=[]; Array.from(e.target.files).slice(0,30).forEach(f=>this.draftImgs.push(URL.createObjectURL(f))); },
+    removeDraft(i){ this.draftImgs.splice(i,1); },
+    autoResize(e){ e.target.style.height='auto'; e.target.style.height=e.target.scrollHeight+'px'; },
     publishPost(){
       if(!this.currentUser) return alert('请先登录');
-      const txt=this.newPostText.trim(); if(!txt && !this.draftImgs.length) return alert('写点文字或选张图片吧~');
-      const post={id:Date.now(),uid:this.currentUser,txt,place:this.newPostPlace,imgs:[...this.draftImgs],ts:Date.now(),views:0,cmts:[]};
+      const txt=this.newPostText.trim();
+      if(!txt && !this.draftImgs.length) return alert('写点文字或选张图片吧~');
+
+      const post={ id:Date.now(), uid:this.currentUser, txt, place:this.newPostPlace,
+                   imgs:[...this.draftImgs], ts:Date.now(), views:0, cmts:[] };
+
       this.posts.unshift(post);
-      localStorage.setItem('posts',JSON.stringify(this.posts.map(p=>({...p,imgs:[]}))));
-      this.newPostText='';this.newPostPlace='';this.draftImgs=[];
+      localStorage.setItem('posts', JSON.stringify(this.posts.map(p=>({...p,imgs:[]}))));
+
+      this.newPostText=''; this.newPostPlace=''; this.draftImgs=[];
     },
-    handlePostEnter(e) {
-      if (!e.shiftKey) {
-      e.preventDefault();
-      this.publishPost();
-    }
-  },
+    handlePostEnter(e){
+      if (!e.shiftKey) { e.preventDefault(); this.publishPost(); }
+    },
     deletePost(p){
       if(confirm('撤回这条动态？')){
         this.posts=this.posts.filter(x=>x.id!==p.id);
-        localStorage.setItem('posts',JSON.stringify(this.posts.map(q=>({...q,imgs:[]}))));
+        localStorage.setItem('posts', JSON.stringify(this.posts.map(q=>({...q,imgs:[]}))));
       }
     },
-    isRead(id){return this.readIds.has(id);},
-    /* 图片 Modal */
-    openModal(src,meta){this.modalSrc=src;this.modalMeta=meta;this.showModal=true;},
-    closeModal(){this.showModal=false;},
-    /* 评论 */
-    sendComment(p){const t=this.newComment[p.id];if(t&&t.trim()){p.cmts.push({who:this.currentUser,txt:t.trim()});this.newComment[p.id]='';}},
-    deleteComment(p,i){if(confirm('确定撤回该评论吗？')) p.cmts.splice(i,1);},
-    editComment(p,i){const old=p.cmts[i].txt,neo=prompt('编辑评论：',old);if(neo!==null&&neo.trim()&&neo!==old)p.cmts[i].txt=neo.trim();},
-    handleCommentEnter(e, post) {
-    if (e.shiftKey) return
-    // enter → 发送评论
-    this.sendComment(post)
+    isRead(id){ return this.readIds.has(id); },
+
+    /* ========== 图片 Modal ========== */
+    openModal(src,meta){ this.modalSrc=src; this.modalMeta=meta; this.showModal=true; },
+    closeModal(){ this.showModal=false; },
+
+    /* ========== 评论 ========== */
+    sendComment(p){
+      const t=this.newComment[p.id];
+      if(t && t.trim()){ p.cmts.push({who:this.currentUser,txt:t.trim()}); this.newComment[p.id]=''; }
     },
-    /* 背景 */
-    changeBackground(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{this.bgSrc=ev.target.result;localStorage.setItem('bgSrc',this.bgSrc)};r.readAsDataURL(f);},
-    saveBgOpacity(){localStorage.setItem('bgOpacity',this.bgOpacity);},
-    saveBgBlur(){localStorage.setItem('bgBlur',this.bgBlur);},
-    /* 个人资料 */
-    changeAvatar(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>localStorage.setItem('avatar-'+this.currentUser,ev.target.result);r.readAsDataURL(f);},
-    updateDisplayName(){localStorage.setItem('displayName_'+this.currentUser,this.localDisplayName);},
-    /* 勋章 */
-    openBadgeModal(){this.showBadgeModal=true;},
-    closeBadgeModal(){this.showBadgeModal=false;},
-    confirmBadge(){localStorage.setItem('wear_'+this.currentUser,this.selectedBadge);alert('勋章已更换');this.closeBadgeModal();},
-    /* 密码 */
-    openPasswordModal(){this.showPasswordModal=true;this.oldPassword=this.newPassword=this.confirmPassword='';},
-    closePasswordModal(){this.showPasswordModal=false;},
+    deleteComment(p,i){ if(confirm('确定撤回该评论吗？')) p.cmts.splice(i,1); },
+    editComment(p,i){
+      const old=p.cmts[i].txt, neo=prompt('编辑评论：',old);
+      if(neo!==null && neo.trim() && neo!==old) p.cmts[i].txt = neo.trim();
+    },
+    handleCommentEnter(e, post){
+      if (e.shiftKey) return;
+      this.sendComment(post);
+    },
+
+    /* ========== 背景 ========== */
+    changeBackground(e){
+      const f=e.target.files[0]; if(!f) return;
+      const r=new FileReader();
+      r.onload=ev=>{ this.bgSrc=ev.target.result; localStorage.setItem('bgSrc', this.bgSrc); };
+      r.readAsDataURL(f);
+    },
+    saveBgOpacity(){ localStorage.setItem('bgOpacity', this.bgOpacity); },
+    saveBgBlur(){ localStorage.setItem('bgBlur', this.bgBlur); },
+
+    /* ========== 个人资料 / 勋章 ========== */
+    changeAvatar(e){
+      const f=e.target.files[0]; if(!f) return;
+      const r=new FileReader(); r.onload=ev=>localStorage.setItem('avatar-'+this.currentUser, ev.target.result); r.readAsDataURL(f);
+    },
+    updateDisplayName(){ localStorage.setItem('displayName_' + this.currentUser, this.localDisplayName); },
+    openBadgeModal(){ this.showBadgeModal=true; },
+    closeBadgeModal(){ this.showBadgeModal=false; },
+    confirmBadge(){
+      localStorage.setItem('wear_' + this.currentUser, this.selectedBadge);
+      alert('勋章已更换'); this.closeBadgeModal();
+    },
+
+    /* ========== 密码修改 ========== */
+    openPasswordModal(){ this.showPasswordModal=true; this.oldPassword=this.newPassword=this.confirmPassword=''; },
+    closePasswordModal(){ this.showPasswordModal=false; },
     changePassword(){
-      let pwd=localStorage.getItem('password_'+this.currentUser)||'\"123456\"';
-      if(this.oldPassword!==JSON.parse(pwd)) return alert('旧密码不正确！');
-      if(this.newPassword!==this.confirmPassword) return alert('两次输入的新密码不一致！');
-      if(!this.newPassword) return alert('新密码不能为空！');
-      localStorage.setItem('password_'+this.currentUser,JSON.stringify(this.newPassword));
-      alert('密码修改成功！');this.closePasswordModal();
+      const key='password_' + this.currentUser;
+      const stored=localStorage.getItem(key) || JSON.stringify(DEFAULT_PASSWORD);
+
+      if(this.oldPassword !== JSON.parse(stored)) return alert('旧密码不正确！');
+      if(this.newPassword !== this.confirmPassword) return alert('两次输入的新密码不一致！');
+      if(!this.newPassword.trim()) return alert('新密码不能为空！');
+
+      localStorage.setItem(key, JSON.stringify(this.newPassword));
+      alert('密码修改成功！'); this.closePasswordModal();
     },
-    /* 桌宠拖拽 */
-    dragPet(e){const pet=this.$refs.pet;const ox=e.offsetX,oy=e.offsetY;document.onmousemove=ev=>{pet.style.left=(ev.pageX-ox)+'px';pet.style.top=(ev.pageY-oy)+'px';};document.onmouseup=()=>document.onmousemove=null;},
-    /* 主题 */
-    toggleTheme(){this.theme=this.theme==='light'?'dark':'light';document.body.classList.toggle('dark',this.theme==='dark');localStorage.setItem('theme',this.theme);}
+
+    /* ========== 桌宠拖拽 ========== */
+    dragPet(e){
+      const pet=this.$refs.pet;
+      const ox=e.offsetX, oy=e.offsetY;
+      document.onmousemove=ev=>{ pet.style.left = (ev.pageX - ox) + 'px'; pet.style.top = (ev.pageY - oy) + 'px'; };
+      document.onmouseup  =()=> document.onmousemove = null;
+    },
+
+    /* ========== 主题 ========== */
+    toggleTheme(){
+      this.theme = this.theme === 'light' ? 'dark' : 'light';
+      document.body.classList.toggle('dark', this.theme === 'dark');
+      localStorage.setItem('theme', this.theme);
+    }
   },
-  mounted(){document.body.classList.toggle('dark',this.theme==='dark');}
+
+  mounted(){
+    document.body.classList.toggle('dark', this.theme === 'dark');
+  }
 };
 </script>
-
 <style>
 :root{
   --bg-light:#f5f5f5;--bg-dark:#0f0f11;
