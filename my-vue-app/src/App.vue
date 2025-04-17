@@ -265,6 +265,7 @@ const BEST_BADGE_UID    = '246490729';                 // 佩戴「最好的大�
 import LoginModal from '@/components/LoginModal.vue';
 import LogoutButton from '@/components/LogoutButton.vue';
 import { logout as authLogout, DEFAULT_PASSWORD } from '@/composables/useAuth';
+import { useBlobStore } from '@/composables/useStorage';
 
 export default {
   name: 'App',
@@ -513,7 +514,20 @@ export default {
 
   mounted(){
     document.body.classList.toggle('dark', this.theme === 'dark');
-  }
+  },
+  async changeBackground(e) {
+    const f = e.target.files[0]; if (!f) return;
+    const store = await useBlobStore();
+    await store.save('bg-' + this.currentUser, f);
+    this.bgSrcKey = 'bg-' + this.currentUser;       // 只存 key
+    localStorage.setItem('bgKey', this.bgSrcKey);
+    this.updateBg(); // ⬅︎ 用 createObjectURL 读出来
+  },
+  async updateBg() {
+    const store = await useBlobStore();
+    const blob = await store.load(localStorage.getItem('bgKey') || '');
+    this.bgSrc = blob ? URL.createObjectURL(blob) : '';
+  },
 };
 </script>
 <style>

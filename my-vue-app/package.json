@@ -3,14 +3,14 @@
     "version": "1.0.0",
     "description": "把回忆拼好给你 - Vue版本",
     "scripts": {
-      "serve": "vue-cli-service serve",
-      "build": "vue-cli-service build"
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build"
     },
     "dependencies": {
-      "vue": "^3.2.0"
+        "idb": "^8.0.2",
+        "vue": "^3.2.0"
     },
     "devDependencies": {
-      "@vue/cli-service": "^5.0.0"
+        "@vue/cli-service": "^5.0.0"
     }
-  }
-  
+}
