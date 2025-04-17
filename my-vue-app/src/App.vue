@@ -460,7 +460,72 @@ body.dark nav{background:rgba(0,0,0,0.18);border-bottom:1px solid rgba(255,255,2
 .menu a:hover{background:rgba(0,0,0,0.08)}
 body.dark .menu a:hover{background:rgba(255,255,255,0.12)}
 .red{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:4px}
+/* 提升“选择地点”下拉可读性 */
+.np-toolbar select {
+  /* 白天主题下：白底深字 */
+  background-color: #ffffff;      /* 纯白背景 */
+  color: #333333;                 /* 深灰文字 */
+  border: 1px solid #888888;      /* 更醒目的灰色边框 */
+}
 
+/* 深色主题下：深底浅字 */
+body.dark .np-toolbar select {
+  background-color: #2a2a2a;      /* 深灰背景 */
+  color: #dddddd;                 /* 淡灰文字 */
+  border: 1px solid #555555;      /* 深色边框 */
+}
+
+/* 选项列表也要同步 */
+.np-toolbar select option {
+  background-color: #ffffff;
+  color: #333333;
+}
+body.dark .np-toolbar select option {
+  background-color: #2a2a2a;
+  color: #dddddd;
+}
+
+/* 聚焦时高亮边框 */
+.np-toolbar select:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #000000;          /* 纯黑边框 */
+}
+/* 设置区下拉框（桌宠类型等）配色 */
+.setting-item select {
+  background-color: #ffffff;   /* 纯白底 */
+  color: #333333;              /* 深灰字 */
+  border: 1px solid #888888;   /* 更醒目的灰边 */
+  padding:6px 30px 6px 10px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* 选项列表（option）也改色 */
+.setting-item select option {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+/* 暗黑主题下 */
+body.dark .setting-item select {
+  background-color: #2a2a2a;
+  color: #dddddd;
+  border: 1px solid #555555;
+}
+body.dark .setting-item select option {
+  background-color: #2a2a2a;
+  color: #dddddd;
+}
+
+/* 聚焦时黑框 */
+.setting-item select:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #000000;
+}
 /* 按钮 */
 .btn-ghost,.btn-publish{display:inline-flex;align-items:center;gap:6px;padding:6px 20px;
   font-size:14px;border-radius:var(--radius);cursor:pointer;transition:.25s background,.2s transform}
@@ -495,6 +560,9 @@ body.dark .np-top textarea{background:var(--card-dark);color:var(--text-dark)}
   background:rgba(0,0,0,0.6);color:#fff;font-size:14px;line-height:18px;text-align:center;cursor:pointer;
   transition:background .2s}
 .np-preview .remove:hover{background:rgba(0,0,0,0.85)}
+.np-preview .thumb {
+  position: relative;
+}
 
 /* 动态列表 */
 #moments-list{display:flex;flex-direction:column;gap:26px}
@@ -518,7 +586,11 @@ body.dark .comment{background:rgba(255,255,255,0.05)}
 .c-input input{flex:1;padding:6px 10px;border-radius:var(--radius);border:var(--glass-border);
   background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2));font-size:14px;transition:box-shadow .2s}
 body.dark .c-input input{background:var(--card-dark);color:var(--text-dark)}
-.c-input input:focus{box-shadow:0 0 5px rgba(0,0,0,0.15)}
+.c-input input:focus {
+  outline: none;        /* 去掉浏览器默认的白色 outline */
+  box-shadow: none;     /* 关闭原来的阴影 */
+  border: 1px solid #000; /* 只要 1px 黑色边框 */
+}
 
 /* 相册 */
 #album{padding:40px 8%}
@@ -542,6 +614,13 @@ body.dark .setting-item + .setting-item{border-top:1px solid rgba(255,255,255,0.
 .setting-item input[type=text]{width:60%;padding:6px;border-radius:var(--radius);border:var(--glass-border);
   background:var(--card-light);backdrop-filter:blur(calc(var(--blur)/2))}
 body.dark .setting-item input[type=text]{background:var(--card-dark);color:var(--text-dark)}
+/* 重写所有文字输入框和多行输入框的聚焦效果 */
+.setting-item input[type="text"]:focus,
+.np-top textarea:focus {
+  outline: none;        /* 去掉默认 outline */
+  box-shadow: none;     /* 去掉阴影 */
+  border: 1px solid #000; /* 1px 黑色实线边框 */
+}
 
 /* Badge */
 .badge{font-size:10px;padding:2px 4px;border-radius:4px;margin-left:4px;display:inline-block;min-width:40px;text-align:center;color:#fff}
