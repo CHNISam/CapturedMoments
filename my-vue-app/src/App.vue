@@ -1,38 +1,10 @@
 <template>
   <div>
-    <!-- ========== 未登录 ========== -->
-    <div v-if="!currentUser">
-      <transition name="fade">
-        <div id="loginModal" class="modal show">
-          <div class="box login-box" style="text-align:center;max-width:340px;">
-            <h3 style="margin-bottom:16px">登录 Captured&nbsp;Moments</h3>
+    <!-- 登录 Modal -->
+    <LoginModal :show="!currentUser" @login-success="handleLogin" />
 
-            <!-- 输入 UID -->
-            <input
-              type="text"
-              v-model.trim="uidInput"
-              placeholder="请输入原神 UID"
-              style="width:100%;padding:8px;margin-bottom:10px;border-radius:8px;border:1px solid #ccc;"
-            />
-
-            <!-- 输入 / 首次设置密码 -->
-            <input
-              type="password"
-              v-model="loginPassword"
-              placeholder="密码（首次输入将被保存）"
-              style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;"
-            />
-
-            <button class="btn-publish" style="margin-top:12px;width:100%;" @click="confirmLogin">
-              进入
-            </button>
-          </div>
-        </div>
-      </transition>
-    </div>
-
-    <!-- ========== 已登录主界面 ========== -->
-    <div v-else>
+    <!-- ================== 已登录主界面 ================== -->
+    <div v-if="currentUser">
       <!-- 用户自定义背景 -->
       <div id="bgLayer" :style="bgStyle"></div>
 
@@ -40,16 +12,14 @@
       <nav>
         <div class="logo">把回忆拼好给你</div>
         <div class="menu">
-          <a href="#moments" @click.prevent="scrollTo('moments')">
-            动态 <span class="red" :class="{ hidden: !hasUnread }"></span>
-          </a>
+          <a href="#moments"  @click.prevent="scrollTo('moments')">动态 <span class="red" :class="{ hidden: !hasUnread }"></span></a>
           <a href="#album"    @click.prevent="scrollTo('album')">相册</a>
           <a href="#settings" @click.prevent="scrollTo('settings')">设置</a>
           <span style="font-weight:600">{{ currentUser }}</span>
           <a class="btn-ghost" @click="logout">退出</a>
           <button class="btn-ghost" @click="toggleTheme">
             <svg v-if="theme==='light'" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
-            <svg v-else             viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+            <svg v-else                viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
           </button>
         </div>
       </nav>
@@ -291,21 +261,18 @@
 
 <script>
 /* ===== 登录白名单 & 常量 ===== */
-const ALLOWED_UIDS      = ['217122260', '246490729'];  // 允许登录的原神 UID
 const BEST_BADGE_UID    = '246490729';                 // 佩戴「最好的大佬」勋章的 UID
 const DEFAULT_PASSWORD  = '123456';                    // 若从未设置密码，修改/登录前先给默认
-
+import LoginModal from '@/components/LoginModal.vue';
 export default {
   name: 'App',
-
+  components: { LoginModal },
   /* ---------- data ---------- */
   data() {
     const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 
     return {
-      /* 登录 */
-      uidInput: '',
-      loginPassword: '',
+      // 当前登录 UID；null 代表未登录
       currentUser: storedUser,
 
       /* 业务数据 */
@@ -410,51 +377,21 @@ export default {
   /* ---------- methods ---------- */
   methods: {
     /* ========== 登录 ========== */
-    confirmLogin() {
-      const uid = this.uidInput.trim();
-
-      /* 1. UID 白名单校验 */
-      if (!ALLOWED_UIDS.includes(uid)) {
-        alert('用户不存在');
-        return;
-      }
-
-      const key = 'password_' + uid;
-      const stored = localStorage.getItem(key);
-
-      /* 2. 首次登录：要求输入非空密码并保存 */
-      if (!stored) {
-        if (!this.loginPassword.trim()) {
-          alert('首次使用请先设置密码！');
-          return;
-        }
-        localStorage.setItem(key, JSON.stringify(this.loginPassword));
-        alert('密码已保存，下次请使用同一密码登录');
-      }
-      /* 3. 再次登录：校验密码 */
-      else if (this.loginPassword !== JSON.parse(stored)) {
-        alert('密码不正确，请重试！');
-        return;
-      }
-
-      /* 4. 登录成功：初始化状态 */
-      this.currentUser = uid;
+    /* 登录成功后的回调 */
+    handleLogin (uid) {
+      this.currentUser   = uid;
       localStorage.setItem('currentUser', JSON.stringify(uid));
-      this.readIds = new Set(JSON.parse(localStorage.getItem('readIds_' + uid) || '[]'));
-
-      /* 5. 清空输入框 */
-      this.uidInput = '';
-      this.loginPassword = '';
+      this.readIds       = new Set(JSON.parse(localStorage.getItem('readIds_' + uid) || '[]'));
+      this.localDisplayName = localStorage.getItem('displayName_' + uid) || '';
+      this.posts         = JSON.parse(localStorage.getItem('posts') || '[]');
     },
-
-    logout() {
+    logout () {
       localStorage.removeItem('currentUser');
-      this.currentUser = null;
-      this.posts = [];
+      this.currentUser    = null;
+      this.posts          = [];
       this.localDisplayName = '';
-      this.readIds = new Set();
+      this.readIds        = new Set();
     },
-
     /* ========== 工具函数 ========== */
     formatMeta(post) { return `${new Date(post.ts).toISOString().slice(0,10)} · ${post.place || '未知'}`; },
     badgeHTML(uid) {
