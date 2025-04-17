@@ -27,6 +27,8 @@
     <div v-if="currentUser">
       <!-- 星空背景，仅在暗黑模式下显示 -->
       <canvas id="starCanvas" ref="starCanvas"></canvas>
+      <!-- 落樱背景，仅在明亮模式下显示 -->
+      <canvas id="sakuraCanvas" ref="sakuraCanvas"></canvas>
       
       <!-- 导航栏 -->
       <nav>
@@ -53,31 +55,50 @@
       <!-- 投稿区域 -->
       <section id="moments">
         <h2 class="big">投稿</h2>
-        <div id="new-post" class="card" style="display:flex; flex-direction:column; gap:12px;">
-          <textarea v-model="newPostText" placeholder="说点什么…"></textarea>
-          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <!-- 下拉菜单：选择地点 -->
-            <select v-model="newPostPlace">
-              <option value="">无地点</option>
-              <option>蒙德</option>
-              <option>璃月</option>
-              <option>稻妻</option>
-              <option>须弥</option>
-              <option>枫丹</option>
-              <option>纳塔</option>
-            </select>
-            <label class="btn-ghost upload-btn">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              </svg>
-              <input type="file" accept="image/*" multiple @change="handlePostImages">
-            </label>
-            <button id="publish" class="btn-publish" @click="publishPost">发布</button>
+          <!-- 文本 + 工具栏 -->
+          <div class="np-top">
+            <textarea
+              v-model="newPostText"
+              placeholder="说点什么…"
+              maxlength="2000"
+              @input="autoResize($event)" />
+
+            <div class="np-toolbar">
+              <!-- 实时字数 -->
+              <span class="char-count">{{ newPostText.length }}/2000</span>
+
+              <!-- 选择地点 -->
+              <select v-model="newPostPlace">
+                <option value="">无地点</option>
+                <option>蒙德</option>
+                <option>璃月</option>
+                <option>稻妻</option>
+                <option>须弥</option>
+                <option>枫丹</option>
+                <option>纳塔</option>
+              </select>
+
+              <!-- 上传按钮 -->
+              <label class="btn-ghost upload-btn">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <input type="file" accept="image/*" multiple @change="handlePostImages">
+              </label>
+
+              <!-- 发布 -->
+              <button id="publish" class="btn-publish" @click="publishPost">发布</button>
+            </div>
           </div>
-          <div id="preview" style="display:flex; gap:8px; overflow-x:auto;">
-            <img v-for="(img, i) in draftImgs" :key="i" :src="img">
-          </div>
+
+          <!-- 预览并可删除 -->
+          <div v-if="draftImgs.length" class="np-preview">
+            <div v-for="(img, i) in draftImgs" :key="i" class="thumb">
+              <img :src="img" />
+              <span class="remove" @click="removeDraft(i)">×</span>
+            </div>
         </div>
+
         
         <h2 class="big">动态</h2>
         <div id="moments-list">
@@ -115,7 +136,7 @@
             <div class="comments">
               <div v-for="(c, idx) in post.cmts" :key="idx" class="comment">
                 <div class="comment-left">
-                  <span class="comment-text">{{ c.txt }}</span>
+                  <span class="comment-display">{{ c.who }}: {{ c.txt }}</span>
                 </div>
                 <div class="comment-right">
                   <span v-if="c.who === currentUser" class="comment-edit" @click="editComment(post, idx)">✎</span>
@@ -264,7 +285,6 @@
     </div>
   </div>
 </template>
-
 <script>
 export default {
   name: "App",
@@ -365,7 +385,8 @@ export default {
     },
     hasUnread() {
       return this.posts.some(post => !this.readIds.has(post.id) && post.uid !== this.currentUser);
-    }
+    },
+     
   },
   methods: {
     badgeHTML(uid) {
@@ -439,6 +460,16 @@ export default {
         this.draftImgs.push(url);
       });
     },
+    removeDraft(idx) {
+      this.draftImgs.splice(idx, 1);
+    },
+    autoResize(e) {
+      // 可选：让 textarea 随输入自动长高
+      const el = e.target;
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    },
+
     publishPost() {
       if (!this.currentUser) return alert('请先登录');
       const txt = this.newPostText.trim();
@@ -560,193 +591,256 @@ export default {
         document.onmousemove = null;
       };
     },
-    // 初始化星空 canvas 及动画
+    // 新版星空：分层视差 + 漫天流星
     initStarCanvas() {
       const canvas = this.$refs.starCanvas;
       if (!canvas) return;
       const ctx = canvas.getContext('2d');
-      let stars = [];
-      let meteor = null;
-      let lastMeteorTime = Date.now();
-      let astronomyBlend = 0;
-      let targetAstronomy = 0;
-      const rotationSpeed = 0.00015;
-      function initStars(numStars = 400) {
-        stars = [];
-        const width = canvas.width;
-        const height = canvas.height;
-        const gridCount = Math.round(Math.sqrt(numStars));
-        const cellW = width / gridCount;
-        const cellH = height / gridCount;
-        const astroCenter = { x: width / 2, y: height * 0.25 };
-        for (let i = 0; i < gridCount; i++) {
-          for (let j = 0; j < gridCount; j++) {
-            let rx = j * cellW + Math.random() * cellW;
-            let ry = i * cellH + Math.random() * cellH;
-            const randomX = rx;
-            const randomY = ry;
-            const dx = (Math.random() - 0.5) * 0.005;
-            const dy = (Math.random() - 0.5) * 0.005;
-            const dX = rx - astroCenter.x, dY = ry - astroCenter.y;
-            const distance = Math.sqrt(dX * dX + dY * dY);
-            const astroAngle = Math.atan2(dY, dX);
-            stars.push({
-              randomX,
-              randomY,
-              dx,
-              dy,
-              distance,
-              astroAngle,
-              x: randomX,
-              y: randomY,
-              radius: Math.random() * 1.5 + 0.5,
-              baseAlpha: Math.random() * 0.5 + 0.5,
-              amplitude: Math.random() * 0.3,
+      // 配置
+      const layerDefs = [
+        { count: 80, size: 1.2, speed: 0.02 },   // 最远层
+        { count: 60, size: 1.6, speed: 0.04 },
+        { count: 40, size: 2.2, speed: 0.06 },   // 最近层
+      ];
+      let layers = [];
+      let meteors = [];
+      // 生成星星
+      function genStars() {
+        layers = layerDefs.map(def => {
+          return Array.from({ length: def.count }).map(() => {
+            return {
+              x: Math.random(),
+              y: Math.random(),
+              size: (Math.random() * 0.5 + 0.5) * def.size,
               phase: Math.random() * Math.PI * 2,
-              brightnessSpeed: Math.random() * 0.001 + 0.0005
-            });
-          }
-        }
-        meteor = null;
-        lastMeteorTime = Date.now();
-      }
-      function spawnMeteor() {
-        const width = canvas.width, height = canvas.height;
-        const x0 = Math.random() * width;
-        const y0 = Math.random() * height * 0.2;
-        const angle = (Math.random() * 20 + 20) * Math.PI / 180;
-        meteor = {
-          x: x0,
-          y: y0,
-          len: Math.random() * 80 + 80,
-          speed: Math.random() * 5 + 12,
-          acceleration: Math.random() * 0.15 + 0.1,
-          angle,
-          life: 0,
-          maxLife: Math.random() * 300 + 500,
-          curveAmplitude: Math.random() * 1 + 0.5,
-          curveFrequency: Math.random() * 0.002 + 0.001,
-          curvePhase: Math.random() * Math.PI * 2
-        };
+              speed: (Math.random() * 0.5 + 0.5) * def.speed
+            };
+          });
+        });
       }
       function resize() {
-        if (!canvas || !canvas.parentElement) return;
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight;
-        initStars(400);
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      function spawnMeteor() {
+        const dir = Math.random() < 0.5 ? 1 : -1; // 左->右 或 右->左
+        const x = dir === 1 ? -200 : canvas.width + 200;
+        const y = Math.random() * canvas.height * 0.4;
+        const len = Math.random() * 150 + 180;
+        meteors.push({ x, y, len, dir, life: 0, speed: Math.random() * 6 + 8 });
+      }
+      function draw() {
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        const time = Date.now();
+        // 绘制星星
+        layers.forEach((stars, layerIdx) => {
+          const depth = layerIdx / layerDefs.length; // 0 ~ 1
+          stars.forEach(star => {
+            star.x += star.speed * (1 - depth) / canvas.width; // 近层移动更快
+            if (star.x > 1) star.x = 0;
+            const alpha = 0.5 + 0.5 * Math.sin(time * 0.002 + star.phase);
+            ctx.globalAlpha = alpha;
+            ctx.beginPath();
+            ctx.arc(star.x * canvas.width, star.y * canvas.height, star.size, 0, Math.PI*2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+          });
+        });
+        ctx.globalAlpha = 1;
+        // 流星
+        if (meteors.length < 3 && Math.random() < 0.005) spawnMeteor();
+        meteors = meteors.filter(m => m.life < 1.2);
+        meteors.forEach(meteor => {
+          meteor.life += 0.016;
+          meteor.x += meteor.speed * meteor.dir;
+          meteor.y += meteor.speed * 0.35;
+          const tailX = meteor.x - meteor.dir * meteor.len;
+          const tailY = meteor.y - meteor.len * 0.35;
+          ctx.lineWidth = 2;
+          const grad = ctx.createLinearGradient(meteor.x, meteor.y, tailX, tailY);
+          grad.addColorStop(0, 'rgba(255,255,255,' + (1 - meteor.life) + ')');
+          grad.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.strokeStyle = grad;
+          ctx.beginPath();
+          ctx.moveTo(meteor.x, meteor.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.stroke();
+        });
+        requestAnimationFrame(draw);
       }
       window.addEventListener('resize', resize);
       resize();
-      function updateMode() {
-        if (Math.random() < 0.0005) {
-          targetAstronomy = 1;
-        } else if (Math.random() < 0.0005) {
-          targetAstronomy = 0;
-        }
-        const blendSpeed = 0.002;
-        astronomyBlend += (targetAstronomy - astronomyBlend) * blendSpeed;
-      }
-      function animate() {
-        const width = canvas.width, height = canvas.height;
-        ctx.clearRect(0, 0, width, height);
-        const time = Date.now();
-        updateMode();
-        const astroCenter = { x: width / 2, y: height * 0.25 };
-        stars.forEach(star => {
-          star.randomX += star.dx;
-          star.randomY += star.dy;
-          if (star.randomX < 0) star.randomX = width;
-          if (star.randomX > width) star.randomX = 0;
-          if (star.randomY < 0) star.randomY = height;
-          if (star.randomY > height) star.randomY = 0;
-          star.astroAngle += rotationSpeed;
-          let astroX = astroCenter.x + star.distance * Math.cos(star.astroAngle);
-          let astroY = astroCenter.y + star.distance * Math.sin(star.astroAngle);
-          star.x = (1 - astronomyBlend) * star.randomX + astronomyBlend * astroX;
-          star.y = (1 - astronomyBlend) * star.randomY + astronomyBlend * astroY;
-          const alpha = star.baseAlpha + star.amplitude * Math.sin(time * star.brightnessSpeed + star.phase);
-          const gradient = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.radius * 3);
-          gradient.addColorStop(0, `rgba(255,255,255,${alpha})`);
-          gradient.addColorStop(1, "rgba(255,255,255,0)");
-          ctx.fillStyle = gradient;
-          ctx.beginPath();
-          ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        if (!meteor && time - lastMeteorTime > 15000 && Math.random() < 0.005) {
-          spawnMeteor();
-          lastMeteorTime = time;
-        }
-        if (meteor) {
-          meteor.life += 16.67;
-          const progress = meteor.life / meteor.maxLife;
-          if (progress > 1) {
-            meteor = null;
-          } else {
-            meteor.speed += meteor.acceleration;
-            meteor.x += Math.cos(meteor.angle) * meteor.speed;
-            meteor.y += Math.sin(meteor.angle) * meteor.speed;
-            const offset = meteor.curveAmplitude * Math.sin(meteor.life * meteor.curveFrequency + meteor.curvePhase);
-            meteor.x += -Math.sin(meteor.angle) * offset;
-            meteor.y += Math.cos(meteor.angle) * offset;
-            ctx.beginPath();
-            const tailX = meteor.x - Math.cos(meteor.angle) * meteor.len;
-            const tailY = meteor.y - Math.sin(meteor.angle) * meteor.len;
-            const grad = ctx.createLinearGradient(meteor.x, meteor.y, tailX, tailY);
-            grad.addColorStop(0, `rgba(255,255,255,${1 - progress})`);
-            grad.addColorStop(1, "rgba(255,255,255,0)");
-            ctx.strokeStyle = grad;
-            ctx.lineWidth = 2;
-            ctx.moveTo(meteor.x, meteor.y);
-            ctx.lineTo(tailX, tailY);
-            ctx.stroke();
-          }
-        }
-        requestAnimationFrame(animate);
-      }
-      animate();
+      genStars();
+      draw();
     },
-    // 修复主题切换：更新 theme 变量并同步修改 body.classList
+       // 明亮主题下的缓慢落樱
+    initSakuraCanvas() {
+      const canvas = this.$refs.sakuraCanvas;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const petals = [];
+
+      /* ---------- 参数区 ---------- */
+      const MAX = 120;            // 同屏最多花瓣
+      const SPAWN = 550;          // 每朵生成间隔 ms
+      const GRAVITY = 0.04;       // 基础重力
+      const WIND_STRENGTH = 0.12; // 最大风速
+      const FOCUS_Z = 0.5;        // 0~1，越小越“近景”
+      /* --------------------------- */
+
+      function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      /* 生成单片花瓣 */
+      function spawn() {
+        const z = Math.random();       // 深度
+        petals.push({
+          x: Math.random() * canvas.width,
+          y: -20,
+          z,
+          size: (10 + Math.random() * 15) * (0.4 + (1 - z) * 0.6),  // 远景更小
+          vx: (Math.random() * 2 - 1) * WIND_STRENGTH,
+          vy: 0.4 + Math.random() * 0.5,
+          ay: GRAVITY * (0.6 + Math.random() * 0.8),
+          rot: Math.random() * Math.PI * 2,
+          spin: (Math.random() - 0.5) * 0.03,
+          life: 0,
+          extend: 1.8 + Math.random()*0.8,        // 长度比例
+          bend:   (Math.random()-0.5) * 0.3,      // 左右弯曲
+          flip:   Math.random() < 0.4 ? 1 : 0,    // 背面概率
+        });
+        if (petals.length > MAX) petals.shift();
+      }
+
+          /* ----------- 真·单瓣樱花 (tear‑drop + 缺口 + 高光) ----------- */
+      function drawPetal(ctx, p) {
+        /*
+        * p.extend   决定长度 (1.8~2.6)
+        * p.bend     决定左右弯 (‑0.3~0.3)
+        * p.flip     0 或 1，用来随机区分“背面”
+        */
+
+        const w  = p.size;              // 基础宽
+        const h  = p.size * p.extend;   // 细长
+        const r1 = h * 0.18;            // 缺口半径
+
+        ctx.save();
+
+        /* 1️⃣ 透视 & 弯曲  */
+        ctx.scale(1 + p.bend, 1);       // 左右弯
+        if (p.flip) ctx.scale(1, -1);   // 翻背面
+
+        /* 2️⃣ 填充渐变（正面更亮、背面暗） */
+        const g = ctx.createLinearGradient(0, -h, 0, 0);
+        if (!p.flip) {
+          g.addColorStop(0,   'rgba(255,215,225,0.96)');
+          g.addColorStop(0.7, 'rgba(247,165,195,0.88)');
+        } else {
+          g.addColorStop(0,   'rgba(240,150,180,0.75)'); // 背面略暗
+          g.addColorStop(1,   'rgba(220,130,160,0.70)');
+        }
+        ctx.fillStyle = g;
+
+        /* 3️⃣ 画瓣身 (两条二次 Bézier) */
+        ctx.beginPath();
+        ctx.moveTo(0, 0);                              // 底端
+        ctx.quadraticCurveTo( w*0.85, -h*0.45, 0, -h); // 右缘
+        ctx.quadraticCurveTo(-w*0.85, -h*0.45, 0, 0);  // 左缘
+        ctx.closePath();
+        ctx.fill();
+
+        /* 4️⃣ 切顶部缺口 */
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(0, -h + r1*0.6, r1, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+
+
+      /* 主循环 */
+      let last = performance.now();
+      function loop(now = performance.now()) {
+        const dt = (now - last) / 16.67; // ~ 帧数归一化
+        last = now;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 每隔 SPAWN ms 造一片
+        if (now % SPAWN < 16) spawn();
+
+        petals.forEach((p) => {
+          // 物理
+          p.vy += p.ay * dt;
+          p.x  += p.vx * dt * 0.8;
+          p.y  += p.vy * dt;
+          p.rot += p.spin * dt;
+          p.life += dt;
+
+          // 超出底部 -> 回炉
+          if (p.y - p.size > canvas.height) Object.assign(p, petals[0]), petals.shift();
+
+          // 绘制，按深度模糊 & 透明
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          const alpha = 0.2 + (1 - p.z) * 0.8;
+          ctx.globalAlpha = alpha;
+          if (p.z < FOCUS_Z) {
+            const blur = (1 - p.z / FOCUS_Z) * 3;
+            ctx.filter = `blur(${blur}px)`;
+          }
+          drawPetal(ctx, p);
+          ctx.restore();
+        });
+
+        requestAnimationFrame(loop);
+      }
+      loop();
+    },
+
     toggleTheme() {
-      this.theme = (this.theme === 'light') ? 'dark' : 'light';
-      localStorage.setItem('theme', this.theme);
+      this.theme = this.theme === 'light' ? 'dark' : 'light';
       document.body.classList.toggle('dark', this.theme === 'dark');
+      if (this.theme === 'dark') {
+        this.initStarCanvas();
+        // 清掉落樱
+        const sc = this.$refs.sakuraCanvas;
+        sc && sc.getContext('2d').clearRect(0,0,sc.width,sc.height);
+      } else {
+        this.initSakuraCanvas();   // 切到白天就启动落樱
+        // 清掉星空
+        const st = this.$refs.starCanvas;
+        st && st.getContext('2d').clearRect(0,0,st.width,st.height);
+      }
     }
+
   },
-  mounted() {
-    // 仅当用户已登录时初始化敏感内容
-    if (this.currentUser) {
-      this.localDisplayName = this.displayName;
-      document.body.classList.toggle('dark', this.theme === 'dark');
+    mounted() {
+    document.body.classList.toggle('dark', this.theme === 'dark');
+    if (this.theme === 'dark') {
       this.initStarCanvas();
+    } else {
+      this.initSakuraCanvas();   // 初次加载白天就启动落樱
     }
   }
 }
 </script>
-
 <style>
+/****  样式（保持不变，仅补充星空层次感） ****/
 /* 全局变量：简约科技风，采用中性灰调 */
-:root {
-  --bg-light: #f5f5f5;              /* 明亮背景 */
-  --bg-dark: #1c1c1c;               /* 暗黑背景 */
-  --card-light: #ffffff;            /* 卡片明亮背景 */
-  --card-dark: #2c2c2c;             /* 卡片暗黑背景 */
-  --text-light: #333333;            /* 明亮文字色 */
-  --text-dark: #cccccc;             /* 暗黑文字色 */
-  --primary: #4a90e2;              /* 少量使用：科技蓝色 */
-  --accent: #e91e63;               /* 辅助色（只做点缀，不作为主要元素） */
-  --radius: 14px;
-  --glass-border: 1px solid rgba(0, 0, 0, 0.1);
-  --blur: 16px;
-  --login-bg: #f5f5f5;
-  --login-text: #333333;
-  --login-border: rgba(0, 0, 0, 0.1);
-}
+:root{--bg-light:#f5f5f5;--bg-dark:#0f0f11;--card-light:#ffffff;--card-dark:#1e1e1f;--text-light:#333;--text-dark:#d2d2d2;--primary:#4a90e2;--accent:#e91e63;--radius:14px;--glass-border:1px solid rgba(0,0,0,0.1);--blur:16px;--login-bg:#f5f5f5;--login-text:#333;--login-border:rgba(0,0,0,0.1);}body.dark{background:var(--bg-dark);color:var(--text-dark);--login-bg:#1c1c1c;--login-text:#d2d2d2;--login-border:rgba(255,255,255,0.1);}html,body{margin:0;padding:0;height:100%;font-family:Inter,"PingFang SC",sans-serif;transition:.3s background-color,.3s color}body{background:var(--bg-light);color:var(--text-light)}body.dark{background:var(--bg-dark);color:var(--text-dark)}a{color:inherit;text-decoration:none;cursor:pointer}
 body.dark {
   background: var(--bg-dark);
   color: var(--text-dark);
   --login-bg: #1c1c1c;
-  --login-text: #cccccc;
+  --login-text: #d2d2d2;
   --login-border: rgba(255, 255, 255, 0.1);
 }
 
@@ -774,16 +868,7 @@ a {
   display: none;
 }
 
-/* 星空 Canvas */
-#starCanvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: -1;
-  width: 100%;
-  height: 100%;
-  display: none;
-}
+#starCanvas,#sakuraCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;display:none}body.dark #starCanvas{display:block}body:not(.dark) #sakuraCanvas{display:block}
 body.dark #starCanvas {
   display: block;
 }
@@ -1059,6 +1144,54 @@ body.dark #new-post textarea {
   height: 50px;
   border-radius: 8px;
   object-fit: cover;
+}
+/* === 新投稿子组件 === */
+.np-top {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.np-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.char-count {
+  font-size: 12px;
+  color: #888;
+}
+.np-preview {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+.np-preview .thumb {
+  position: relative;
+}
+.np-preview img {
+  width: 70px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+.np-preview .remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 14px;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.np-preview .remove:hover {
+  background: rgba(0,0,0,0.85);
 }
 #moments-list {
   display: flex;
