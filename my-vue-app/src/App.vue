@@ -460,72 +460,42 @@ body.dark nav{background:rgba(0,0,0,0.18);border-bottom:1px solid rgba(255,255,2
 .menu a:hover{background:rgba(0,0,0,0.08)}
 body.dark .menu a:hover{background:rgba(255,255,255,0.12)}
 .red{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:4px}
-/* 提升“选择地点”下拉可读性 */
-.np-toolbar select {
-  /* 白天主题下：白底深字 */
-  background-color: #ffffff;      /* 纯白背景 */
-  color: #333333;                 /* 深灰文字 */
-  border: 1px solid #888888;      /* 更醒目的灰色边框 */
-}
-
-/* 深色主题下：深底浅字 */
-body.dark .np-toolbar select {
-  background-color: #2a2a2a;      /* 深灰背景 */
-  color: #dddddd;                 /* 淡灰文字 */
-  border: 1px solid #555555;      /* 深色边框 */
-}
-
-/* 选项列表也要同步 */
-.np-toolbar select option {
-  background-color: #ffffff;
-  color: #333333;
-}
-body.dark .np-toolbar select option {
-  background-color: #2a2a2a;
-  color: #dddddd;
-}
-
-/* 聚焦时高亮边框 */
-.np-toolbar select:focus {
-  outline: none;
-  box-shadow: none;
-  border-color: #000000;          /* 纯黑边框 */
-}
-/* 设置区下拉框（桌宠类型等）配色 */
-.setting-item select {
-  background-color: #ffffff;   /* 纯白底 */
-  color: #333333;              /* 深灰字 */
-  border: 1px solid #888888;   /* 更醒目的灰边 */
-  padding:6px 30px 6px 10px;
+/* ---------- 玻璃背景·系统原生下拉 ---------- */
+.np-toolbar select,
+.setting-item select{
+  /* 半透明卡片背景 + 毛玻璃，别动箭头 */
+  background: var(--card-light);
+  backdrop-filter: blur(calc(var(--blur)/2));
+  border: var(--glass-border);
   border-radius: var(--radius);
+
+  padding: 6px 12px;          /* 正常左右内边距 */
   font-size: 14px;
-  appearance: none;
+  color: var(--text-light);   /* 白天深灰字 */
   cursor: pointer;
 }
 
-/* 选项列表（option）也改色 */
-.setting-item select option {
-  background-color: #ffffff;
-  color: #333333;
+/* 深色主题：保持同色系即可，别再灰白 */
+body.dark .np-toolbar select,
+body.dark .setting-item select{
+  background: var(--card-dark);  /* 半透明黑 */
+  color: var(--text-dark);       /* 亮灰字（易读） */
 }
-
-/* 暗黑主题下 */
-body.dark .setting-item select {
-  background-color: #2a2a2a;
-  color: #dddddd;
-  border: 1px solid #555555;
-}
+/* 深色模式：给 option 单行上色 */
+body.dark .np-toolbar select option,
 body.dark .setting-item select option {
-  background-color: #2a2a2a;
-  color: #dddddd;
+  background-color: rgba(30,30,31,0.9);  /* 深底 */
+  color: #f0f0f0;                         /* 浅字 */
 }
 
-/* 聚焦时黑框 */
-.setting-item select:focus {
+
+/* 获得焦点时给 1px 黑边就够 */
+.np-toolbar select:focus,
+.setting-item select:focus{
   outline: none;
-  box-shadow: none;
-  border-color: #000000;
+  border: 1px solid #000;
 }
+
 /* 按钮 */
 .btn-ghost,.btn-publish{display:inline-flex;align-items:center;gap:6px;padding:6px 20px;
   font-size:14px;border-radius:var(--radius);cursor:pointer;transition:.25s background,.2s transform}
