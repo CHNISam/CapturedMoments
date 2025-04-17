@@ -16,7 +16,7 @@
           <a href="#album"    @click.prevent="scrollTo('album')">相册</a>
           <a href="#settings" @click.prevent="scrollTo('settings')">设置</a>
           <span style="font-weight:600">{{ currentUser }}</span>
-          <a class="btn-ghost" @click="logout">退出</a>
+          <LogoutButton @logged-out="logoutHandler" />
           <button class="btn-ghost" @click="toggleTheme">
             <svg v-if="theme==='light'" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
             <svg v-else                viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
@@ -262,11 +262,13 @@
 <script>
 /* ===== 登录白名单 & 常量 ===== */
 const BEST_BADGE_UID    = '246490729';                 // 佩戴「最好的大佬」勋章的 UID
-const DEFAULT_PASSWORD  = '123456';                    // 若从未设置密码，修改/登录前先给默认
 import LoginModal from '@/components/LoginModal.vue';
+import LogoutButton from '@/components/LogoutButton.vue';
+import { logout as authLogout, DEFAULT_PASSWORD } from '@/composables/useAuth';
+
 export default {
   name: 'App',
-  components: { LoginModal },
+  components: { LoginModal, LogoutButton },
   /* ---------- data ---------- */
   data() {
     const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
@@ -385,12 +387,12 @@ export default {
       this.localDisplayName = localStorage.getItem('displayName_' + uid) || '';
       this.posts         = JSON.parse(localStorage.getItem('posts') || '[]');
     },
-    logout () {
-      localStorage.removeItem('currentUser');
-      this.currentUser    = null;
-      this.posts          = [];
+    logoutHandler () {
+      authLogout();
+      this.currentUser      = null;
+      this.posts            = [];
       this.localDisplayName = '';
-      this.readIds        = new Set();
+      this.readIds          = new Set();
     },
     /* ========== 工具函数 ========== */
     formatMeta(post) { return `${new Date(post.ts).toISOString().slice(0,10)} · ${post.place || '未知'}`; },

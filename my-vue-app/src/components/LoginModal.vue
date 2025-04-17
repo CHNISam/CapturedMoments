@@ -31,9 +31,15 @@
 </template>
 
 <script>
-const ALLOWED_UIDS     = ['217122260', '246490729'];   // 允许登录的原神 UID
-const DEFAULT_PASSWORD = '123456';                     // 没设过密码时的默认值
+/**
+ * LoginModal.vue
+ * - 支持白名单校验
+ * - 首次设置密码后缓存到 localStorage
+ * - 后续登录进行密码校验
+ */
 
+const ALLOWED_UIDS     = ['217122260', '246490729'];   // 允许登录的原神 UID 列表
+import { DEFAULT_PASSWORD } from '@/composables/useAuth';
 export default {
   name: 'LoginModal',
   props: {
@@ -42,8 +48,8 @@ export default {
   emits: ['login-success'],
   data () {
     return {
-      uidInput: '',
-      loginPassword: ''
+      uidInput: '',        // 用户输入的 UID
+      loginPassword: ''    // 用户输入的密码
     };
   },
   methods: {
@@ -52,33 +58,36 @@ export default {
 
       // 1. 白名单校验
       if (!ALLOWED_UIDS.includes(uid)) {
-        alert('用户不存在');
-        return;
+        return alert('用户不存在');
       }
 
-      const key     = 'password_' + uid;
-      const stored  = localStorage.getItem(key);
+      const key    = 'password_' + uid;
+      const stored = localStorage.getItem(key);
 
-      // 2. 首登：要求设置密码
+      // 2. 首次登录：设置密码或允许默认密码登录
       if (!stored) {
-        if (!this.loginPassword.trim()) {
-          alert('首次使用请先设置密码！');
-          return;
+        // allow the DEFAULT_PASSWORD to log in immediately, otherwise force user to set one
+        if (this.loginPassword === DEFAULT_PASSWORD) {
+          alert(`使用默认密码登录成功（${DEFAULT_PASSWORD}）`);
         }
-        localStorage.setItem(key, JSON.stringify(this.loginPassword));
-        alert('密码已保存，下次请使用同一密码登录');
+        else if (!this.loginPassword.trim()) {
+          return alert('首次使用请先设置密码！');
+        }
+        else {
+          localStorage.setItem(key, JSON.stringify(this.loginPassword));
+          alert('密码已保存，下次请使用同一密码登录');
+        }
       }
-      // 3. 普通登录：校验密码
+      // 3. 后续登录：校验密码
       else if (this.loginPassword !== JSON.parse(stored)) {
-        alert('密码不正确，请重试！');
-        return;
+        return alert('密码不正确，请重试！');
       }
 
       // 4. 登录成功，通知父组件
       this.$emit('login-success', uid);
 
       // 5. 清理输入框
-      this.uidInput = '';
+      this.uidInput     = '';
       this.loginPassword = '';
     }
   }
@@ -87,7 +96,11 @@ export default {
 
 <style scoped>
 .fade-enter-active,
-.fade-leave-active{transition:opacity .3s ease}
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
 .fade-enter,
-.fade-leave-to{opacity:0}
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
