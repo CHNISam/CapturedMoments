@@ -73,7 +73,12 @@
               </div>
               <div style="display:flex;align-items:center;gap:10px;">
                 <span style="font-size:12px">{{ new Date(post.ts).toLocaleTimeString() }}</span>
-                <span v-if="post.uid===currentUser" class="more" @click="deletePost(post)">⋯</span>
+                <span v-if="post.uid===currentUser" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
+                <div v-if="postOptionsPost===post" class="post-options">
+                  <button @click="openPlaceModal('post', post)">编辑地点</button>
+                  <button @click="deletePost(post)">删除</button>
+                </div>
+
               </div>
             </div>
 
@@ -83,7 +88,7 @@
             </div>
 
             <div class="photos">
-              <img v-for="(img,i) in post.imgs" :key="i" :src="img" @click="openModal(post.imgs, i, formatMeta(post))"/>
+              <img v-for="(img,i) in post.imgs" :key="i" :src="img" @click="openModal(post.imgs, i, formatMeta(post), post)"/>
             </div>
 
             <div class="actions">
@@ -253,6 +258,13 @@
       <div v-if="showModal" class="modal show" @touchstart="onTouchStart" @touchend="onTouchEnd">
         <div class="box" style="max-width:90%;text-align:center;position:relative;">
           <span class="close" @click="closeModal">×</span>
+          <!-- Modal 图片菜单按钮 -->
+          <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
+          <!-- Modal 图片操作菜单 -->
+          <div v-if="showImageOptions" class="modal-options">
+            <button @click="openPlaceModal('image', modalPost)">编辑地点</button>
+            <button @click="deleteImage()">删除</button>
+          </div>
           <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
           <img
             :src="modalImgs[modalIndex]"
@@ -264,6 +276,26 @@
           </div>
         </div>
       </div>
+      <!-- 编辑地点 Modal -->
+      <div v-if="showPlaceModal" class="modal show">
+        <div class="box" style="max-width:320px;padding:16px;position:relative;">
+          <span class="close" @click="closePlaceModal">×</span>
+          <h3 style="margin-bottom:12px;">编辑地点</h3>
+           <!-- 跟发帖区一模一样的 np-toolbar -->
+        <div class="np-toolbar" style="margin-bottom:12px;">
+          <select v-model="placeModalTarget.place">
+            <option value="">无地点</option>
+            <option>蒙德</option><option>璃月</option><option>稻妻</option>
+            <option>须弥</option><option>枫丹</option><option>纳塔</option>
+          </select>
+        </div>
+          <div style="text-align:right;">
+            <button class="btn-ghost" @click="closePlaceModal" style="margin-right:8px;">取消</button>
+            <button class="btn-publish" @click="confirmPlaceEdit">确定</button>
+          </div>
+        </div>
+      </div>
+
 
 
       <!-- 密码 Modal -->
@@ -342,7 +374,9 @@ export default {
       modalImgs: [],     // 本次 Modal 要展示的图片列表
       modalIndex: 0,     // 当前显示的图片下标
       touchStartX: 0,   // 记录手指按下时的横坐标
-
+      showPlaceModal: false,      // 控制编辑地点弹窗显隐
+      placeModalTarget: null,     // 要编辑的对象（post 或 modalPost）
+      placeModalType: '',         // 'post' 或 'image'
 
       /* 设置 */
       petEnabled: true,
@@ -378,6 +412,16 @@ export default {
       
       /* 白名单 */
       allowedUids: getAllowedUids(),
+      // Modal 内部「⋯」菜单
+      showImageOptions: false,   // 控制图片选项菜单显隐
+      modalPost: null,           // 当前在 Modal 里编辑的 post 对象
+
+      // 动态列表「⋯」菜单
+      postOptionsPost: null,     // 控制哪个 post 的选项菜单显隐
+
+      imageNewPlace: '',  // Modal 编辑时用的 v-model
+      postNewPlace: '',   // 动态列表编辑时用的 v-model
+
     };
   },
 
@@ -488,14 +532,53 @@ export default {
         localStorage.setItem('posts', JSON.stringify(this.posts.map(q=>({...q,imgs:[]}))));
       }
     },
+    // Modal: 确认修改图片地点
+    confirmEditImagePlace() {
+        if (this.imageNewPlace != null) {
+          this.modalPost.place = this.imageNewPlace;
+          this.modalMeta = `${new Date(this.modalPost.ts).toISOString().slice(0,10)} · ${this.imageNewPlace}`;
+          localStorage.setItem('posts', JSON.stringify(this.posts.map(p=>({ ...p, imgs: [] }))));
+        }
+        this.showImageOptions = false;
+      },
+      openPlaceModal(type, target) {
+      this.placeModalType   = type;
+      this.placeModalTarget = target;
+      this.showPlaceModal   = true;
+    },
+    // 取消
+    closePlaceModal() {
+      this.showPlaceModal = false;
+      this.placeModalTarget = null;
+    },
+    // 确认，保存到 localStorage
+    confirmPlaceEdit() {
+      if (!this.placeModalTarget) return;
+      // localStorage
+      localStorage.setItem(
+        'posts',
+        JSON.stringify(this.posts.map(p => ({ ...p, imgs: [] })))
+      );
+      // 如果是在图片 Modal，更新 modalMeta
+      if (this.placeModalType === 'image') {
+        this.modalMeta = `${new Date(this.modalPost.ts).toISOString().slice(0,10)} · ${this.modalPost.place}`;
+      }
+      this.closePlaceModal();
+      // 同步收起主菜单
+      this.postOptionsPost = null;
+      this.showImageOptions = false;
+    },
+
     isRead(id){ return this.readIds.has(id); },
 
     /* ========== 图片 Modal ========== */
-    openModal(imgs, startIndex = 0, meta) {
-      this.modalImgs  = imgs;
-      this.modalIndex = startIndex;
-      this.modalMeta  = meta;
-      this.showModal  = true;
+    openModal(imgs, startIndex = 0, meta, post) {
+      this.modalImgs       = imgs;
+      this.modalIndex      = startIndex;
+      this.modalMeta       = meta;
+      this.modalPost       = post;
+      this.showModal       = true;
+      this.showImageOptions = false;  // 每次打开都隐藏菜单
     },
     prevModalImg() {
       if (this.modalIndex > 0) this.modalIndex--;
@@ -512,6 +595,42 @@ export default {
       else if (diff < -50) this.nextModalImg();
     },
     closeModal(){ this.showModal=false; },
+    // Modal 里：编辑当前 post 的地点
+    editImagePlace() {
+      const newPlace = prompt('请输入新的地点', this.modalPost.place);
+      if (newPlace != null) {
+        this.modalPost.place = newPlace;
+        // 同步回 localStorage
+        localStorage.setItem('posts', JSON.stringify(this.posts.map(p => ({ ...p, imgs: [] }))));
+        this.modalMeta = `${new Date(this.modalPost.ts).toISOString().slice(0,10)} · ${newPlace}`;
+      }
+      this.showImageOptions = false;
+    },
+
+    // Modal 里：删除当前图片
+    deleteImage() {
+      if (!confirm('确认删除这张图片？')) return;
+      this.modalPost.imgs.splice(this.modalIndex, 1);
+      this.modalImgs.splice(this.modalIndex, 1);
+      // 更新 storage
+      localStorage.setItem('posts', JSON.stringify(this.posts.map(p => ({ ...p, imgs: [] }))));
+      if (this.modalIndex >= this.modalImgs.length) this.modalIndex = this.modalImgs.length - 1;
+      this.showImageOptions = false;
+      if (this.modalImgs.length === 0) {
+        this.showModal = false;
+      }
+
+    },
+
+    // 动态列表里：编辑 post.place
+    editPostPlace(post) {
+      const newPlace = prompt('请输入新的地点', post.place);
+      if (newPlace != null) {
+        post.place = newPlace;
+        localStorage.setItem('posts', JSON.stringify(this.posts.map(p => ({ ...p, imgs: [] }))));
+      }
+      this.postOptionsPost = null;
+    },
 
     /* ========== 评论 ========== */
     sendComment(p){
@@ -781,6 +900,15 @@ body.dark .np-top textarea{background:var(--card-dark);color:var(--text-dark)}
 .actions svg{width:18px;height:18px;fill:currentColor}
 .more{cursor:pointer;font-size:18px;padding:2px 6px;border-radius:50%;transition:.2s background}
 .more:hover{background:rgba(0,0,0,0.08)}
+.post-options {
+  position: absolute; top: 40px; right: 22px;
+  background: var(--card-light); padding:4px; border-radius:6px;
+  backdrop-filter: blur(calc(var(--blur)/2));
+  display:flex; flex-direction:column;
+}
+body.dark .post-options { background: var(--card-dark); }
+.post-options button { background:none; border:none; cursor:pointer; text-align:left; padding:4px 8px;}
+
 
 /* 评论 */
 .comments{margin-top:8px;padding-top:4px;border-top:1px solid rgba(0,0,0,0.1)}
@@ -888,6 +1016,41 @@ body.dark .slider-btn {
 body.dark .modal-meta {
   color: var(--text-dark);
 }
+.modal-more {
+  position: absolute; top: 10px; right: 50px; cursor: pointer;
+}
+.modal-options {
+  position: absolute; top: 36px; right: 50px;
+  background: var(--card-light); padding: 6px; border-radius: 6px;
+  backdrop-filter: blur(calc(var(--blur)/2));
+  display: flex; flex-direction: column; gap: 4px;
+}
+body.dark .modal-options { background: var(--card-dark); }
+.modal-options button { background: none; border: none; cursor: pointer; }
+.post-options,
+.modal-options {
+  color: var(--text-light);
+}
+body.dark .post-options,
+body.dark .modal-options {
+  color: var(--text-dark);
+}
+/* 按钮文字也要跟随主题 */
+.post-options button,
+.modal-options button {
+  color: inherit;
+}
+/* 确保 Modal 里的 np-toolbar select 在亮色模式下也用同样的背景 / 文字色 */
+.modal .np-toolbar select {
+  background: var(--card-light);
+  backdrop-filter: blur(calc(var(--blur)/2));
+  border: var(--glass-border);
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  font-size: 14px;
+  color: var(--text-light);
+  cursor: pointer;
+}
 
 
 /* 桌宠 */
@@ -897,4 +1060,15 @@ body.dark .modal-meta {
 /* 过渡 */
 .fade-enter-active,.fade-leave-active{transition:opacity .3s ease}
 .fade-enter,.fade-leave-to{opacity:0}
+
+/* 更多按钮主题自适应 */
+.more,
+.modal-more {
+  color: var(--text-light);
+}
+body.dark .more,
+body.dark .modal-more {
+  color: var(--text-dark);
+}
+
 </style>
