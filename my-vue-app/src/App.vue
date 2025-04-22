@@ -83,7 +83,7 @@
             </div>
 
             <div class="photos">
-              <img v-for="(img,i) in post.imgs" :key="i" :src="img" @click="openModal(img, formatMeta(post))"/>
+              <img v-for="(img,i) in post.imgs" :key="i" :src="img" @click="openModal(post.imgs, i, formatMeta(post))"/>
             </div>
 
             <div class="actions">
@@ -132,7 +132,7 @@
               v-for="(photo,i) in group"
               :key="i"
               class="photo"
-              @click="openModal(photo.url,photo.meta)"
+              @click="openModal(group.map(p => p.url), i, photo.meta)"
             >
               <img :src="photo.url"/><span>{{ photo.place }}</span>
             </div>
@@ -249,14 +249,22 @@
         </div>
       </div>
 
-      <!-- 图片 Modal -->
-      <div v-if="showModal" class="modal show">
-        <div class="box" style="max-width:90%;text-align:center;">
+      <!-- 图片 Slider Modal -->
+      <div v-if="showModal" class="modal show" @touchstart="onTouchStart" @touchend="onTouchEnd">
+        <div class="box" style="max-width:90%;text-align:center;position:relative;">
           <span class="close" @click="closeModal">×</span>
-          <img :src="modalSrc" style="max-width:100%;max-height:80vh"/>
-          <div style="margin-top:6px;font-size:13px;color:#888">{{ modalMeta }}</div>
+          <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
+          <img
+            :src="modalImgs[modalIndex]"
+            style="max-width:100%;max-height:80vh;display:inline-block;"
+          />
+          <button class="slider-btn right" @click="nextModalImg" :disabled="modalIndex===modalImgs.length-1">›</button>
+          <div class="modal-meta">
+            {{ modalMeta }} · {{ modalIndex+1 }} / {{ modalImgs.length }}
+          </div>
         </div>
       </div>
+
 
       <!-- 密码 Modal -->
       <div v-if="showPasswordModal" class="modal show">
@@ -331,6 +339,10 @@ export default {
       showModal: false,
       modalSrc: '',
       modalMeta: '',
+      modalImgs: [],     // 本次 Modal 要展示的图片列表
+      modalIndex: 0,     // 当前显示的图片下标
+      touchStartX: 0,   // 记录手指按下时的横坐标
+
 
       /* 设置 */
       petEnabled: true,
@@ -479,7 +491,26 @@ export default {
     isRead(id){ return this.readIds.has(id); },
 
     /* ========== 图片 Modal ========== */
-    openModal(src,meta){ this.modalSrc=src; this.modalMeta=meta; this.showModal=true; },
+    openModal(imgs, startIndex = 0, meta) {
+      this.modalImgs  = imgs;
+      this.modalIndex = startIndex;
+      this.modalMeta  = meta;
+      this.showModal  = true;
+    },
+    prevModalImg() {
+      if (this.modalIndex > 0) this.modalIndex--;
+    },
+    nextModalImg() {
+      if (this.modalIndex < this.modalImgs.length - 1) this.modalIndex++;
+    },
+    onTouchStart(e) {
+      this.touchStartX = e.changedTouches[0].clientX;
+    },
+    onTouchEnd(e) {
+      const diff = e.changedTouches[0].clientX - this.touchStartX;
+      if (diff > 50) this.prevModalImg();
+      else if (diff < -50) this.nextModalImg();
+    },
     closeModal(){ this.showModal=false; },
 
     /* ========== 评论 ========== */
@@ -827,6 +858,37 @@ body.dark .setting-item input[type=text]{background:var(--card-dark);color:var(-
 .box{background:var(--card-light);backdrop-filter:blur(var(--blur));border:var(--glass-border);border-radius:var(--radius);max-width:600px;width:90%;max-height:90vh;overflow:auto;padding:20px;position:relative}
 body.dark .box{background:var(--card-dark);border:1px solid rgba(255,255,255,0.2)}
 .close{position:absolute;top:10px;right:16px;font-size:24px;cursor:pointer}
+/* Slider Modal 箭头按钮 */
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.3);
+  border: none;
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+body.dark .slider-btn {
+  background: rgba(255,255,255,0.3);
+  color: #333;
+}
+.slider-btn.left  { left: 10px; }
+.slider-btn.right { right: 10px; }
+.modal-meta {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-light);
+}
+body.dark .modal-meta {
+  color: var(--text-dark);
+}
+
 
 /* 桌宠 */
 #pet svg{width:100%;animation:breathe 3s ease-in-out infinite}
