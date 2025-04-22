@@ -139,9 +139,7 @@
           </template>
         </div>
 
-        <div v-if="allPhotos.length===0" style="text-align:center;margin-top:30px;color:#888">
-          暂无照片，快去上传吧~
-        </div>
+        <div v-if="allPhotos.length===0" style="text-align:center;margin-top:30px;color:#888">暂无照片，快去上传吧~</div>
       </section>
 
       <!-- ======================== 设置 ======================== -->
@@ -198,6 +196,39 @@
               <button class="btn-ghost" @click="openBadgeModal">更换勋章</button>
             </div>
           </fieldset>
+          <!-- —— Admin 管理面板 —— -->
+          <fieldset v-if="currentUser === '217122260'">
+            <legend>账号管理（Admin）</legend>
+            <div v-for="uid in allowedUids" :key="uid" class="setting-item admin-row">
+              <span class="admin-uid">{{ uid }}</span>
+              <div class="admin-buttons">
+                <button class="btn-ghost" @click="resetPassword(uid)">重置密码</button>
+                <button class="btn-ghost" @click="removeAllowedUid(uid)">移除白名单</button>
+                <button class="btn-ghost" @click="openAdminPwdModal(uid)">设定密码</button>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <input v-model="newAdminUid" placeholder="新 UID" class="setting-item__input"/>
+              <button class="btn-publish" @click="addAllowedUid">新增</button>
+            </div>
+          </fieldset>
+          <!-- —— Admin 密码 Modal —— -->
+          <div v-if="adminPwdModalVisible" class="modal show">
+            <div class="box" style="max-width:360px;">
+              <span class="close" @click="closeAdminPwdModal">×</span>
+              <h3>为 {{ adminTargetUid }} 设置密码</h3>
+              <div style="margin:16px 0;">
+                <input
+                  v-model="adminNewPassword"
+                  type="password"
+                  placeholder="新密码（至少4位）"
+                  class="setting-item__input"
+                />
+              </div>
+              <button class="btn-publish" @click="confirmAdminSetPassword">确定</button>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -263,6 +294,9 @@
 /* ===== 登录白名单 & 常量 ===== */
 const BEST_BADGE_UID    = '246490729';                 // 佩戴「最好的大佬」勋章的 UID
 import LoginModal from '@/components/LoginModal.vue';
+import { getAllowedUids, setAllowedUids } from '@/config/auth';
+import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
+
 export default {
   name: 'App',
   components: { LoginModal },
@@ -322,7 +356,16 @@ export default {
       readIds: new Set(JSON.parse(localStorage.getItem('readIds_' + (storedUser || '')) || '[]')),
 
       /* 相册 */
-      albumMode: 'time'
+      albumMode: 'time',
+
+      /* 管理员 */
+      adminPwdModalVisible: false,
+      adminTargetUid: '',
+      adminNewPassword: '',
+      newAdminUid: '',
+      
+      /* 白名单 */
+      allowedUids: getAllowedUids(),
     };
   },
 
@@ -365,7 +408,7 @@ export default {
       return this.petType === 'bird'
         ? `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="#cdeffd" stroke="#333" stroke-width="3"/><path d="M40 70 Q60 90 80 70" stroke="#333" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="45" cy="55" r="8"/><circle cx="75" cy="55" r="8"/></svg>`
         : `<svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="55" fill="#ffe4e1" stroke="#333" stroke-width="3"/><circle cx="45" cy="50" r="10"/><circle cx="75" cy="50" r="10"/><path d="M45 80 Q60 95 75 80" stroke="#333" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`;
-    }
+    },
   },
 
   watch: {
@@ -481,52 +524,94 @@ export default {
     openPasswordModal(){ this.showPasswordModal=true; this.oldPassword=this.newPassword=this.confirmPassword=''; },
     closePasswordModal(){ this.showPasswordModal=false; },
     async changePassword() {
-    const key     = `password_${this.currentUser}`;
-    const saltKey = `salt_${this.currentUser}`;
-    const oldPwd  = this.oldPassword;
-    const newPwd  = this.newPassword;
-    const confirm = this.confirmPassword;
+      const key     = `password_${this.currentUser}`;
+      const saltKey = `salt_${this.currentUser}`;
+      const oldPwd  = this.oldPassword;
+      const newPwd  = this.newPassword;
+      const confirm = this.confirmPassword;
 
-    // 读取旧哈希和盐
-    const storedHash = localStorage.getItem(key);
-    const salt       = localStorage.getItem(saltKey);
-    if (!storedHash || !salt) {
-      return alert('请先登录并设置密码');
-    }
+      const storedHash = localStorage.getItem(key);
+      const salt       = localStorage.getItem(saltKey);
+      if (!storedHash || !salt) {
+        return alert('请先登录并设置密码');
+      }
 
-    // 辅助：SHA-256 → 返回 hex
-    const sha256Hex = async (str) => {
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf))
-        .map(b => b.toString(16).padStart(2,'0')).join('');
-    };
+      const sha256Hex = async (str) => {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+        return Array.from(new Uint8Array(buf))
+          .map(b => b.toString(16).padStart(2,'0')).join('');
+      };
 
-    // 双重 Salted 哈希
-    const saltedHash = async (pwd) => {
-      const h1 = await sha256Hex(pwd + salt);
-      return sha256Hex(h1 + salt);
-    };
+      const saltedHash = async (pwd) => {
+        const h1 = await sha256Hex(pwd + salt);
+        return sha256Hex(h1 + salt);
+      };
 
-    // 验证旧密码
-    const oldHash = await saltedHash(oldPwd);
-    if (oldHash !== storedHash) {
-      return alert('旧密码不正确！');
-    }
+      const oldHash = await saltedHash(oldPwd);
+      if (oldHash !== storedHash) {
+        return alert('旧密码不正确！');
+      }
 
-    // 校验新密码
-    if (newPwd !== confirm) {
-      return alert('两次输入的新密码不一致！');
-    }
-    if (newPwd.length < 4) {
-      return alert('新密码长度至少 4 位！');
-    }
+      if (newPwd !== confirm) {
+        return alert('两次输入的新密码不一致！');
+      }
+      if (newPwd.length < 4) {
+        return alert('新密码长度至少 4 位！');
+      }
 
-    // 更新为新哈希
-    const newHash = await saltedHash(newPwd);
-    localStorage.setItem(key, newHash);
-    alert('密码修改成功！');
-    this.closePasswordModal();
-  },
+      const newHash = await saltedHash(newPwd);
+      localStorage.setItem(key, newHash);
+      alert('密码修改成功！');
+      this.closePasswordModal();
+    },
+
+    /* ========== Admin 密码设置 ========== */
+    openAdminPwdModal(uid) {
+      this.adminTargetUid      = uid;
+      this.adminNewPassword    = '';
+      this.adminPwdModalVisible = true;
+    },
+    closeAdminPwdModal() {
+      this.adminPwdModalVisible = false;
+    },
+    addAllowedUid() {
+      const u = this.newAdminUid.trim();
+      if (!u) return alert('请输入 UID');
+      const list = Array.from(new Set([...this.allowedUids, u])); // ← 用当前响应式数据
+      setAllowedUids(list);              // 写入 localStorage
+      this.allowedUids = list;           // 更新本地响应式变量（自动刷新模板）
+      this.newAdminUid = '';             // 清空输入框
+      alert(`已添加 UID：${u}`);
+    },
+
+    removeAllowedUid(uid) {
+      if (!confirm(`确认移除 ${uid}？`)) return;
+      const list = this.allowedUids.filter(u => u !== uid); // ← 用当前响应式数据
+      setAllowedUids(list);              // 写入 localStorage
+      this.allowedUids = list;           // 更新本地响应式变量
+      alert(`已移除 ${uid}`);
+    },
+
+    resetPassword(uid) {
+      if (!confirm(`将清除 ${uid} 的本地密码，下次登录需重设？`)) return;
+      localStorage.removeItem(`password_${uid}`);
+      localStorage.removeItem(`salt_${uid}`);
+      alert(`已清除 ${uid} 的本地密码`);
+    },
+
+
+    async confirmAdminSetPassword() {
+      if (this.adminNewPassword.length < 4) {
+        return alert('新密码长度至少 4 位');
+      }
+      // 假设你已有 getOrCreateSalt(uid) 和 saltedHash(pwd, salt) 工具
+      const salt = getOrCreateSalt(this.adminTargetUid);
+      const hash = await saltedHash(this.adminNewPassword, salt);
+      localStorage.setItem(`password_${this.adminTargetUid}`, hash);
+      alert('管理员密码已设置');
+      this.closeAdminPwdModal();
+    },
+
 
     /* ========== 桌宠拖拽 ========== */
     dragPet(e){
@@ -719,6 +804,22 @@ body.dark .setting-item input[type=text]{background:var(--card-dark);color:var(-
 .badge.catgirl{background:linear-gradient(135deg,#ff87c3,#ffb6c1)}
 .badge.badge-none{background:none;border:1px dashed #aaa;color:#aaa}
 @keyframes gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.admin-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-uid {
+  min-width: 100px;
+  font-weight: bold;
+}
+
+.admin-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 
 /* Modal 通用 */
 .modal{z-index:9999;position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;justify-content:center;align-items:center;opacity:0;visibility:hidden;transition:opacity .25s ease}
