@@ -76,7 +76,7 @@
                 <span v-if="post.uid===currentUser" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
                 <div v-if="postOptionsPost===post" class="post-options">
                   <button @click="openPlaceModal('post', post)">编辑地点</button>
-                  <button @click="deletePost(post)">删除</button>
+                  <button @click="deletePost(post)">撤回</button>
                 </div>
 
               </div>
@@ -137,7 +137,7 @@
               v-for="(photo,i) in group"
               :key="i"
               class="photo"
-              @click="openModal(group.map(p => p.url), i, photo.meta)"
+              @click="openModal(group.map(p => p.url), i, photo.meta, photo.post)"
             >
               <img :src="photo.url"/><span>{{ photo.place }}</span>
             </div>
@@ -432,12 +432,22 @@ export default {
       return localStorage.getItem('displayName_' + this.currentUser) || this.currentUser;
     },
     allPhotos() {
-      const out = [];
-      this.posts.forEach(p => p.imgs.forEach(url => out.push({
-        url, place: p.place || '未知', date: new Date(p.ts).toISOString().slice(0, 10)
-      })));
-      return out;
-    },
+    const out = [];
+    // 遍历每个 post，把 post 对象也带上
+    this.posts.forEach(post => {
+      post.imgs.forEach(url => {
+        out.push({
+          url,
+          place: post.place || '未知',
+          date: new Date(post.ts).toISOString().slice(0, 10),
+          post        // ← 这里多了 post 引用
+        });
+      });
+    });
+    return out;
+  },
+
+    
     groupedPhotos() {
       const g = {};
       this.allPhotos.forEach(p => {
