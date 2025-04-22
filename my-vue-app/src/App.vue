@@ -480,17 +480,53 @@ export default {
     /* ========== 密码修改 ========== */
     openPasswordModal(){ this.showPasswordModal=true; this.oldPassword=this.newPassword=this.confirmPassword=''; },
     closePasswordModal(){ this.showPasswordModal=false; },
-    changePassword(){
-      const key='password_' + this.currentUser;
-      const stored=localStorage.getItem(key) || JSON.stringify(DEFAULT_PASSWORD);
+    async changePassword() {
+    const key     = `password_${this.currentUser}`;
+    const saltKey = `salt_${this.currentUser}`;
+    const oldPwd  = this.oldPassword;
+    const newPwd  = this.newPassword;
+    const confirm = this.confirmPassword;
 
-      if(this.oldPassword !== JSON.parse(stored)) return alert('旧密码不正确！');
-      if(this.newPassword !== this.confirmPassword) return alert('两次输入的新密码不一致！');
-      if(!this.newPassword.trim()) return alert('新密码不能为空！');
+    // 读取旧哈希和盐
+    const storedHash = localStorage.getItem(key);
+    const salt       = localStorage.getItem(saltKey);
+    if (!storedHash || !salt) {
+      return alert('请先登录并设置密码');
+    }
 
-      localStorage.setItem(key, JSON.stringify(this.newPassword));
-      alert('密码修改成功！'); this.closePasswordModal();
-    },
+    // 辅助：SHA-256 → 返回 hex
+    const sha256Hex = async (str) => {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf))
+        .map(b => b.toString(16).padStart(2,'0')).join('');
+    };
+
+    // 双重 Salted 哈希
+    const saltedHash = async (pwd) => {
+      const h1 = await sha256Hex(pwd + salt);
+      return sha256Hex(h1 + salt);
+    };
+
+    // 验证旧密码
+    const oldHash = await saltedHash(oldPwd);
+    if (oldHash !== storedHash) {
+      return alert('旧密码不正确！');
+    }
+
+    // 校验新密码
+    if (newPwd !== confirm) {
+      return alert('两次输入的新密码不一致！');
+    }
+    if (newPwd.length < 4) {
+      return alert('新密码长度至少 4 位！');
+    }
+
+    // 更新为新哈希
+    const newHash = await saltedHash(newPwd);
+    localStorage.setItem(key, newHash);
+    alert('密码修改成功！');
+    this.closePasswordModal();
+  },
 
     /* ========== 桌宠拖拽 ========== */
     dragPet(e){

@@ -3,206 +3,218 @@
     <div v-if="visible" class="modal show">
       <div class="box login-box">
         <h3 class="login-title">登录 Captured Moments</h3>
-        <div class="form-group">
-          <input
-            v-model="uid"
-            type="text"
-            placeholder="请输入原神 UID"
-            @input="error = ''"
-          />
-        </div>
-        <div class="form-group">
-          <input
-            v-model="password"
-            type="password"
-            :placeholder="isFirstLogin
-              ? '首次设置密码（建议至少4位）'
-              : '请输入密码'"
-            @input="error = ''"
-          />
-        </div>
-        <p v-if="error" class="error-msg">{{ error }}</p>
-        <button
-          class="btn-publish"
-          :disabled="!canSubmit || loading"
-          @click="onSubmit"
+        <form
+          ref="loginForm"
+          method="post"
+          action="/login"
+          autocomplete="on"
+          @submit="handleSubmit"
         >
-          {{ loading ? '请稍候...' : submitText }}
-        </button>
+          <div class="form-group">
+            <input
+              v-model="uid"
+              name="username"
+              type="text"
+              placeholder="请输入原神 UID"
+              @input="error = ''"
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-group">
+            <input
+              v-model="password"
+              name="password"
+              type="password"
+              :placeholder="isFirstLogin
+                ? '首次设置密码（建议至少4位）'
+                : '请输入密码'"
+              @input="error = ''"
+              :autocomplete="isFirstLogin ? 'new-password' : 'current-password'"
+            />
+          </div>
+          <p v-if="error" class="error-msg">{{ error }}</p>
+          <button
+            type="submit"
+            class="btn-publish"
+            :disabled="!canSubmit || loading"
+          >
+            {{ loading ? '请稍候...' : (isFirstLogin ? '设置并登录' : '登录') }}
+          </button>
+        </form>
       </div>
     </div>
   </transition>
 </template>
 
 <script setup>
-import { ALLOWED_UIDS } from '@/config/auth';
+import { getAllowedUids } from '@/config/auth';
 import { computed, ref, watch } from 'vue';
 
+// Props & Emits
 const props = defineProps({ show: Boolean });
 const emit = defineEmits(['login-success']);
 
+// Refs
+const loginForm = ref(null);
+
+// State
 const uid = ref('');
 const password = ref('');
 const error = ref('');
 const loading = ref(false);
+const tick = ref(0);
 
-const storageKey = computed(() => `password_${uid.value.trim()}`);
-const storedHash = computed(() => localStorage.getItem(storageKey.value));
+// Storage keys
+const hashKey = computed(() => `password_${uid.value.trim()}`);
+const saltKey = computed(() => `salt_${uid.value.trim()}`);
 
-const isFirstLogin = computed(
-  () => uid.value.trim() !== '' && !storedHash.value
-);
-const submitText = computed(
-  () => isFirstLogin.value ? '设置并登录' : '登录'
-);
-const canSubmit = computed(
-  () => uid.value.trim() !== '' && password.value.trim() !== ''
-);
+// Read hash & salt, force-refresh via tick
+const storedHash = computed(() => { tick.value; return localStorage.getItem(hashKey.value); });
+const storedSalt = computed(() => { tick.value; return localStorage.getItem(saltKey.value); });
 
-// SHA-256 哈希函数
-async function hashPwd(text) {
-  const enc = new TextEncoder();
-  const data = enc.encode(text);
-  const hashBuf = await crypto.subtle.digest('SHA-256', data);
-  const hashArr = Array.from(new Uint8Array(hashBuf));
-  return hashArr.map(b => b.toString(16).padStart(2, '0')).join('');
+// Flags
+const isFirstLogin = computed(() => uid.value.trim() !== '' && !storedHash.value);
+const canSubmit = computed(() => uid.value.trim() !== '' && password.value.trim() !== '');
+const visible = computed(() => props.show);
+
+// SHA-256 helper
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-async function onSubmit() {
+// Salted hash
+async function saltedHash(pwd, salt) {
+  const first = await sha256Hex(pwd + salt);
+  return await sha256Hex(first + salt);
+}
+
+// Generate or retrieve salt
+function getOrCreateSalt() {
+  let salt = localStorage.getItem(saltKey.value);
+  if (!salt) {
+    const arr = crypto.getRandomValues(new Uint8Array(8));
+    salt = Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+    localStorage.setItem(saltKey.value, salt);
+  }
+  return salt;
+}
+
+// Form submit handler
+async function handleSubmit(e) {
+  e.preventDefault();
   error.value = '';
   loading.value = true;
   const id = uid.value.trim();
-  if (!ALLOWED_UIDS.includes(id)) {
+
+  if (!getAllowedUids().includes(id)) {
     error.value = '用户不存在';
     loading.value = false;
     return;
   }
-  const pwd  = password.value;
-  const hash = await hashPwd(pwd);
-  const raw  = storedHash.value;  // localStorage.getItem
 
-  // 首次登录：存储哈希
-  if (!raw) {
+  const pwd = password.value;
+  const rawHash = storedHash.value;
+  const salt = storedSalt.value;
+
+  // First-time login
+  if (!rawHash) {
     if (pwd.length < 4) {
-      error.value = '密码长度至少 4 位';
+      error.value = '密码长度至少4位';
       loading.value = false;
       return;
     }
-    localStorage.setItem(storageKey.value, hash);
-  } else {
-    // 兼容旧版明文：JSON.parse(raw) 得到旧密码
-    const plain = (() => {
-      try { return JSON.parse(raw); }
-      catch { return null; }
-    })();
-    if (hash !== raw && pwd !== plain) {
+    const newSalt = getOrCreateSalt();
+    const newHash = await saltedHash(pwd, newSalt);
+    localStorage.setItem(hashKey.value, newHash);
+    tick.value++;
+  }
+  // Salted login
+  else if (salt) {
+    const check = await saltedHash(pwd, salt);
+    if (check !== rawHash) {
       error.value = '密码不正确，请重试';
       loading.value = false;
       return;
     }
-    // 成功：统一写入新哈希
-    localStorage.setItem(storageKey.value, hash);
+  }
+  // Legacy support
+  else {
+    let plain = null;
+    try { plain = JSON.parse(rawHash); } catch {}
+    const simple = await sha256Hex(pwd);
+    if (pwd === plain || simple === rawHash) {
+      const newSalt = getOrCreateSalt();
+      const newHash = await saltedHash(pwd, newSalt);
+      localStorage.setItem(hashKey.value, newHash);
+      tick.value++;
+    } else {
+      error.value = '密码不正确，请重试';
+      loading.value = false;
+      return;
+    }
   }
 
-  // 正常登录成功
+  // Save current user
+  localStorage.setItem('currentUser', JSON.stringify(id));
+  emit('login-success', id);
+
+  // Delay then submit real form to trigger browser prompt
   setTimeout(() => {
-    emit('login-success', id);
-    uid.value = '';
-    password.value = '';
-    loading.value = false;
-  }, 300);
+    if (loginForm.value && typeof loginForm.value.submit === 'function') {
+      loginForm.value.submit();
+    } else {
+      console.warn('loginForm ref not found, cannot submit form');
+    }
+  }, 100);
 }
 
-
-const visible = computed(() => props.show);
+// Reset state when modal opens
 watch(visible, v => {
   if (v) {
     uid.value = '';
     password.value = '';
     error.value = '';
     loading.value = false;
+    tick.value++;
   }
 });
 </script>
 
 <style scoped>
-.login-box { overflow: visible !important; }
+.login-box { overflow: visible; }
 .login-box::-webkit-scrollbar { display: none; }
 
 .login-box {
-  width: 88%;
-  max-width: 360px;
-  margin: 0 auto;
-  padding: 28px;
+  width: 90%; max-width: 360px;
+  margin: 0 auto; padding: 24px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(12px);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
 }
-.login-title {
-  margin-bottom: 24px;
-  font-size: 22px;
-  color: #333;
-  font-weight: 600;
-}
-.form-group {
-  margin-bottom: 18px;
-}
+.login-title { margin-bottom:20px; font-size:20px; font-weight:600; }
+.form-group { margin-bottom:16px; }
 input {
-  width: 100%;
-  height: 46px;
-  padding: 0 14px;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  background: #fff;
-  font-size: 15px;
-  transition: border-color 0.2s;
+  width:100%; height:44px; padding:0 12px;
+  border:1px solid #ccc; border-radius:8px;
+  font-size:14px;
 }
-input:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-.error-msg {
-  color: #e00;
-  font-size: 13px;
-  margin-bottom: 16px;
-  text-align: left;
-}
+input:focus { outline:none; border-color:var(--primary); }
+.error-msg { color:#e00; font-size:13px; margin-bottom:12px; text-align:left; }
 .btn-publish {
-  width: 100%;
-  height: 50px;
-  font-size: 16px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  width:100%; height:48px;
+  background:var(--primary); color:#fff;
+  border:none; border-radius:8px;
+  font-size:15px; cursor:pointer;
+  transition: transform 0.1s;
 }
-.btn-publish:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.btn-publish:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-@media (max-width: 480px) {
-  .login-box {
-    padding: 20px;
-  }
-  .login-title {
-    font-size: 20px;
-  }
-  input {
-    height: 44px;
-    font-size: 14px;
-  }
-  .btn-publish {
-    height: 46px;
-    font-size: 15px;
-  }
+.btn-publish:disabled { opacity:0.6; cursor:not-allowed; }
+.btn-publish:not(:disabled):hover { transform: translateY(-1px); }
+@media (max-width:480px) {
+  .login-box { padding:16px; }
+  input { height:42px; font-size:13px; }
+  .btn-publish { height:44px; font-size:14px; }
 }
 </style>
