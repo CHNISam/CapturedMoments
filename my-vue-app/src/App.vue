@@ -49,7 +49,17 @@
               <input type="file" accept="image/*" multiple @change="handlePostImages"/>
             </label>
 
-            <button class="btn-publish" @click="publishPost">发布</button>
+            <button
+              class="btn-publish"
+              @click="publishPost"
+              :disabled="isPublishing"
+            >
+              <template v-if="!isPublishing">发布</template>
+              <template v-else>
+                <span class="spinner"></span> 发布中…
+              </template>
+            </button>
+
           </div>
         </div>
 
@@ -62,69 +72,87 @@
 
         <!-- 动态列表 -->
         <h2 class="big">动态</h2>
-        <div id="moments-list">
-          <div v-for="post in posts" :key="post.id" class="post card">
-            <div class="head" style="display:flex;justify-content:space-between;align-items:center;">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <div :style="{width:'34px',height:'34px',borderRadius:'50%',background:'url('+getAvatar(post.uid)+') center/cover'}"></div>
-                <b>{{ getDisplayName(post.uid) }}</b>
-                <span v-html="badgeHTML(post.uid)"></span>
-                <span class="red" v-if="!isRead(post.id)&&post.uid!==currentUser"></span>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:12px">{{ new Date(post.ts).toLocaleTimeString() }}</span>
-                <span v-if="post.uid===currentUser" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
-                <div v-if="postOptionsPost===post" class="post-options">
-                  <button @click="openPlaceModal('post', post)">编辑地点</button>
-                  <button @click="deletePost(post)">撤回</button>
-                </div>
+      <!-- 1. 骨架屏，当 isListLoading=true 时显示 -->
+      <template v-if="isListLoading">
+        <div class="skeleton-list">
+          <div class="skeleton-card" v-for="n in 3" :key="n">
+            <div class="skeleton-head"></div>
+            <div class="skeleton-body"></div>
+          </div>
+        </div>
+      </template>
 
-              </div>
+      <!-- 2. 列表主结构，用 transition-group 加入进场动画 -->
+      <transition-group name="post-fade" tag="div" id="moments-list">
+        <div v-for="post in posts" :key="post.id" class="post card">
+          <!-- ——— 保留你原来的 post 结构 —— ——— -->
+          <div class="head" style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div :style="{width:'34px',height:'34px',borderRadius:'50%',background:'url('+getAvatar(post.uid)+') center/cover'}"></div>
+              <b>{{ getDisplayName(post.uid) }}</b>
+              <span v-html="badgeHTML(post.uid)"></span>
+              <span class="red" v-if="!isRead(post.id)&&post.uid!==currentUser"></span>
             </div>
-
-            <div class="body">
-              <p>{{ post.txt }}</p>
-              <small>{{ new Date(post.ts).toLocaleDateString() }}{{ post.place?' · '+post.place:'' }}</small>
-            </div>
-
-            <div class="photos">
-              <img v-for="(img,i) in post.imgs" :key="i" :src="img" @click="openModal(post.imgs, i, formatMeta(post), post)"/>
-            </div>
-
-            <div class="actions">
-              <svg viewBox="0 0 24 24"><path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/></svg>
-              <span>{{ post.views }}</span>
-            </div>
-
-            <div class="comments">
-              <div v-for="(c,idx) in post.cmts" :key="idx" class="comment">
-                <div class="comment-left">
-                  <span class="comment-display">{{ getDisplayName(c.who) }}: {{ c.txt }}</span>
-                </div>
-                <div class="comment-right">
-                  <span v-if="c.who===currentUser" class="comment-edit"   @click="editComment(post,idx)">✎</span>
-                  <span v-if="c.who===currentUser" class="comment-delete" @click="deleteComment(post,idx)">×</span>
-                  <span v-else class="comment-author">{{ getDisplayName(c.who) }}</span>
-                </div>
-              </div>
-
-              <div class="c-input">
-                <input
-                  type="text"
-                  v-model="newComment[post.id]"
-                  placeholder="评论..."
-                  @keydown.enter.prevent="handleCommentEnter($event, post)"
-                />
-                <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:12px">{{ new Date(post.ts).toLocaleTimeString() }}</span>
+              <span v-if="post.uid===currentUser" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
+              <div v-if="postOptionsPost===post" class="post-options">
+                <button @click="openPlaceModal('post', post)">编辑地点</button>
+                <button @click="deletePost(post)">撤回</button>
               </div>
             </div>
           </div>
-        </div>
+
+          <div class="body">
+            <p>{{ post.txt }}</p>
+            <small>{{ new Date(post.ts).toLocaleDateString() }}{{ post.place?' · '+post.place:'' }}</small>
+          </div>
+
+          <div class="photos">
+            <img
+              v-for="(img,i) in post.imgs"
+              :key="i"
+              :src="img"
+              @click="openModal(post.imgs, i, formatMeta(post), post)"
+            />
+          </div>
+
+          <div class="actions">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/>
+            </svg>
+            <span>{{ post.views }}</span>
+          </div>
+
+          <div class="comments">
+            <div v-for="(c,idx) in post.cmts" :key="idx" class="comment">
+              <div class="comment-left">
+                <span class="comment-display">{{ getDisplayName(c.who) }}: {{ c.txt }}</span>
+              </div>
+              <div class="comment-right">
+                <span v-if="c.who===currentUser" class="comment-edit" @click="editComment(post,idx)">✎</span>
+                <span v-if="c.who===currentUser" class="comment-delete" @click="deleteComment(post,idx)">×</span>
+                <span v-else class="comment-author">{{ getDisplayName(c.who) }}</span>
+              </div>
+            </div>
+            <div class="c-input">
+              <input
+                type="text"
+                v-model="newComment[post.id]"
+                placeholder="评论..."
+                @keydown.enter.prevent="handleCommentEnter($event, post)"
+              />
+              <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
+                    </div>
+                  </div>
+                  <!-- ———————————————— 结束 ———————————————— -->
+                </div>
+        </transition-group>
       </section>
 
-      <!-- ======================== 相册 ======================== -->
+      <!-- ======================== 照片 ======================== -->
       <section id="album">
-        <h2 class="big">相册</h2>
+        <h2 class="big">照片</h2>
         <div class="album-tabs">
           <button :class="{on:albumMode==='time'}"   @click="albumMode='time'">按时间</button>
           <button :class="{on:albumMode==='region'}" @click="albumMode='region'">按地区</button>
@@ -361,6 +389,8 @@ export default {
       newPostText: '',
       newPostPlace: '',
       draftImgs: [],
+      isPublishing: false,    // 按钮 loading
+      isListLoading: false,   // 列表骨架屏
 
       /* 评论 */
       newComment: {},
@@ -521,10 +551,15 @@ export default {
     removeDraft(i){ this.draftImgs.splice(i,1); },
     autoResize(e){ e.target.style.height='auto'; e.target.style.height=e.target.scrollHeight+'px'; },
     publishPost(){
-      if(!this.currentUser) return alert('请先登录');
+      if (!this.currentUser) return alert('请先登录');
+      this.isPublishing = true;
+      this.isListLoading = true;
       const txt=this.newPostText.trim();
-      if(!txt && !this.draftImgs.length) return alert('写点文字或选张图片吧~');
-
+      if(!txt && !this.draftImgs.length) {
+        this.isPublishing = false; 
+        this.isListLoading = false;
+        return alert('写点文字或选张图片吧~');
+        }
       const post={ id:Date.now(), uid:this.currentUser, txt, place:this.newPostPlace,
                    imgs:[...this.draftImgs], ts:Date.now(), views:0, cmts:[] };
 
@@ -532,6 +567,12 @@ export default {
       localStorage.setItem('posts', JSON.stringify(this.posts.map(p=>({...p,imgs:[]}))));
 
       this.newPostText=''; this.newPostPlace=''; this.draftImgs=[];
+
+      setTimeout(() => {
+        this.isPublishing = false;
+        this.isListLoading = false;
+        // this.scrollTo('post-list');
+      }, 300);
     },
     handlePostEnter(e){
       if (!e.shiftKey) { e.preventDefault(); this.publishPost(); }
@@ -619,7 +660,6 @@ export default {
 
     // Modal 里：删除当前图片
     deleteImage() {
-      if (!confirm('确认删除这张图片？')) return;
       this.modalPost.imgs.splice(this.modalIndex, 1);
       this.modalImgs.splice(this.modalIndex, 1);
       // 更新 storage
@@ -1087,5 +1127,80 @@ body.dark .more,
 body.dark .modal-more {
   color: var(--text-dark);
 }
+/* 小型环形 loading */
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+@keyframes spin { to { transform: rotate(360deg) } }
+
+/* —— 优化后的骨架屏（玻璃 + 流光） —— */
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.skeleton-card {
+  position: relative;
+  border-radius: var(--radius);
+  background: var(--card-light);           /* 浅色模式下半透明玻璃 */
+  backdrop-filter: blur(calc(var(--blur)/2));
+  overflow: hidden;
+  padding: 12px;
+}
+body.dark .skeleton-card {
+  background: var(--card-dark);            /* 深色模式下半透明玻璃 */
+}
+
+.skeleton-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.6),
+    transparent
+  );
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.skeleton-head,
+.skeleton-body {
+  background: rgba(255,255,255,0.2);      /* 统一浅色打底 */
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+body.dark .skeleton-head,
+body.dark .skeleton-body {
+  background: rgba(0,0,0,0.2);            /* 深色模式调整为暗色调 */
+}
+.skeleton-head {
+  width: 40%;
+  height: 16px;
+}
+.skeleton-body {
+  width: 100%;
+  height: 60px;
+}
+
+/* 流光动画 */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  50%  { transform: translateX(100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* 保留进场动画 */
+.post-fade-enter-active  { transition: all .3s ease; }
+.post-fade-leave-active  { transition: all .2s ease; }
+.post-fade-enter         { opacity:0; transform:translateY(-10px); }
 
 </style>
