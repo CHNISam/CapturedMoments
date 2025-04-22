@@ -98,7 +98,12 @@
               <span v-if="post.uid===currentUser" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
               <div v-if="postOptionsPost===post" class="post-options">
                 <button @click="openPlaceModal('post', post)">编辑地点</button>
-                <button @click="deletePost(post)">撤回</button>
+                <button @click="deletePost(post)" class="trash-btn">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
               </div>
             </div>
           </div>
@@ -291,7 +296,11 @@
           <!-- Modal 图片操作菜单 -->
           <div v-if="showImageOptions" class="modal-options">
             <button @click="openPlaceModal('image', modalPost)">编辑地点</button>
-            <button @click="deleteImage()">删除</button>
+            <button @click="deleteImage()" class="trash-btn">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
           </div>
           <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
           <img
@@ -1202,5 +1211,21 @@ body.dark .skeleton-body {
 .post-fade-enter-active  { transition: all .3s ease; }
 .post-fade-leave-active  { transition: all .2s ease; }
 .post-fade-enter         { opacity:0; transform:translateY(-10px); }
+
+.trash-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #d32f2f              /* 关键：设置 currentColor 为红 */
+}
+.trash-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;     /* 继续沿用 currentColor */
+  fill: none;
+  color: #d32f2f
+}
+
 
 </style>
