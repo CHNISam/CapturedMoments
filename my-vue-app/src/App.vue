@@ -899,6 +899,13 @@ body.dark .np-top textarea{background:var(--card-dark);color:var(--text-dark)}
 .np-preview .thumb {
   position: relative;
 }
+.np-preview {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-top: 8px; /* ← 增加这一句 */
+}
+
 
 /* 动态列表 */
 #moments-list{display:flex;flex-direction:column;gap:26px}
