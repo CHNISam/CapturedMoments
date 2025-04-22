@@ -262,7 +262,6 @@
 <script>
 /* ===== 登录白名单 & 常量 ===== */
 const BEST_BADGE_UID    = '246490729';                 // 佩戴「最好的大佬」勋章的 UID
-const DEFAULT_PASSWORD  = '123456';                    // 若从未设置密码，修改/登录前先给默认
 import LoginModal from '@/components/LoginModal.vue';
 export default {
   name: 'App',
