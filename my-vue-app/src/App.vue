@@ -84,7 +84,7 @@
 
       <!-- 2. 列表主结构，用 transition-group 加入进场动画 -->
       <transition-group name="post-fade" tag="div" id="moments-list">
-        <div v-for="post in posts" :key="post.id" class="post card">
+        <div v-for="post in visiblePosts" :key="post.id" class="post card">
           <!-- ——— 保留你原来的 post 结构 —— ——— -->
           <div class="head" style="display:flex;justify-content:space-between;align-items:center;">
             <div style="display:flex;align-items:center;gap:8px;">
@@ -153,6 +153,13 @@
                   <!-- ———————————————— 结束 ———————————————— -->
                 </div>
         </transition-group>
+        <div
+          v-if="visiblePosts.length < posts.length"
+          style="text-align:center;margin:16px 0;"
+        >
+          <button class="btn-ghost" @click="loadMore">加载更多</button>
+        </div>
+
       </section>
 
       <!-- ======================== 照片 ======================== -->
@@ -401,6 +408,11 @@ export default {
       isPublishing: false,    // 按钮 loading
       isListLoading: false,   // 列表骨架屏
 
+      // —— 分页加载配置 —— 
+      loadedCount: 5,  // 初始加载 5 条
+      loadStep: 5,     // 每次点击再加载 5 条
+
+
       /* 评论 */
       newComment: {},
 
@@ -466,6 +478,11 @@ export default {
 
   /* ---------- computed ---------- */
   computed: {
+    // 只显示已加载的条数
+    visiblePosts() {
+      return this.posts.slice(0, this.loadedCount);
+    },
+
     displayName() {
       if (!this.currentUser) return '';
       return localStorage.getItem('displayName_' + this.currentUser) || this.currentUser;
@@ -690,6 +707,11 @@ export default {
       }
       this.postOptionsPost = null;
     },
+    // 点击“加载更多”
+    loadMore() {
+      this.loadedCount += this.loadStep;
+    },
+
 
     /* ========== 评论 ========== */
     sendComment(p){
