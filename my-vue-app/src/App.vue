@@ -295,12 +295,8 @@
       </div>
 
       <!-- 图片 Slider Modal -->
-      <div v-if="showModal" class="modal show" @touchstart="onTouchStart" @touchend="onTouchEnd">
-        <div class="box"
-          style="width:80vw; height:80vh; max-width:90%; overflow:auto;
-                  text-align:center; position:relative;
-                  display:flex; flex-direction:column;
-                  align-items:center; justify-content:center;">
+      <div v-if="showModal" class="modal show slider-modal" @touchstart="onTouchStart" @touchend="onTouchEnd">
+        <div class="box">
           <span class="close" @click="closeModal">×</span>
           <!-- Modal 图片菜单按钮 -->
           <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
@@ -418,8 +414,8 @@ export default {
       loadedCount: 5,  // 初始加载 5 条
       loadStep: 5,     // 每次点击再加载 5 条
 
-
       /* 评论 */
+      localDisplayName: '',
       newComment: {},
 
       /* Modals */
@@ -449,6 +445,15 @@ export default {
         { id: 'catgirl', name: '你才是猫娘'    }
       ],
       selectedBadge: localStorage.getItem('wear_' + (storedUser || '')) || 'none',
+      userBadges: (() => {
+        const map = JSON.parse(localStorage.getItem('userBadges') || '{}');
+        // 如果有登录用户，且 map 里还没它的记录，就初始化一下
+        if (storedUser && !(storedUser in map)) {
+          map[storedUser] = localStorage.getItem('wear_' + storedUser) || 'none';
+        }
+        return map;
+      })(),
+
 
       /* 密码 */
       oldPassword: '',
@@ -490,9 +495,8 @@ export default {
     },
 
     displayName() {
-      if (!this.currentUser) return '';
-      return localStorage.getItem('displayName_' + this.currentUser) || this.currentUser;
-    },
+      return this.localDisplayName;
+    },  
     allPhotos() {
     const out = [];
     // 遍历每个 post，把 post 对象也带上
@@ -541,8 +545,20 @@ export default {
 
   watch: {
     bgOpacity: 'saveBgOpacity',
-    bgBlur: 'saveBgBlur'
-  },
+    bgBlur: 'saveBgBlur',
+    // 本地改名时，立刻写入 localStorage
+    localDisplayName(newName) {
+      localStorage.setItem('displayName_' + (this.currentUser || ''), newName);
+      },
+      
+      selectedBadge(newVal) {
+      // 直接赋值给响应式对象
+      this.userBadges[this.currentUser] = newVal;
+      localStorage.setItem('userBadges', JSON.stringify(this.userBadges));
+    }
+  },  
+    
+    
 
   /* ---------- methods ---------- */
   methods: {
@@ -571,18 +587,24 @@ export default {
     },
 
     badgeHTML(uid) {
-      const raw = localStorage.getItem('wear_' + uid);
-      if (!raw || raw === '"none"' || raw === 'none') return '';
-      const val  = (() => { try { return JSON.parse(raw); } catch { return raw; } })();
-      const cls  = val === 'best' ? 'badge best'
-                 : val === 'catgirl' ? 'badge catgirl'
-                 : val === 'none' ? 'badge-none' : 'badge';
-      const name = this.BADGES.find(b => b.id === val)?.name || '';
-      return `<span class="${cls}">${name}</span>`;
-    },
+    const val = this.userBadges[uid] || 'none';
+    // 不佩戴就不渲染
+    if (val === 'none') return '';
+    // 只有 best 和 catgirl 两种可渲染
+    const cls  = val === 'best'    ? 'badge best'
+               : /* catgirl */      'badge catgirl';
+    const name = this.BADGES.find(b => b.id === val)?.name || '';
+    return `<span class="${cls}">${name}</span>`;
+  },
+
     scrollTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); },
     getAvatar(uid){ return uid ? localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60' : '' },
-    getDisplayName(uid){ return localStorage.getItem('displayName_' + uid) || uid },
+    getDisplayName(uid){
+      if (uid === this.currentUser) {
+        return this.displayName;
+      } 
+      return localStorage.getItem('displayName_' + uid) || uid;
+    },
 
     /* ========== 投稿 ========== */
     handlePostImages(e){ this.draftImgs=[]; Array.from(e.target.files).slice(0,30).forEach(f=>this.draftImgs.push(URL.createObjectURL(f))); },
@@ -761,10 +783,14 @@ export default {
     updateDisplayName(){ localStorage.setItem('displayName_' + this.currentUser, this.localDisplayName); },
     openBadgeModal(){ this.showBadgeModal=true; },
     closeBadgeModal(){ this.showBadgeModal=false; },
-    confirmBadge(){
-      localStorage.setItem('wear_' + this.currentUser, this.selectedBadge);
-      alert('勋章已更换'); this.closeBadgeModal();
+    confirmBadge() {
+      // 直接赋值，触发响应式
+      this.userBadges[this.currentUser] = this.selectedBadge;
+      localStorage.setItem('userBadges', JSON.stringify(this.userBadges));
+      alert('勋章已更换');
+      this.closeBadgeModal();
     },
+
 
     /* ========== 密码修改 ========== */
     openPasswordModal(){ this.showPasswordModal=true; this.oldPassword=this.newPassword=this.confirmPassword=''; },
@@ -877,7 +903,7 @@ export default {
 
   mounted(){
     document.body.classList.toggle('dark', this.theme === 'dark');
-  }
+  },
 };
 </script>
 <style>
@@ -1086,7 +1112,61 @@ body.dark .setting-item input[type=text]{background:var(--card-dark);color:var(-
 /* Modal 通用 */
 .modal{z-index:9999;position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;justify-content:center;align-items:center;opacity:0;visibility:hidden;transition:opacity .25s ease}
 .modal.show{opacity:1;visibility:visible}
-.box{background:var(--card-light);backdrop-filter:blur(var(--blur));border:var(--glass-border);border-radius:var(--radius);max-width:600px;width: 80vw;height: 80vh;overflow:auto;padding:20px;position:relative}
+/* 1. 固定 Modal 大小：替换原有 .box 定义 */
+.box {
+  background: var(--card-light);
+  backdrop-filter: blur(var(--blur));
+  border: var(--glass-border);
+  border-radius: var(--radius);
+
+  /* 固定宽度，高度自适应，但在小屏幕时不超出 */
+  width: 600px;
+  max-width: 90vw;
+  max-height: 80vh;
+
+  overflow: auto;
+  padding: 20px;
+  position: relative;
+}
+
+/* 2. 列表里 “删除” 按钮，复用 modal-delete-btn 风格，文本跟随主题 */
+.post-options .trash-btn {
+  /* 复制 modal-delete-btn 的核心风格 */
+  background: rgba(120, 120, 120, 0.15);
+  border: 1px solid rgba(200, 200, 200, 0.4);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 6px rgba(120, 120, 120, 0.6);
+  transition: transform .1s, box-shadow .2s, background .2s;
+  cursor: pointer;
+
+  /* 文字 / 图标 跟随主题色 */
+  color: inherit;
+}
+.post-options .trash-btn:hover {
+  background: rgba(120, 120, 120, 0.25);
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(120, 120, 120, 0.8);
+}
+/* 确保 svg 图标大小合适 */
+.post-options .trash-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
+@media (max-width: 480px) {
+  .box {
+    width: 95vw;
+    padding: 12px;
+  }
+}
+
 body.dark .box{background:var(--card-dark);border:1px solid rgba(255,255,255,0.2)}
 .close{position:absolute;top:10px;right:16px;font-size:24px;cursor:pointer}
 /* Slider Modal 箭头按钮 */
