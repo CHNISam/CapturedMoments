@@ -296,7 +296,11 @@
 
       <!-- 图片 Slider Modal -->
       <div v-if="showModal" class="modal show" @touchstart="onTouchStart" @touchend="onTouchEnd">
-        <div class="box" style="max-width:90%;text-align:center;position:relative;">
+        <div class="box"
+          style="width:80vw; height:80vh; max-width:90%; overflow:auto;
+                  text-align:center; position:relative;
+                  display:flex; flex-direction:column;
+                  align-items:center; justify-content:center;">
           <span class="close" @click="closeModal">×</span>
           <!-- Modal 图片菜单按钮 -->
           <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
@@ -557,7 +561,13 @@ export default {
       this.readIds        = new Set();
     },
     /* ========== 工具函数 ========== */
-    formatMeta(post) { return `${new Date(post.ts).toISOString().slice(0,10)} · ${post.place || '未知'}`; },
+    formatMeta(post) {
+      const d = new Date(post.ts);
+      const date = d.toLocaleDateString();      // 本地化日期
+      const time = d.toLocaleTimeString();      // 本地化时分秒
+      return `${date} ${time}${post.place ? ' · ' + post.place : ''}`;
+    },
+
     badgeHTML(uid) {
       const raw = localStorage.getItem('wear_' + uid);
       if (!raw || raw === '"none"' || raw === 'none') return '';
@@ -1071,7 +1081,7 @@ body.dark .setting-item input[type=text]{background:var(--card-dark);color:var(-
 /* Modal 通用 */
 .modal{z-index:9999;position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;justify-content:center;align-items:center;opacity:0;visibility:hidden;transition:opacity .25s ease}
 .modal.show{opacity:1;visibility:visible}
-.box{background:var(--card-light);backdrop-filter:blur(var(--blur));border:var(--glass-border);border-radius:var(--radius);max-width:600px;width:90%;max-height:90vh;overflow:auto;padding:20px;position:relative}
+.box{background:var(--card-light);backdrop-filter:blur(var(--blur));border:var(--glass-border);border-radius:var(--radius);max-width:600px;width: 80vw;height: 80vh;overflow:auto;padding:20px;position:relative}
 body.dark .box{background:var(--card-dark);border:1px solid rgba(255,255,255,0.2)}
 .close{position:absolute;top:10px;right:16px;font-size:24px;cursor:pointer}
 /* Slider Modal 箭头按钮 */
@@ -1247,6 +1257,44 @@ body.dark .skeleton-body {
   stroke: currentColor;     /* 继续沿用 currentColor */
   fill: none;
   color: #d32f2f
+}
+.modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.lightbox {
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column;
+  padding: 16px;
+}
+.lightbox img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+.close-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: none; border: none;
+  font-size: 28px; color: #fff;
+  cursor: pointer; padding: 4px;
+}
+.nav-btn {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255,255,255,0.2); border: none;
+  font-size: 32px; color: #fff;
+  width: 48px; height: 48px;
+  cursor: pointer; border-radius: 50%;
+}
+.nav-btn:hover { background: rgba(255,255,255,0.4); }
+.prev { left: 16px; }
+.next { right: 16px; }
+.caption {
+  margin-top: 12px; font-size: 14px; color: #eee;
 }
 
 
