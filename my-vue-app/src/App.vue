@@ -118,7 +118,7 @@
               v-for="(img,i) in post.imgs"
               :key="i"
               :src="img"
-              @click="openModal(post.imgs, i, formatMeta(post), post)"
+              @click="openModal(post, i)"
             />
           </div>
 
@@ -177,7 +177,8 @@
               v-for="(photo,i) in group"
               :key="i"
               class="photo"
-              @click="openModal(group.map(p => p.url), i, photo.meta, photo.post)"
+              @click="openModal(photo.post, photo.post.imgs.indexOf(photo.url))"
+
             >
               <img :src="photo.url"/><span>{{ photo.place }}</span>
             </div>
@@ -366,7 +367,10 @@
               class="info-sidebar"
             >
               <p><b>尺寸：</b>{{ infoSize }}</p>
-              <p><b>地点：</b>{{ modalPost.place || '未知' }}</p>
+              <p>
+                <b>地点：</b>
+                {{ modalPost.imgPlaces[modalIndex] || modalPost.place || '未知' }}
+              </p>
               <p><b>日期：</b>{{ new Date(modalPost.ts).toLocaleString() }}</p>
             </div>
           </transition>
@@ -383,7 +387,7 @@
           <h3 style="margin-bottom:12px;">编辑地点</h3>
            <!-- 跟发帖区一模一样的 np-toolbar -->
         <div class="np-toolbar" style="margin-bottom:12px;">
-          <select v-model="placeModalTarget.place">
+          <select v-model="placeModalValue">
             <option value="">无地点</option>
             <option>蒙德</option><option>璃月</option><option>稻妻</option>
             <option>须弥</option><option>枫丹</option><option>纳塔</option>
@@ -521,6 +525,8 @@ export default {
         return map;
       })(),
 
+      editingImgIdx: 0,          // ⑦ 当前在改哪一张
+      placeModalValue: '',       // ⑧ <select v-model> 的值
 
       /* 密码 */
       oldPassword: '',
@@ -565,20 +571,21 @@ export default {
       return this.localDisplayName;
     },  
     allPhotos() {
-    const out = [];
-    // 遍历每个 post，把 post 对象也带上
-    this.posts.forEach(post => {
-      post.imgs.forEach(url => {
-        out.push({
-          url,
-          place: post.place || '未知',
-          date: new Date(post.ts).toISOString().slice(0, 10),
-          post        // ← 这里多了 post 引用
+      const out = [];
+      this.posts.forEach(post => {
+        post.imgs.forEach((url, idx) => {
+          out.push({
+            url,
+            // 1️⃣ 如果这张图有 imgPlaces，就用它；否则 fallback 到 post.place
+            place: post.imgPlaces?.[idx] || post.place || '未知',
+            date: new Date(post.ts).toISOString().slice(0, 10),
+            post,
+            idx
+          });
         });
       });
-    });
-    return out;
-  },
+      return out;
+    },
 
     
     groupedPhotos() {
@@ -693,8 +700,7 @@ export default {
         this.isListLoading = false;
         return alert('写点文字或选张图片吧~');
         }
-      const post={ id:Date.now(), uid:this.currentUser, txt, place:this.newPostPlace,
-                   imgs:[...this.draftImgs], ts:Date.now(), views:0, cmts:[] };
+      const post={ id:Date.now(), uid:this.currentUser, txt, place:this.newPostPlace,imgPlaces: this.draftImgs.map(() => null), imgs:[...this.draftImgs], ts:Date.now(), views:0, cmts:[] };
 
       this.posts.unshift(post);
       localStorage.setItem('posts', JSON.stringify(this.posts.map(p=>({...p,imgs:[]}))));
@@ -717,18 +723,16 @@ export default {
       }
     },
     // Modal: 确认修改图片地点
-    confirmEditImagePlace() {
-        if (this.imageNewPlace != null) {
-          this.modalPost.place = this.imageNewPlace;
-          this.modalMeta = `${new Date(this.modalPost.ts).toISOString().slice(0,10)} · ${this.imageNewPlace}`;
-          localStorage.setItem('posts', JSON.stringify(this.posts.map(p=>({ ...p, imgs: [] }))));
-        }
-        this.showImageOptions = false;
-      },
-      openPlaceModal(type, target) {
+    openPlaceModal(type, target) {
       this.placeModalType   = type;
       this.placeModalTarget = target;
       this.showPlaceModal   = true;
+      if (type === 'image') {
+        this.editingImgIdx   = this.modalIndex;
+        this.placeModalValue = target.imgPlaces[this.modalIndex] ?? target.place ?? '';
+      } else {
+        this.placeModalValue = target.place ?? '';
+      }
     },
     // 取消
     closePlaceModal() {
@@ -736,42 +740,67 @@ export default {
       this.placeModalTarget = null;
     },
     // 确认，保存到 localStorage
-    confirmPlaceEdit() {
-      if (!this.placeModalTarget) return;
-      // localStorage
-      localStorage.setItem(
-        'posts',
-        JSON.stringify(this.posts.map(p => ({ ...p, imgs: [] })))
-      );
-      // 如果是在图片 Modal，更新 modalMeta
-      if (this.placeModalType === 'image') {
-        this.modalMeta = `${new Date(this.modalPost.ts).toISOString().slice(0,10)} · ${this.modalPost.place}`;
+    confirmPlaceEdit () {
+      const val = this.placeModalValue;
+      if (this.placeModalType === 'image') {               // ⑨ 单张
+        this.placeModalTarget.imgPlaces[this.editingImgIdx] = val || null;
+      } else {                                             // 动态
+        const old = this.placeModalTarget.place;
+        this.placeModalTarget.place = val || '';
+        // 把仍在“继承”旧地点的图片同步到新地点（继承 = imgPlace 为 null）
+        this.placeModalTarget.imgPlaces = this.placeModalTarget.imgPlaces.map(p =>
+          p === null ? null : p
+        );
       }
+
+      // 持久化
+      // 只调用一次 setItem，把整个 this.posts 序列化
+      localStorage.setItem('posts', JSON.stringify(this.posts));
+      this.updateModalMeta();        // 如果正在看 Modal，立即刷新
       this.closePlaceModal();
-      // 同步收起主菜单
-      this.postOptionsPost = null;
-      this.showImageOptions = false;
     },
+
 
     isRead(id){ return this.readIds.has(id); },
 
     /* ========== 图片 Modal ========== */
-    openModal(imgs, startIndex = 0, meta, post) {
-      this.modalZoom = 1;        // ← 每次打开归 1
+    openModal (post, startIndex = 0) {               // ③ 只传 post 和索引
+      // —— 保底：确保这一条动态带 imgPlaces —— 
+      if (!Array.isArray(post.imgPlaces) || post.imgPlaces.length !== post.imgs.length) {
+        post.imgPlaces = post.imgs.map(() => null);
+      }
+
+      this.modalPost   = post;
+      this.modalImgs   = post.imgs;
+      this.modalIndex  = startIndex;
+      this.modalZoom   = 1;
+      this.showModal   = true;
       this.showInfoSidebar = false;
-      this.infoSize = '';
-      this.modalImgs       = imgs;
-      this.modalIndex      = startIndex;
-      this.modalMeta       = meta;
-      this.modalPost       = post;
-      this.showModal       = true;
-      this.showImageOptions = false;  // 每次打开都隐藏菜单
+      this.showImageOptions = false;
+
+      this.updateModalMeta();                        // 初始页脚文字
     },
+    // ④ 把页脚文字封装成单独函数
+    updateModalMeta () {
+      const p = this.modalPost;
+      const place = p.imgPlaces?.[this.modalIndex] ?? p.place ?? '';
+      const d = new Date(p.ts);
+      const date = d.toLocaleDateString();
+      const time = d.toLocaleTimeString();
+      this.modalMeta = place ? `${date} ${time} · ${place}` : `${date} ${time}`;
+    },
+
     prevModalImg() {
-      if (this.modalIndex > 0) this.modalIndex--;
+      if (this.modalIndex > 0) {
+        this.modalIndex--;
+        this.updateModalMeta(); 
+      }
     },
     nextModalImg() {
-      if (this.modalIndex < this.modalImgs.length - 1) this.modalIndex++;
+      if (this.modalIndex < this.modalImgs.length - 1) {
+        this.modalIndex++;
+        this.updateModalMeta(); 
+      }
     },
     onTouchStart(e) {
       this.touchStartX = e.changedTouches[0].clientX;
@@ -788,7 +817,7 @@ export default {
       if (newPlace != null) {
         this.modalPost.place = newPlace;
         // 同步回 localStorage
-        localStorage.setItem('posts', JSON.stringify(this.posts.map(p => ({ ...p, imgs: [] }))));
+        localStorage.setItem('posts', JSON.stringify(this.posts));
         this.modalMeta = `${new Date(this.modalPost.ts).toISOString().slice(0,10)} · ${newPlace}`;
       }
       this.showImageOptions = false;
@@ -841,9 +870,10 @@ export default {
         return; // 用户点击“取消”就直接退出
       }
       this.modalPost.imgs.splice(this.modalIndex, 1);
+      this.modalPost.imgPlaces.splice(this.modalIndex, 1);   // ⑩ 同步
       this.modalImgs.splice(this.modalIndex, 1);
       // 更新 storage
-      localStorage.setItem('posts', JSON.stringify(this.posts.map(p => ({ ...p, imgs: [] }))));
+      localStorage.setItem('posts', JSON.stringify(this.posts));
       if (this.modalIndex >= this.modalImgs.length) this.modalIndex = this.modalImgs.length - 1;
       this.showImageOptions = false;
       if (this.modalImgs.length === 0) {
@@ -857,7 +887,7 @@ export default {
       const newPlace = prompt('请输入新的地点', post.place);
       if (newPlace != null) {
         post.place = newPlace;
-        localStorage.setItem('posts', JSON.stringify(this.posts.map(p => ({ ...p, imgs: [] }))));
+        localStorage.setItem('posts', JSON.stringify(this.posts));
       }
       this.postOptionsPost = null;
     },
@@ -1029,8 +1059,13 @@ export default {
     }
   },
 
-  mounted(){
+  mounted() {
     document.body.classList.toggle('dark', this.theme === 'dark');
+    this.posts.forEach(p => {
+      if (!Array.isArray(p.imgPlaces) || p.imgPlaces.length !== p.imgs.length) {
+        p.imgPlaces = p.imgs.map(() => null);
+      }
+    });
   },
 };
 </script>
