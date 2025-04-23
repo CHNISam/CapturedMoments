@@ -307,17 +307,19 @@
           <!-- Modal 图片操作菜单 -->
           <div v-if="showImageOptions" class="modal-options">
             <button @click="openPlaceModal('image', modalPost)">编辑地点</button>
-            <button @click="deleteImage()" class="trash-btn">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
           </div>
           <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
           <img
             :src="modalImgs[modalIndex]"
             style="max-width:100%;max-height:80vh;display:inline-block;"
           />
+          <!-- 新增：固定在右下角的删除按钮 -->
+          <button class="modal-delete-btn" @click="deleteImage()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
           <button class="slider-btn right" @click="nextModalImg" :disabled="modalIndex===modalImgs.length-1">›</button>
           <div class="modal-meta">
             {{ modalMeta }} · {{ modalIndex+1 }} / {{ modalImgs.length }}
@@ -696,6 +698,9 @@ export default {
 
     // Modal 里：删除当前图片
     deleteImage() {
+      if (!confirm('确定要删除这张图片吗？')) {
+        return; // 用户点击“取消”就直接退出
+      }
       this.modalPost.imgs.splice(this.modalIndex, 1);
       this.modalImgs.splice(this.modalIndex, 1);
       // 更新 storage
@@ -1149,6 +1154,39 @@ body.dark .modal-options {
   color: var(--text-light);
   cursor: pointer;
 }
+.modal-delete-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(120, 120, 120, 0.15);           /* 浅灰半透明背景 */
+  border: 1px solid rgba(200, 200, 200, 0.4);      /* 细灰边框 */
+  color: #e0e0e0;                                   /* 图标浅灰色 */
+  border-radius: 50%;
+  backdrop-filter: blur(4px);                       /* 玻璃模糊效果 */
+  box-shadow: 0 0 6px rgba(120, 120, 120, 0.6);     /* 科技感微光 */
+  transition: transform .1s, box-shadow .2s, background .2s;
+  cursor: pointer;
+}
+
+.modal-delete-btn:hover {
+  background: rgba(120, 120, 120, 0.25);           /* 深一点的灰 */
+  transform: scale(1.1);                            /* 放大反馈 */
+  box-shadow: 0 0 12px rgba(120, 120, 120, 0.8);    /* 更强的光晕 */
+}
+
+.modal-delete-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;                             /* 跟随 color */
+  fill: none;
+}
+
+
 
 
 /* 桌宠 */
@@ -1244,20 +1282,6 @@ body.dark .skeleton-body {
 .post-fade-leave-active  { transition: all .2s ease; }
 .post-fade-enter         { opacity:0; transform:translateY(-10px); }
 
-.trash-btn {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: #d32f2f              /* 关键：设置 currentColor 为红 */
-}
-.trash-btn svg {
-  width: 18px;
-  height: 18px;
-  stroke: currentColor;     /* 继续沿用 currentColor */
-  fill: none;
-  color: #d32f2f
-}
 .modal {
   position: fixed; inset: 0;
   background: rgba(0,0,0,0.8);
