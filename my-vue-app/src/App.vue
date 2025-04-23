@@ -295,20 +295,38 @@
       </div>
 
       <!-- 图片 Slider Modal -->
-      <div v-if="showModal" class="modal show slider-modal" @touchstart="onTouchStart" @touchend="onTouchEnd">
+      <div v-if="showModal" class="modal show slider-modal" @click.self="closeInfoSidebar"@touchstart="onTouchStart" @touchend="onTouchEnd">
         <div class="box">
           <span class="close" @click="closeModal">×</span>
           <!-- Modal 图片菜单按钮 -->
           <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
+          <!-- Modal 信息按钮 -->
+          <span
+            class="info-btn"
+            @click="toggleInfoSidebar"
+            :aria-label="showInfoSidebar ? '收起信息' : '查看信息'"
+          >
+            <!-- 圆圈里的 i，和 iOS 类似 -->
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+              <line   x1="12" y1="8"  x2="12" y2="8"  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <line   x1="12" y1="11" x2="12" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+
           <!-- Modal 图片操作菜单 -->
           <div v-if="showImageOptions" class="modal-options">
             <button @click="openPlaceModal('image', modalPost)">编辑地点</button>
           </div>
-          <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
-          <img
-            :src="modalImgs[modalIndex]"
-            style="max-width:100%;max-height:80vh;display:inline-block;"
-          />
+          <div class="slider-content">
+            <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
+            <img
+              class="slider-img"
+              :src="modalImgs[modalIndex]"
+              @load="handleImgLoad"
+            />
+            <button class="slider-btn right" @click="nextModalImg" :disabled="modalIndex===modalImgs.length-1">›</button>
+          </div>
           <!-- 新增：固定在右下角的删除按钮 -->
           <button class="modal-delete-btn" @click="deleteImage()">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -316,7 +334,18 @@
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <button class="slider-btn right" @click="nextModalImg" :disabled="modalIndex===modalImgs.length-1">›</button>
+          <!-- 侧边栏：照片信息 -->
+          <transition name="sidebar-slide">
+            <div
+              v-if="showInfoSidebar"
+              class="info-sidebar"
+            >
+              <p><b>尺寸：</b>{{ infoSize }}</p>
+              <p><b>地点：</b>{{ modalPost.place || '未知' }}</p>
+              <p><b>日期：</b>{{ new Date(modalPost.ts).toLocaleString() }}</p>
+            </div>
+          </transition>
+                    
           <div class="modal-meta">
             {{ modalMeta }} · {{ modalIndex+1 }} / {{ modalImgs.length }}
           </div>
@@ -430,6 +459,8 @@ export default {
       showPlaceModal: false,      // 控制编辑地点弹窗显隐
       placeModalTarget: null,     // 要编辑的对象（post 或 modalPost）
       placeModalType: '',         // 'post' 或 'image'
+      showInfoSidebar: false,          // Info 侧边栏显隐
+      infoSize: '',                    // "4032 × 3024" 这样的字符串
 
       /* 设置 */
       petEnabled: true,
@@ -684,6 +715,8 @@ export default {
 
     /* ========== 图片 Modal ========== */
     openModal(imgs, startIndex = 0, meta, post) {
+      this.showInfoSidebar = false;
+      this.infoSize = '';
       this.modalImgs       = imgs;
       this.modalIndex      = startIndex;
       this.modalMeta       = meta;
@@ -717,6 +750,21 @@ export default {
       }
       this.showImageOptions = false;
     },
+
+    toggleInfoSidebar () {
+      this.showInfoSidebar = !this.showInfoSidebar;
+    },
+
+    // 在 <img> load 时记录尺寸
+    handleImgLoad (e) {
+      const { naturalWidth: w, naturalHeight: h } = e.target;
+      this.infoSize = `${w} × ${h}`;
+    },
+
+    closeInfoSidebar () {
+      this.showInfoSidebar = false;
+    },
+
 
     // Modal 里：删除当前图片
     deleteImage() {
@@ -1202,6 +1250,23 @@ body.dark .modal-meta {
 .modal-more {
   position: absolute; top: 10px; right: 50px; cursor: pointer;
 }
+.info-btn{
+  position: absolute;
+  top: 10px;
+  right: 82px;          /* 刚好挨着 ⋯，可自行微调 */
+  cursor: pointer;
+  font-size: 18px;
+  padding: 2px 6px;
+  border-radius:50%;
+  transition:.2s background;
+  color: var(--text-light);
+}
+body.dark .info-btn{ color: var(--text-dark); }
+.info-btn:hover{ background:rgba(0,0,0,0.08); }
+body.dark .info-btn:hover{ background:rgba(255,255,255,0.12); }
+.info-btn svg{ width:20px; height:20px; display: block;             /* 确保可以用 margin 调整 */
+  margin-top: 4px;            /* 向下移动 icon */ }
+
 .modal-options {
   position: absolute; top: 36px; right: 50px;
   background: var(--card-light); padding: 6px; border-radius: 6px;
@@ -1400,6 +1465,101 @@ body.dark .skeleton-body {
 .caption {
   margin-top: 12px; font-size: 14px; color: #eee;
 }
+/* —— 针对 Slider Modal —— */
+/* —— Slider Modal 重写 —— */
+.slider-modal .box {
+  position: relative;    /* 变为定位容器 */
+  display: block;        /* 去掉 flex 布局 */
+  width: 80vw;
+  max-width: 90vw;
+  height: 80vh;
+  max-height: 90vh;
+  background: var(--card-light);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.slider-modal .slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* 其它你喜欢的样式… */
+}
+.slider-modal .slider-btn.left  { left: 16px; }
+.slider-modal .slider-btn.right { right: 16px; }
+
+/* —— Slider Modal 最终版 —— */
+.slider-modal .slider-content {
+  text-align: center;    /* 水平居中 */
+  padding: 20px 0;       /* 上下留白 */
+}
+
+.slider-modal .slider-img {
+  display: inline-block; /* 保持内联块，不要被 flex 或 width:100% 拉伸 */
+  width: auto !important;     /* 让浏览器用图片本身宽度 */
+  height: auto !important;    /* 让浏览器用图片本身高度 */
+  max-width: 90vw;       /* 只有超宽时才缩到 90vw */
+  max-height: 80vh;      /* 超高时才缩到 80vh */
+
+}
+
+/* 1. 让 box 继续作 flex column 布局 */
+.slider-modal .box {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 2. slider-content 占满剩余空间，并水平/垂直双向居中 */
+.slider-modal .slider-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 3. 图片只在过大时缩放，平常按原始大小 */
+.slider-modal .slider-img {
+  display: block;           /* block 或 inline-block 都可 */
+  width: auto !important;
+  height: auto !important;
+  max-width: 90vw;
+  max-height: 80vh;
+}
+/* ---- Info 侧边栏 ---- */
+.info-sidebar{
+  position:absolute; left:0; bottom:0;
+  width:100%;       /* 占满横向 */
+  padding:18px 22px 28px;
+  background:var(--card-light);
+  backdrop-filter:blur(calc(var(--blur)/2));
+  border-top:var(--glass-border);
+  border-bottom-left-radius:var(--radius);
+  border-bottom-right-radius:var(--radius);
+  font-size:14px;
+  box-shadow:0 -4px 18px rgba(0,0,0,0.15);
+}
+body.dark .info-sidebar{ background:var(--card-dark); }
+
+/* Slide-up 过渡 */
+.sidebar-slide-enter-from,
+.sidebar-slide-leave-to{
+  transform:translateY(100%);
+  opacity:0;
+}
+.sidebar-slide-enter-active,
+.sidebar-slide-leave-active{
+  transition:.25s ease transform, .25s ease opacity;
+}
+
+
 
 
 </style>
