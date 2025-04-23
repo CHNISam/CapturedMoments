@@ -320,11 +320,18 @@
           </div>
           <div class="slider-content">
             <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
+            <!-- 桌面鼠标滚轮 -->
             <img
               class="slider-img"
               :src="modalImgs[modalIndex]"
+              :style="{ transform: 'scale(' + modalZoom + ')', transition: 'transform .15s' }"
               @load="handleImgLoad"
+              @wheel.prevent="onWheelZoom"
+              @touchstart="onPinchStart"
+              @touchmove="onPinchMove"
+              @touchend="onPinchEnd"
             />
+
             <button class="slider-btn right" @click="nextModalImg" :disabled="modalIndex===modalImgs.length-1">›</button>
           </div>
           <!-- 新增：固定在右下角的删除按钮 -->
@@ -334,6 +341,21 @@
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
+          <!-- 缩放条 + 放大镜 -->
+          <div class="zoom-control">
+            <svg class="zoom-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+              <line   x1="16" y1="16" x2="22" y2="22" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round"/>
+            </svg>
+            <input
+              type="range"
+              :min="minZoom"
+              :max="maxZoom"
+              step="0.1"
+              v-model.number="modalZoom"
+            />
+          </div>
           <!-- 侧边栏：照片信息 -->
           <transition name="sidebar-slide">
             <div
@@ -461,7 +483,11 @@ export default {
       placeModalType: '',         // 'post' 或 'image'
       showInfoSidebar: false,          // Info 侧边栏显隐
       infoSize: '',                    // "4032 × 3024" 这样的字符串
-
+      /* 图片缩放 */
+      modalZoom: 1,          // 当前缩放倍数（1 = 100%）
+      minZoom : 0.5,         // 下限
+      maxZoom : 3,           // 上限
+      pinchDist: 0,          // 记录双指初始距离
       /* 设置 */
       petEnabled: true,
       petType: 'cat',
@@ -715,6 +741,7 @@ export default {
 
     /* ========== 图片 Modal ========== */
     openModal(imgs, startIndex = 0, meta, post) {
+      this.modalZoom = 1;        // ← 每次打开归 1
       this.showInfoSidebar = false;
       this.infoSize = '';
       this.modalImgs       = imgs;
@@ -763,6 +790,32 @@ export default {
 
     closeInfoSidebar () {
       this.showInfoSidebar = false;
+    },
+    /* ========= = 图片缩放 ========== */
+    onWheelZoom(e){
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;         // 上滚放大、下滚缩小
+      this.modalZoom = this.clampZoom(this.modalZoom + delta);
+    },
+    onPinchStart(e){
+      if (e.touches.length === 2){
+        const [p1, p2] = e.touches;
+        this.pinchDist = Math.hypot(p1.clientX - p2.clientX, p1.clientY - p2.clientY);
+      }
+    },
+    onPinchMove(e){
+      if (e.touches.length === 2){
+        const [p1, p2] = e.touches;
+        const now = Math.hypot(p1.clientX - p2.clientX, p1.clientY - p2.clientY);
+        if (this.pinchDist){
+          const ratio = now / this.pinchDist;          // >1 放大，<1 缩小
+          this.modalZoom = this.clampZoom(this.modalZoom * ratio);
+          this.pinchDist = now;                        // 连续缩放
+        }
+      }
+    },
+    onPinchEnd(){ this.pinchDist = 0; },
+    clampZoom(v){                                      // 辅助函数：限制范围
+      return Math.min(this.maxZoom, Math.max(this.minZoom, parseFloat(v.toFixed(2))));
     },
 
 
@@ -1557,6 +1610,27 @@ body.dark .info-sidebar{ background:var(--card-dark); }
 .sidebar-slide-enter-active,
 .sidebar-slide-leave-active{
   transition:.25s ease transform, .25s ease opacity;
+}
+.zoom-control{
+  position:absolute;                 /* 右下角贴边 */
+  bottom:18px; right:62px;           /* 不挡删除按钮 */
+  display:flex; align-items:center;
+  gap:6px;
+  background:rgba(120,120,120,.15);
+  border:1px solid rgba(200,200,200,.4);
+  padding:4px 8px;
+  border-radius:20px;
+  backdrop-filter:blur(4px);
+}
+body.dark .zoom-control{
+  background:rgba(255,255,255,.08);
+}
+.zoom-control input[type=range]{
+  width:100px;      /* 长度随意 */
+}
+.zoom-icon{
+  width:18px; height:18px;
+  stroke:currentColor; fill:none;
 }
 
 
