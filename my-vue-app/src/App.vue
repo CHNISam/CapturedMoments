@@ -228,7 +228,10 @@
                   <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
                   <input type="file" accept="image/*" @change="changeAvatar"/>
                 </label>
-                <img :src="getAvatar(currentUser)" alt="Avatar" style="width:40px;height:40px;border-radius:50%;"/>
+                <img 
+                  :src="getAvatar(currentUser)"
+                  alt="Avatar" 
+                  style="width:40px;height:40px;border-radius:50%;"/>
               </div>
             </div>
             <div class="setting-item"><span>我的昵称</span><input type="text" v-model="localDisplayName" @input="updateDisplayName"/></div>
@@ -369,7 +372,7 @@
           </transition>
                     
           <div class="modal-meta">
-            {{ modalMeta }} · {{ modalIndex+1 }} / {{ modalImgs.length }}
+            {{ modalIndex + 1 }} / {{ modalImgs.length }}
           </div>
         </div>
       </div>
@@ -483,11 +486,13 @@ export default {
       placeModalType: '',         // 'post' 或 'image'
       showInfoSidebar: false,          // Info 侧边栏显隐
       infoSize: '',                    // "4032 × 3024" 这样的字符串
+
       /* 图片缩放 */
       modalZoom: 1,          // 当前缩放倍数（1 = 100%）
       minZoom : 0.5,         // 下限
       maxZoom : 3,           // 上限
       pinchDist: 0,          // 记录双指初始距离
+
       /* 设置 */
       petEnabled: true,
       petType: 'cat',
@@ -495,6 +500,11 @@ export default {
       petPrompt: '喵～ 记得喝水喔！',
       localDisplayName: localStorage.getItem('displayName_' + (storedUser || '')) || '',
 
+      /*头像 */ 
+      avatarMap: {
+      [storedUser]: localStorage.getItem('avatar-' + storedUser)
+                     || 'https://placehold.co/60'
+       },
       /* 勋章 */
       BADGES: [
         { id: 'none',    name: '不佩戴'        },
@@ -655,7 +665,13 @@ export default {
   },
 
     scrollTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); },
-    getAvatar(uid){ return uid ? localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60' : '' },
+    getAvatar(uid) {
+      // 先试试响应式的 avatarMap
+      return this.avatarMap[uid]
+          // 如果没这个 key，再回退到 placeholder
+          || 'https://placehold.co/60'
+    },
+
     getDisplayName(uid){
       if (uid === this.currentUser) {
         return this.displayName;
@@ -877,10 +893,21 @@ export default {
     saveBgBlur(){ localStorage.setItem('bgBlur', this.bgBlur); },
 
     /* ========== 个人资料 / 勋章 ========== */
-    changeAvatar(e){
-      const f=e.target.files[0]; if(!f) return;
-      const r=new FileReader(); r.onload=ev=>localStorage.setItem('avatar-'+this.currentUser, ev.target.result); r.readAsDataURL(f);
+    changeAvatar(e) {
+      const f = e.target.files[0]
+      if (!f) return
+      const r = new FileReader()
+      r.onload = ev => {
+        const url = ev.target.result
+        // —— 更新响应式 avatarMap，让所有用到它的地方都自动刷新 —— 
+        this.avatarMap[this.currentUser] = url
+        // —— 同步到 localStorage，保证刷新或下次登录还能继续用 —— 
+        localStorage.setItem('avatar-' + this.currentUser, url)
+      }
+      r.readAsDataURL(f)
     },
+
+
     updateDisplayName(){ localStorage.setItem('displayName_' + this.currentUser, this.localDisplayName); },
     openBadgeModal(){ this.showBadgeModal=true; },
     closeBadgeModal(){ this.showBadgeModal=false; },
@@ -1292,14 +1319,31 @@ body.dark .slider-btn {
 }
 .slider-btn.left  { left: 10px; }
 .slider-btn.right { right: 10px; }
-.modal-meta {
-  margin-top: 6px;
+/* 保证 .box 是定位容器 */
+.slider-modal .box {
+  position: relative;
+}
+
+/* 固定页码到底部中央 */
+.slider-modal .modal-meta {
+  position: absolute;
+  bottom: 16px;              /* 距底部 16px，可调 */
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 0;             /* 覆盖原 margin-top */
   font-size: 13px;
-  color: var(--text-light);
+  padding: 4px 8px;          /* 可选：加点内边距，提高可读性 */
+  border-radius: 4px;        /* 可选：圆角框 */
+  background: rgba(0,0,0,0.3); /* 可选：半透明底，确保对比度 */
+  color: #fff !important;      /* 强制白色文字 */
+  z-index: 10;               /* 确保浮在图片之上 */
 }
-body.dark .modal-meta {
-  color: var(--text-dark);
+
+/* 深色模式下调整文字色 */
+body.dark .slider-modal .modal-meta {
+  color: #ddd !important;
 }
+
 .modal-more {
   position: absolute; top: 10px; right: 50px; cursor: pointer;
 }
