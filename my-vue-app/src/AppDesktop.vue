@@ -120,6 +120,8 @@
               contenteditable="true"
               ref="postInput"
               @input="handleInput"
+              @keyup="saveCaret"
+              @mouseup="saveCaret"
               @keydown.enter.prevent="handlePostEnter"
               data-placeholder="说点什么..."
             ></div>
@@ -218,7 +220,7 @@
         <div v-for="post in visiblePosts" :key="post.id" class="post card">
           <!-- ——— 保留你原来的 post 结构 —— ——— -->
           <div class="head" style="display:flex;justify-content:space-between;align-items:center;">
-            <div style="display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
               <div :style="{width:'34px',height:'34px',borderRadius:'50%',background:'url('+getAvatar(post.uid)+') center/cover'}"></div>
               <b>{{ getDisplayName(post.uid) }}</b>
               <span v-html="badgeHTML(post.uid)"></span>
@@ -229,7 +231,9 @@
               <span class="red" v-if="!isRead(post.id)&&post.uid!==currentUser"></span>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:12px">{{ new Date(post.ts).toLocaleTimeString() }}</span>
+              <span style="font-size:12px">
+                {{ new Date(post.ts).toLocaleTimeString() }}<span v-if="post.place"> · {{ post.place }}</span>
+              </span>
               <span   v-if="post.uid === currentUser || currentUser === '217122260'" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
               <div v-if="postOptionsPost===post" class="post-options">
                 <button @click="openPlaceModal('post', post)">编辑地点</button>
@@ -676,6 +680,7 @@ export default {
       stickers: [],          // ↙ 先给空数组
       stickerPage      : 0,   // 当前页
       stickersPerPage  : 32,  // 每页多少张
+      savedRange       : null,   // ⭐︎ 光标缓存
 
       /* 管理员 */
       adminPwdModalVisible: false,
@@ -862,6 +867,26 @@ export default {
       el.style.height = 'auto';
       el.style.height = el.scrollHeight + 'px';
     },
+    /* —— 光标缓存 —— */
+    saveCaret () {
+      const sel = window.getSelection()
+      if (sel && sel.rangeCount) {
+        this.savedRange = sel.getRangeAt(0).cloneRange()
+      }
+    },
+    restoreCaret () {
+      const box = this.$refs.postInput
+      // 1) 没缓存 2) 缓存已经跑到别的元素 → 统一放到文本末尾
+      if (!this.savedRange || !box.contains(this.savedRange.startContainer)) {
+        this.savedRange = document.createRange()
+        this.savedRange.selectNodeContents(box)
+        this.savedRange.collapse(false)
+      }
+      const sel = window.getSelection()
+      sel.removeAllRanges()
+      sel.addRange(this.savedRange)
+      box.focus()
+    },
 
     publishPost(){
       if (!this.currentUser) return alert('请先登录');
@@ -904,9 +929,13 @@ export default {
     },
     /* === 自定义表情 === */
     toggleStickerPicker () {
-    this.stickerPage = 0      // ← 打开面板时，先回第一页
-    this.stickerPickerVisible = !this.stickerPickerVisible
-  },
+      if (!this.stickerPickerVisible) {      // 正在“打开”面板
+        this.saveCaret();                    // 先记住 Range
+      }
+      this.stickerPage = 0;
+      this.stickerPickerVisible = !this.stickerPickerVisible;
+    },
+
       // 👉 下一页贴图（只有当前页未满时才生效）
     nextStickerPage () {
       if ((this.stickerPage + 1) * this.stickersPerPage < this.stickers.length)
@@ -934,39 +963,43 @@ export default {
     },
 
 
-    // 👉 选择贴图时：插入 markdown 格式的图片语法
-    selectSticker(s) {
-      const md = `![](${s.url})`              // 保存到文本
-      const sel = window.getSelection()
-      if (!sel || !sel.rangeCount) return
+    selectSticker (s) {
+      /* ---------- 1. 让光标回到用户刚才的位置 ---------- */
+      this.restoreCaret()                 // ← 前面 saveCaret() 过
 
+      const sel   = window.getSelection()
+      if (!sel || !sel.rangeCount) return
       const range = sel.getRangeAt(0)
 
-      // 1. 插入 <img>
+      /* ---------- 2. 插入 <img> 节点 ---------- */
       const img = document.createElement('img')
-      img.src = s.url
-      img.className = 'inline-sticker'
-      img.contentEditable = false
+      img.src              = s.url
+      img.className        = 'inline-sticker'
+      img.contentEditable  = false        // 不可被直接编辑
+      range.deleteContents()              // 把可能的选中内容清掉
       range.insertNode(img)
 
-      // 2. 在 <img> 后插入一个空的 textNode（防止选区丢失）
+      /* ---------- 3. 在 <img> 后补一个空格，再把光标放到空格后 ---------- */
       const space = document.createTextNode(' ')
       range.setStartAfter(img)
       range.insertNode(space)
 
-      // 3. 把光标移到 textNode 的末尾
       const newRange = document.createRange()
       newRange.setStart(space, 1)
       newRange.collapse(true)
       sel.removeAllRanges()
       sel.addRange(newRange)
+      this.savedRange = newRange.cloneRange()   // 更新缓存，方便继续插
 
-      // 4. 更新你的数据（newPostText）
-      this.newPostText += md
+      /* ---------- 4. 用现成的 handleInput 把 DOM → markdown ---------- */
+      this.handleInput({ target: this.$refs.postInput })
+
+      /* ---------- 5. 关面板 ---------- */
       this.stickerPickerVisible = false
     },
 
-        renderText(raw) {
+
+    renderText(raw) {
       // 把换行变 <br>，把 markdown 图片变 <img>
       return raw
         .replace(/!\[\]\((.+?)\)/g, (_, u) => `<img class="inline-sticker" src="${u}">`)
