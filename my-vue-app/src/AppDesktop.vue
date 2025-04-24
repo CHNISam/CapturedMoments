@@ -126,6 +126,28 @@
                 <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 <input type="file" accept="image/*" multiple @change="handlePostImages"/>
               </label>
+              <!-- Emoji SVG 按钮 -->
+              <button type="button" class="emoji-fab">
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"               
+                  stroke="currentColor"    
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <!-- 外圆 -->
+                  <circle cx="12" cy="12" r="10" />
+                  <!-- 眼睛 -->
+                  <circle cx="9"  cy="10" r="1" />
+                  <circle cx="15" cy="10" r="1" />
+                  <!-- 微笑曲线 -->
+                  <path d="M8 16c1.333-1 2.667-1 4 0" />
+                </svg>
+              </button>
+
+
             </div>
             <div class="np-toolbar">
               <span class="char-count">{{ newPostText.length }}/30000</span>
@@ -1907,5 +1929,39 @@ body.dark .upload-fab:hover { background: rgba(255,255,255,0.12); }
 .upload-fab svg { width:16px; height:16px; }  /* 图标跟着缩小 */
 .upload-fab input{ display:none; }            /* 隐藏真正的 file input */
 
+/* —— Emoji 按钮 —— */
+.emoji-fab {
+  position: absolute;
+  bottom: 10px;
+  left:   48px;               /* upload-fab（10px） + 宽度28px + 间距10px = 48px */
+  width:  28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--card-light);
+  border: var(--glass-border);
+  backdrop-filter: blur(calc(var(--blur)/2));
+  color: var(--text-light);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: background .25s, transform .15s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+body.dark .emoji-fab {
+  background: var(--card-dark);
+  color: var(--text-dark);
+}
+.emoji-fab:hover {
+  background: rgba(0,0,0,0.08);
+}
+body.dark .emoji-fab:hover {
+  background: rgba(255,255,255,0.12);
+}
+/* SVG 图标缩放 */
+.emoji-fab svg {
+  width:16px;
+  height:16px;
+}
 
   </style>
