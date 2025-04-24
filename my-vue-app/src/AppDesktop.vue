@@ -172,7 +172,7 @@
 
           </div>
           <div class="np-toolbar">
-            <span class="char-count">{{ newPostText.length }}/30000</span>
+            <span class="char-count">{{ newPostCharCount }}/30000</span>
             <select v-model="newPostPlace">
               <option value="">无地点</option>
               <option>蒙德</option><option>璃月</option><option>稻妻</option>
@@ -696,6 +696,12 @@ export default {
 
   /* ---------- computed ---------- */
   computed: {
+    newPostCharCount() {
+      // 把所有 markdown 图片语法替换成单个占位符
+      const txt = this.newPostText.replace(/!\[\]\([^)]*\)/g, '□');
+      return txt.length;
+    },
+
     displayedStickers () {
       const start = this.stickerPage * this.stickersPerPage
       return this.stickers.slice(start, start + this.stickersPerPage)
@@ -868,7 +874,14 @@ export default {
       this.posts.unshift(post);
       localStorage.setItem('posts', JSON.stringify(this.posts.map(p=>({...p,imgs:[]}))));
 
-      this.newPostText=''; this.newPostPlace=''; this.draftImgs=[];
+      // 清空输入状态
+      this.newPostText = '';
+      this.newPostPlace = '';
+      this.draftImgs = [];
+
+      // 手动清空 contenteditable 区域，否则 Vue 不会重绘
+      this.$refs.postInput.innerHTML = '';
+
 
       setTimeout(() => {
         this.isPublishing = false;
