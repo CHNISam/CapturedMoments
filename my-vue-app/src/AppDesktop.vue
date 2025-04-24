@@ -15,9 +15,20 @@
           <div class="menu">
             <a href="#moments"  @click.prevent="scrollTo('moments')">动态 <span class="red" :class="{ hidden: !hasUnread }"></span></a>
             <a href="#album"    @click.prevent="scrollTo('album')">相册</a>
-            <a href="#settings" @click.prevent="scrollTo('settings')">设置</a>
-            <span style="font-weight:600">{{ currentUser }}</span>
-            <a class="btn-ghost" @click="logout">退出</a>
+              <!-- ① 在 data() 里新增 navDropdownVisible -->
+              <div class="nav-avatar" @click="toggleNavDropdown">
+                <img
+                    :src="getAvatar(currentUser)"
+                    alt="Avatar"
+                    class="avatar-img"
+                />
+                <div v-if="navDropdownVisible" class="nav-dropdown">
+                    <button @click="scrollTo('settings')" class="dropdown-item">设置</button>
+                    <button @click="logout"                 class="dropdown-item">退出</button>
+                </div>
+                </div>
+
+
             <button class="btn-ghost" @click="toggleTheme">
               <svg v-if="theme==='light'" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
               <svg v-else                viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
@@ -458,7 +469,10 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
         bgSrc: localStorage.getItem('bgSrc') || '',
         bgOpacity: parseFloat(localStorage.getItem('bgOpacity') || 0.35),
         bgBlur: parseInt(localStorage.getItem('bgBlur') || 4),
-  
+
+        /* 导航栏 */
+        navDropdownVisible: false,
+
         /* 投稿 */
         newPostText: '',
         newPostPlace: '',
@@ -681,7 +695,12 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
         } 
         return localStorage.getItem('displayName_' + uid) || uid;
       },
-  
+      
+      toggleNavDropdown() {
+        this.navDropdownVisible = !this.navDropdownVisible;
+        },
+
+
       /* ========== 投稿 ========== */
       handlePostImages(e){ this.draftImgs=[]; Array.from(e.target.files).slice(0,50).forEach(f=>this.draftImgs.push(URL.createObjectURL(f))); },
       removeDraft(i){ this.draftImgs.splice(i,1); },
@@ -1037,7 +1056,15 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
           p.imgPlaces = p.imgs.map(() => null);
         }
       });
+      document.body.addEventListener('click', e => {
+            // 如果点击不在头像或菜单内，就收起
+            if (!this.$el.querySelector('.nav-avatar').contains(e.target)
+                && !this.$el.querySelector('.nav-dropdown')?.contains(e.target)) {
+            this.navDropdownVisible = false;
+            }
+        });
     },
+    
   };
   </script>
   <style>
@@ -1683,7 +1710,56 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
     stroke:currentColor; fill:none;
   }
   
-  
+  .nav-avatar {
+  position: relative;      /* 关键：让子元素 .nav-dropdown 参照它定位 */
+  display: inline-block;   /* 确保宽度包裹头像 */
+  cursor: pointer;
+}
+
+.avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.nav-dropdown {
+  /* 让下拉菜单至少宽到能容纳其内容 */
+  min-width: max-content;
+  /* 其余保持不变 */
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: var(--card-light);
+  backdrop-filter: blur(calc(var(--blur)/2));
+  border: var(--glass-border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+  z-index: 200;
+}
+
+.dropdown-item {
+  /* 自动根据自己内容撑宽，不要限制成 100% */
+  width: auto;
+  /* 允许文字在需要的时候换行（默认即可） */
+  white-space: normal;
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-light);
+}
+.dropdown-item:hover {
+  background: rgba(0,0,0,0.08);
+}
+body.dark .nav-dropdown { background: var(--card-dark); }
+body.dark .dropdown-item:hover { background: rgba(255,255,255,0.12); }
+body.dark .dropdown-item {
+  color: #fff;
+}
   
   
   </style>
