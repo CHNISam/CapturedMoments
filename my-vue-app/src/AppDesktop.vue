@@ -115,19 +115,23 @@
           <div class="np-top">
             <div class="np-input-wrapper">
               <textarea
+                ref="postInput"
                 v-model="newPostText"
                 placeholder="说点什么…"
                 maxlength="30000"
                 @input="autoResize($event)"
                 @keydown.enter="handlePostEnter($event)"
               ></textarea>
+              
                <!-- ② 新的“悬浮”上传按钮，圆形、尺寸更小 -->
               <label class="upload-fab">
                 <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 <input type="file" accept="image/*" multiple @change="handlePostImages"/>
               </label>
-              <!-- Emoji SVG 按钮 -->
-              <button type="button" class="emoji-fab">
+              <!-- === ① 触发按钮 === -->
+              <button type="button"
+                      class="emoji-fab"
+                      @click="toggleStickerPicker">
                 <svg 
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -146,6 +150,24 @@
                   <path d="M8 16c1.333-1 2.667-1 4 0" />
                 </svg>
               </button>
+              <!-- === ② 贴图网格 === -->
+              <div v-if="stickerPickerVisible" class="sticker-picker">
+                <img v-for="s in displayedStickers"
+                    :key="s.id"
+                    :src="s.url"
+                    :alt="s.id"
+                    @click.stop="selectSticker(s)" />
+
+                <!-- 分页按钮 -->
+                <button class="page-btn left"
+                        @click="prevStickerPage"
+                        :disabled="stickerPage===0"
+                >‹</button>
+                <button class="page-btn right"
+                        @click="nextStickerPage"
+                        :disabled="(stickerPage+1)*stickersPerPage>=stickers.length"
+                >›</button>
+              </div>
 
 
             </div>
@@ -217,7 +239,7 @@
             </div>
   
             <div class="body">
-              <p>{{ post.txt }}</p>
+              <p v-html="renderText(post.txt)"></p>
               <small>{{ new Date(post.ts).toLocaleDateString() }}{{ post.place?' · '+post.place:'' }}</small>
             </div>
   
@@ -644,7 +666,13 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
   
         /* 相册 */
         albumMode: 'time',
-  
+        
+        /* 表情 */
+        stickerPickerVisible: false,
+        stickers: [],          // ↙ 先给空数组
+        stickerPage      : 0,   // 当前页
+        stickersPerPage  : 32,  // 每页多少张
+
         /* 管理员 */
         adminPwdModalVisible: false,
         adminTargetUid: '',
@@ -662,12 +690,16 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
   
         imageNewPlace: '',  // Modal 编辑时用的 v-model
         postNewPlace: '',   // 动态列表编辑时用的 v-model
-  
+          
       };
     },
   
     /* ---------- computed ---------- */
     computed: {
+      displayedStickers () {
+        const start = this.stickerPage * this.stickersPerPage
+        return this.stickers.slice(start, start + this.stickersPerPage)
+      },
       // 只显示已加载的条数
       visiblePosts() {
         return this.posts.slice(0, this.loadedCount);
@@ -833,6 +865,45 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
           localStorage.setItem('posts', JSON.stringify(this.posts.map(q=>({...q,imgs:[]}))));
         }
       },
+      /* === 自定义表情 === */
+      toggleStickerPicker () {
+      this.stickerPage = 0      // ← 打开面板时，先回第一页
+      this.stickerPickerVisible = !this.stickerPickerVisible
+    },
+        // 👉 下一页贴图（只有当前页未满时才生效）
+      nextStickerPage () {
+        if ((this.stickerPage + 1) * this.stickersPerPage < this.stickers.length)
+          this.stickerPage++
+      },
+
+      // 👉 上一页贴图（第一页时无效）
+      prevStickerPage () {
+        if (this.stickerPage > 0) this.stickerPage--
+      },
+
+      // 👉 在 textarea 光标处插入文本（适用于贴图插入、emoji 插入等）
+      insertAtCaret (txt) {
+        const ta = this.$refs.postInput // 获取 textarea DOM
+        const { selectionStart: s, selectionEnd: e } = ta
+        this.newPostText = this.newPostText.slice(0, s) + txt + this.newPostText.slice(e)
+
+        this.$nextTick(() => {
+          ta.focus()
+          ta.selectionStart = ta.selectionEnd = s + txt.length
+        })
+      },
+
+      // 👉 选择贴图时：插入 markdown 格式的图片语法
+      selectSticker (s) {
+            this.insertAtCaret(`![](${s.url})`)
+            this.stickerPickerVisible = false
+          },
+          renderText(raw) {
+        // 把换行变 <br>，把 markdown 图片变 <img>
+        return raw
+          .replace(/!\[\]\((.+?)\)/g, (_, u) => `<img class="inline-sticker" src="${u}">`)
+          .replace(/\n/g, '<br>')
+      },      
       // Modal: 确认修改图片地点
       openPlaceModal(type, target) {
         this.placeModalType   = type;
@@ -1146,6 +1217,26 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
     },
   
     mounted() {
+      const ctx = require.context(
+        '@/assets/stickers/原神表情', // 表情图的根目录
+        true,                        // 递归子目录
+        /\.png$/                     // 匹配所有 .png 文件
+      );
+      this.stickers = ctx.keys().map((key, idx) => ({
+        id : 'sticker-' + idx,
+        url: ctx(key)                // ctx(key) 返回图片的 URL
+      }));
+
+
+        // 点击贴图面板外部时收起
+        document.body.addEventListener('click', e => {
+          if (this.stickerPickerVisible &&
+              !e.target.closest('.sticker-picker') &&
+              !e.target.closest('.emoji-fab')) {
+            this.stickerPickerVisible = false;
+          }
+        });
+
       // 同步主题
       document.body.classList.toggle('dark', this.theme === 'dark');
 
@@ -1155,7 +1246,7 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
           p.imgPlaces = p.imgs.map(() => null);
         }
       });
-
+      
       // 全局点击：点击头像外部时收起下拉
       document.body.addEventListener('click', e => {
         // 只有下拉打开时才处理
@@ -1962,6 +2053,35 @@ body.dark .emoji-fab:hover {
 .emoji-fab svg {
   width:16px;
   height:16px;
+}
+/* === Sticker 选择面板 === */
+.sticker-picker{
+  position:absolute;
+  bottom:48px;                /* 紧贴两个圆钮上方 */
+  left:48px;
+  display:grid;
+  grid-template-columns:repeat(4,40px);
+  gap:8px;
+  padding:10px;
+  background:var(--card-light);
+  border:var(--glass-border);
+  backdrop-filter:blur(calc(var(--blur)/2));
+  border-radius:var(--radius);
+  box-shadow:0 6px 18px rgba(0,0,0,.18);
+  z-index:400;
+}
+body.dark .sticker-picker{background:var(--card-dark);}
+.sticker-picker img{
+  width:40px;height:40px;border-radius:6px;cursor:pointer;
+  transition:transform .15s;
+}
+.sticker-picker img:hover{transform:scale(1.15);}
+/* 行内贴图：跟随字体，默认≈1行文字高 */
+.inline-sticker{
+  height: 3em;          /* 高度 ≈ 一行字 */
+  width : auto;            /* 宽度等比缩放 */
+  vertical-align: -.25em;  /* 略微下沉，使中心对齐文字基线 */
+  display: inline-block;   /* 防止被视为文本行高 */
 }
 
   </style>
