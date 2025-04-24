@@ -73,6 +73,20 @@
               </svg>
               <span class="nav-label">相册</span>
             </a>
+            <!-- 投稿 -->
+            <a
+              href="#moments"
+              @click.prevent="scrollTo('moments')"
+              class="nav-item nav-item-submit"
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 11l-5 5v4h4l5-5" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 3a1.5 1.5 0 010 2.121L13.879 12.243a1.5 1.5 0 01-2.121 0L5 5.484a1.5 1.5 0 012.121-2.121l6.758 6.758a1.5 1.5 0 002.121 0L21 3z" />
+            </svg>
+
+              <span class="nav-label">投稿</span>
+            </a>            
               <!-- ① 在 data() 里新增 navDropdownVisible -->
               <div class="nav-avatar" @click="toggleNavDropdown">
                 <img
@@ -87,6 +101,7 @@
                 </div>
 
 
+
             <button class="btn-ghost" @click="toggleTheme">
               <svg v-if="theme==='light'" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg>
               <svg v-else                viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
@@ -98,27 +113,28 @@
         <section id="moments">
           <h2 class="big">投稿</h2>
           <div class="np-top">
-            <textarea
-              v-model="newPostText"
-              placeholder="说点什么…"
-              maxlength="30000"
-              @input="autoResize($event)"
-              @keydown.enter="handlePostEnter($event)"
-            ></textarea>
-  
+            <div class="np-input-wrapper">
+              <textarea
+                v-model="newPostText"
+                placeholder="说点什么…"
+                maxlength="30000"
+                @input="autoResize($event)"
+                @keydown.enter="handlePostEnter($event)"
+              ></textarea>
+               <!-- ② 新的“悬浮”上传按钮，圆形、尺寸更小 -->
+              <label class="upload-fab">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="file" accept="image/*" multiple @change="handlePostImages"/>
+              </label>
+            </div>
             <div class="np-toolbar">
-              <span class="char-count">{{ newPostText.length }}/2000</span>
+              <span class="char-count">{{ newPostText.length }}/30000</span>
               <select v-model="newPostPlace">
                 <option value="">无地点</option>
                 <option>蒙德</option><option>璃月</option><option>稻妻</option>
                 <option>须弥</option><option>枫丹</option><option>纳塔</option>
               </select>
-  
-              <label class="btn-ghost upload-btn">
-                <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input type="file" accept="image/*" multiple @change="handlePostImages"/>
-              </label>
-  
+
               <button
                 class="btn-publish"
                 @click="publishPost"
@@ -232,9 +248,9 @@
   
         </section>
   
-        <!-- ======================== 照片 ======================== -->
+        <!-- ======================== 相册 ======================== -->
         <section id="album">
-          <h2 class="big">照片</h2>
+          <h2 class="big">相册</h2>
           <div class="album-tabs">
             <button :class="{on:albumMode==='time'}"   @click="albumMode='time'">按时间</button>
             <button :class="{on:albumMode==='region'}" @click="albumMode='region'">按地区</button>
@@ -1108,20 +1124,25 @@ import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
     },
   
     mounted() {
+      // 同步主题
       document.body.classList.toggle('dark', this.theme === 'dark');
+
+      // 确保所有 post 都初始化好 imgPlaces
       this.posts.forEach(p => {
         if (!Array.isArray(p.imgPlaces) || p.imgPlaces.length !== p.imgs.length) {
           p.imgPlaces = p.imgs.map(() => null);
         }
       });
+
+      // 全局点击：点击头像外部时收起下拉
       document.body.addEventListener('click', e => {
-            // 如果点击不在头像或菜单内，就收起
-            if (!this.$el.querySelector('.nav-avatar').contains(e.target)
-                && !this.$el.querySelector('.nav-dropdown')?.contains(e.target)) {
-            this.navDropdownVisible = false;
-            }
-        });
+        // 只有下拉打开时才处理
+        if (this.navDropdownVisible && !e.target.closest('.nav-avatar')) {
+          this.navDropdownVisible = false;
+        }
+      });
     },
+
     
   };
   </script>
@@ -1847,7 +1868,44 @@ body.dark .menu .nav-item:hover {
 body.dark .nav-label {
   color: var(--text-dark);
 }
+/* 让 textarea 成为相对定位的参照物 */
+.np-input-wrapper{
+  position: relative;
+}
 
+/* 给 textarea 预留空间，避免文字被按钮盖住 */
+.np-input-wrapper textarea{
+padding-bottom: 44px;   
+
+}
+/* 圆形玻璃按钮 —— 复用 btn-ghost 的配色 */
+.upload-fab{
+  position: absolute;
+  bottom: 10px;
+  left:   10px;
+  width:  28px;          /* ← 直径调小 */
+  height: 28px;
+  border-radius: 50%;
+  background: var(--card-light);
+  border: var(--glass-border);
+  backdrop-filter: blur(calc(var(--blur)/2));
+  color: var(--text-light);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  transition: background .25s, transform .15s;
+  box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+body.dark .upload-fab{
+  background: var(--card-dark);
+  color: var(--text-dark);
+}
+
+/* hover 效果沿用 btn-ghost */
+.upload-fab:hover       { background: rgba(0,0,0,0.08); }
+body.dark .upload-fab:hover { background: rgba(255,255,255,0.12); }
+
+.upload-fab svg { width:16px; height:16px; }  /* 图标跟着缩小 */
+.upload-fab input{ display:none; }            /* 隐藏真正的 file input */
 
 
   </style>
