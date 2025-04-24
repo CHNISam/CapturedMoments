@@ -121,6 +121,7 @@
               ref="postInput"
               @input="handleInput"
               @keydown.enter.prevent="handlePostEnter"
+              data-placeholder="说点什么..."
             ></div>
 
              <!-- ② 新的“悬浮”上传按钮，圆形、尺寸更小 -->
@@ -221,6 +222,10 @@
               <div :style="{width:'34px',height:'34px',borderRadius:'50%',background:'url('+getAvatar(post.uid)+') center/cover'}"></div>
               <b>{{ getDisplayName(post.uid) }}</b>
               <span v-html="badgeHTML(post.uid)"></span>
+              <!-- 勋章后面追加日期 -->
+              <small class="post-date">
+                {{ new Date(post.ts).toLocaleDateString() }}
+              </small>
               <span class="red" v-if="!isRead(post.id)&&post.uid!==currentUser"></span>
             </div>
             <div style="display:flex;align-items:center;gap:10px;">
@@ -240,7 +245,6 @@
 
           <div class="body">
             <p v-html="renderText(post.txt)"></p>
-            <small>{{ new Date(post.ts).toLocaleDateString() }}{{ post.place?' · '+post.place:'' }}</small>
           </div>
 
           <div class="photos">
@@ -1028,6 +1032,9 @@ export default {
     },
     // ④ 把页脚文字封装成单独函数
     updateModalMeta () {
+      if (!this.modalPost) {
+        return;
+      }
       const p = this.modalPost;
       const place = p.imgPlaces?.[this.modalIndex] ?? p.place ?? '';
       const d = new Date(p.ts);
@@ -2192,6 +2199,30 @@ display: inline-block;   /* 防止被视为文本行高 */
 body.dark .ta-preview {
   background: var(--card-dark);
   color: var(--text-dark);
+}
+.ta-preview {
+  /* —— 日常字体 —— */
+  font-family: Arial, sans-serif;
+
+  position: relative;
+  pointer-events: auto;
+  z-index: 1;
+  min-height: 78px;
+  padding: 10px;
+  border-radius: var(--radius);
+  border: var(--glass-border);
+  background: var(--card-light);
+  backdrop-filter: blur(calc(var(--blur)/2));
+  white-space: pre-wrap;
+  word-break: break-word;
+  outline: none;
+}
+
+/* —— 占位文字 —— */
+.ta-preview:empty::before {
+  content: attr(data-placeholder);
+  color: #888;
+  pointer-events: none;
 }
 
 </style>
