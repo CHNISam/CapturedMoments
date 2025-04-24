@@ -13,8 +13,66 @@
         <nav>
           <div class="logo">把回忆拼好给你</div>
           <div class="menu">
-            <a href="#moments"  @click.prevent="scrollTo('moments')">动态 <span class="red" :class="{ hidden: !hasUnread }"></span></a>
-            <a href="#album"    @click.prevent="scrollTo('album')">相册</a>
+            <a
+              href="#moments"
+              @click.prevent="scrollTo('moments')"
+              class="nav-item nav-item-moments"
+            >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 21"
+              class="nav-icon"
+              fill="none"
+            >
+              <g clip-path="url(#clip0)">
+                <path
+                  d="M10 10.743C7.69883 10.743 5.83333 8.87747 5.83333 6.5763C5.83333 4.27512 7.69883 2.40964 10 2.40964V10.743Z"
+                  stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
+                />
+                <path
+                  d="M10 10.743C10 13.0441 8.1345 14.9096 5.83333 14.9096C3.53217 14.9096 1.66667 13.0441 1.66667 10.743H10Z"
+                  stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
+                />
+                <path
+                  d="M10 10.743C10 8.44182 11.8655 6.57632 14.1667 6.57632C16.4679 6.57632 18.3333 8.44182 18.3333 10.743H10Z"
+                  stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
+                />
+                <path
+                  d="M9.99999 10.743C12.3012 10.743 14.1667 12.6085 14.1667 14.9096C14.1667 17.2108 12.3012 19.0763 9.99999 19.0763V10.743Z"
+                  stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
+                />
+              </g>
+              <defs>
+                <clipPath id="clip0">
+                  <rect
+                    width="20"
+                    height="20"
+                    fill="currentColor"
+                    transform="matrix(-1 0 0 1 20 0.742981)"
+                  />
+                </clipPath>
+              </defs>
+            </svg>
+
+              <span class="nav-label">
+                动态
+                <span class="red" :class="{ hidden: !hasUnread }"></span>
+              </span>
+            </a>
+
+            <!-- 相册 -->
+            <a
+              href="#album"
+              @click.prevent="scrollTo('album')"
+              class="nav-item nav-item-album"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              <span class="nav-label">相册</span>
+            </a>
               <!-- ① 在 data() 里新增 navDropdownVisible -->
               <div class="nav-avatar" @click="toggleNavDropdown">
                 <img
@@ -1761,5 +1819,35 @@ body.dark .dropdown-item {
   color: #fff;
 }
   
-  
+.menu .nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  transition: background .25s;
+}
+.menu .nav-item:hover {
+  background: rgba(0,0,0,0.08);
+}
+body.dark .menu .nav-item:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.nav-label {
+  font-size: 12px;
+  color: var(--text-light);
+}
+body.dark .nav-label {
+  color: var(--text-dark);
+}
+
+
+
   </style>
