@@ -1,5 +1,15 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import './assets/styles.css'; // 如果你不希望分离样式，也可以将 CSS 放入 App.vue 中
+import './assets/styles.css';
 
-createApp(App).mount('#app')
+const app = createApp(App);
+
+// 判断是否是移动设备（简单基于宽度）
+app.config.globalProperties.$isMobile = window.innerWidth <= 768;
+
+// 监听窗口大小变化，动态更新
+window.addEventListener('resize', () => {
+  app.config.globalProperties.$isMobile = window.innerWidth <= 768;
+});
+
+app.mount('#app');
