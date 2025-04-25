@@ -2,20 +2,20 @@
   <transition name="fade">
     <div v-if="visible" class="modal show">
       <div class="box login-box">
-        <h3 class="login-title">登录 Captured Moments</h3>
+        <h3 class="login-title">登录 Captured Moments</h3>
         <form
           ref="loginForm"
           method="post"
           action="/login"
           autocomplete="on"
-          @submit="handleSubmit"
+          @submit.prevent="handleSubmit"
         >
           <div class="form-group">
             <input
               v-model="uid"
               name="username"
               type="text"
-              placeholder="请输入原神 UID"
+              placeholder="请输入原神 UID"
               @input="error = ''"
               autocomplete="username"
             />
@@ -47,138 +47,164 @@
 </template>
 
 <script setup>
-import { getAllowedUids } from '@/config/auth';
-import { computed, ref, watch } from 'vue';
+import { getAllowedUids } from '@/config/auth'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
 // Props & Emits
-const props = defineProps({ show: Boolean });
-const emit = defineEmits(['login-success']);
+const props = defineProps({ show: Boolean })
+const emit = defineEmits(['login-success'])
 
-// Refs
-const loginForm = ref(null);
-
-// State
-const uid = ref('');
-const password = ref('');
-const error = ref('');
-const loading = ref(false);
-const tick = ref(0);
+// Refs & state
+const loginForm = ref(null)
+const uid = ref('')
+const password = ref('')
+const error = ref('')
+const loading = ref(false)
+const tick = ref(0)
+let submitTimeout = null
 
 // Storage keys
-const hashKey = computed(() => `password_${uid.value.trim()}`);
-const saltKey = computed(() => `salt_${uid.value.trim()}`);
+const hashKey = computed(() => `password_${uid.value.trim()}`)
+const saltKey = computed(() => `salt_${uid.value.trim()}`)
 
-// Read hash & salt, force-refresh via tick
-const storedHash = computed(() => { tick.value; return localStorage.getItem(hashKey.value); });
-const storedSalt = computed(() => { tick.value; return localStorage.getItem(saltKey.value); });
+// Reactive reads (force-refresh via tick)
+const storedHash = computed(() => { tick.value; return localStorage.getItem(hashKey.value) })
+const storedSalt = computed(() => { tick.value; return localStorage.getItem(saltKey.value) })
 
 // Flags
-const isFirstLogin = computed(() => uid.value.trim() !== '' && !storedHash.value);
-const canSubmit = computed(() => uid.value.trim() !== '' && password.value.trim() !== '');
-const visible = computed(() => props.show);
+const isFirstLogin = computed(() => uid.value.trim() !== '' && !storedHash.value)
+const canSubmit = computed(() => uid.value.trim() !== '' && password.value.trim() !== '')
+const visible = computed(() => props.show)
 
 // SHA-256 helper
 async function sha256Hex(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
 }
 
 // Salted hash
 async function saltedHash(pwd, salt) {
-  const first = await sha256Hex(pwd + salt);
-  return await sha256Hex(first + salt);
+  const first = await sha256Hex(pwd + salt)
+  return await sha256Hex(first + salt)
 }
 
 // Generate or retrieve salt
 function getOrCreateSalt() {
-  let salt = localStorage.getItem(saltKey.value);
+  let salt = localStorage.getItem(saltKey.value)
   if (!salt) {
-    const arr = crypto.getRandomValues(new Uint8Array(8));
-    salt = Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
-    localStorage.setItem(saltKey.value, salt);
+    const arr = crypto.getRandomValues(new Uint8Array(8))
+    salt = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')
+    try {
+      localStorage.setItem(saltKey.value, salt)
+    } catch (err) {
+      console.error('写入 salt 失败：', err)
+    }
   }
-  return salt;
+  return salt
 }
 
 // Form submit handler
-async function handleSubmit(e) {
-  e.preventDefault();
-  error.value = '';
-  loading.value = true;
-  const id = uid.value.trim();
+async function handleSubmit() {
+  loading.value = true
 
-  if (!getAllowedUids().includes(id)) {
-    error.value = '用户不存在';
-    loading.value = false;
-    return;
-  }
+  try {
+    error.value = ''
+    const id = uid.value.trim()
 
-  const pwd = password.value;
-  const rawHash = storedHash.value;
-  const salt = storedSalt.value;
-
-  // First-time login
-  if (!rawHash) {
-    if (pwd.length < 4) {
-      error.value = '密码长度至少4位';
-      loading.value = false;
-      return;
+    if (!getAllowedUids().includes(id)) {
+      error.value = '用户不存在'
+      return
     }
-    const newSalt = getOrCreateSalt();
-    const newHash = await saltedHash(pwd, newSalt);
-    localStorage.setItem(hashKey.value, newHash);
-    tick.value++;
-  }
-  // Salted login
-  else if (salt) {
-    const check = await saltedHash(pwd, salt);
-    if (check !== rawHash) {
-      error.value = '密码不正确，请重试';
-      loading.value = false;
-      return;
-    }
-  }
-  // Legacy support
-  else {
-    let plain = null;
-    try { plain = JSON.parse(rawHash); } catch {}
-    const simple = await sha256Hex(pwd);
-    if (pwd === plain || simple === rawHash) {
-      const newSalt = getOrCreateSalt();
-      const newHash = await saltedHash(pwd, newSalt);
-      localStorage.setItem(hashKey.value, newHash);
-      tick.value++;
-    } else {
-      error.value = '密码不正确，请重试';
-      loading.value = false;
-      return;
-    }
-  }
 
-  // Save current user
-  localStorage.setItem('currentUser', JSON.stringify(id));
-  emit('login-success', id);
+    const pwd = password.value
+    const rawHash = storedHash.value
+    const salt = storedSalt.value
 
-  // Delay then submit real form to trigger browser prompt
-  setTimeout(() => {
-    if (loginForm.value && typeof loginForm.value.submit === 'function') {
-      loginForm.value.submit();
-    } else {
-      console.warn('loginForm ref not found, cannot submit form');
+    // First-time login
+    if (!rawHash) {
+      if (pwd.length < 4) {
+        error.value = '密码长度至少4位'
+        return
+      }
+      const newSalt = getOrCreateSalt()
+      const newHash = await saltedHash(pwd, newSalt)
+      try {
+        localStorage.setItem(hashKey.value, newHash)
+      } catch (err) {
+        console.error('写入密码哈希失败：', err)
+      }
+      tick.value++
     }
-  }, 100);
+    // Salted login
+    else if (salt) {
+      const check = await saltedHash(pwd, salt)
+      if (check !== rawHash) {
+        error.value = '密码不正确，请重试'
+        return
+      }
+    }
+    // Legacy support
+    else {
+      let plain = null
+      try { plain = JSON.parse(rawHash) } catch {}
+      const simple = await sha256Hex(pwd)
+      if (pwd === plain || simple === rawHash) {
+        const newSalt = getOrCreateSalt()
+        const newHash = await saltedHash(pwd, newSalt)
+        try {
+          localStorage.setItem(hashKey.value, newHash)
+        } catch (err) {
+          console.error('写入升级哈希失败：', err)
+        }
+        tick.value++
+      } else {
+        error.value = '密码不正确，请重试'
+        return
+      }
+    }
+
+    // Save current user
+    try {
+      localStorage.setItem('currentUser', id)
+    } catch (err) {
+      console.error('写入当前用户失败：', err)
+    }
+    emit('login-success', id)
+
+    // Delay then submit real form
+    submitTimeout = setTimeout(() => {
+      if (loginForm.value?.submit) {
+        loginForm.value.submit()
+      } else {
+        console.warn('loginForm ref not found，无法提交表单')
+      }
+    }, 100)
+
+  } catch (err) {
+    console.error('登录异常：', err)
+    error.value = '系统错误，请稍后重试'
+  } finally {
+    loading.value = false
+  }
 }
 
 // Reset state when modal opens
 watch(visible, v => {
   if (v) {
-    uid.value = '';
-    password.value = '';
-    error.value = '';
-    loading.value = false;
-    tick.value++;
+    uid.value = ''
+    password.value = ''
+    error.value = ''
+    loading.value = false
+    tick.value++
   }
-});
+})
+
+// Clean up pending timeout
+onBeforeUnmount(() => {
+  if (submitTimeout) clearTimeout(submitTimeout)
+})
 </script>
 
 <style scoped>
