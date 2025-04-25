@@ -922,7 +922,7 @@ export default {
         this.isListLoading = false;
         return alert('写点文字或选张图片吧~');
         }
-      const post={ id:Date.now(), uid:this.currentUser, txt, place:this.newPostPlace,imgPlaces: this.draftImgs.map(() => null), imgs:[...this.draftImgs], ts:Date.now(), views:0, cmts:[] };
+      const post={ id:crypto.randomUUID(), uid:this.currentUser, txt, place:this.newPostPlace,imgPlaces: this.draftImgs.map(() => null), imgs:[...this.draftImgs], ts:Date.now(), views:0, cmts:[] };
 
       this.posts.unshift(post);
       localStorage.setItem('posts', JSON.stringify(this.posts.map(p=>({...p,imgs:[]}))));
