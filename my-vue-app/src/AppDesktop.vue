@@ -123,6 +123,7 @@
               @keyup="saveCaret"
               @mouseup="saveCaret"
               @keydown.enter.prevent="handlePostEnter"
+              @keydown="handleKeydown"
               data-placeholder="说点什么..."
             ></div>
 
@@ -1005,6 +1006,49 @@ export default {
         .replace(/!\[\]\((.+?)\)/g, (_, u) => `<img class="inline-sticker" src="${u}">`)
         .replace(/\n/g, '<br>')
     },      
+
+    handleKeydown(event) {
+      if (event.key !== 'Backspace') return;
+      const sel = window.getSelection();
+      if (!sel || !sel.rangeCount) return;
+
+      const range = sel.getRangeAt(0);
+      if (!range.collapsed) return;
+
+      let nodeBefore;
+      const { startContainer, startOffset } = range;
+
+      // 如果光标在文本节点开头，检查前一个兄弟节点
+      if (startContainer.nodeType === Node.TEXT_NODE && startOffset === 0) {
+        nodeBefore = startContainer.previousSibling;
+      }
+      // 如果光标在元素节点中，检查 startOffset 前的子节点
+      else if (startContainer.nodeType === Node.ELEMENT_NODE && startOffset > 0) {
+        nodeBefore = startContainer.childNodes[startOffset - 1];
+      }
+
+      // 检查是否是贴图 IMG，并执行删除
+      if (
+        nodeBefore &&
+        nodeBefore.nodeType === Node.ELEMENT_NODE &&
+        nodeBefore.tagName === 'IMG' &&
+        nodeBefore.classList.contains('inline-sticker')
+      ) {
+        event.preventDefault();
+        nodeBefore.remove(); // 删除该 IMG
+
+        // 将光标设置到原位置
+        const newRange = document.createRange();
+        newRange.setStart(startContainer, startOffset - 1);
+        newRange.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+
+        // 触发输入处理，更新 markdown 内容
+        this.handleInput({ target: this.$refs.postInput });
+      }
+    },
+
     // Modal: 确认修改图片地点
     openPlaceModal(type, target) {
       this.placeModalType   = type;
