@@ -849,12 +849,14 @@ export default {
   },
 
     scrollTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); },
-    getAvatar(uid) {
-      // 先试试响应式的 avatarMap
-      return this.avatarMap[uid]
-          // 如果没这个 key，再回退到 placeholder
-          || 'https://placehold.co/60'
+    getAvatar(uid){
+      if (!this.avatarMap[uid]){
+        this.$set(this.avatarMap, uid,
+          localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60');
+      }
+      return this.avatarMap[uid];
     },
+
 
     getDisplayName(uid){
       if (uid === this.currentUser) {
@@ -933,7 +935,10 @@ export default {
       this.draftImgs = [];
 
       // 手动清空 contenteditable 区域，否则 Vue 不会重绘
-      this.$refs.postInput.innerHTML = '';
+      if (this.$refs.postInput) {
+        this.$refs.postInput.innerHTML = '';
+      }
+
 
 
       setTimeout(() => {
@@ -1062,7 +1067,7 @@ export default {
 
         // 将光标设置到原位置
         const newRange = document.createRange();
-        newRange.setStart(startContainer, startOffset - 1);
+        newRange.setStart(startContainer, Math.max(0, startOffset - 1));
         newRange.collapse(true);
         sel.removeAllRanges();
         sel.addRange(newRange);
