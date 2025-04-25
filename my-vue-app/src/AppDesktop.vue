@@ -851,8 +851,7 @@ export default {
     scrollTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); },
     getAvatar(uid){
       if (!this.avatarMap[uid]){
-        this.$set(this.avatarMap, uid,
-          localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60');
+        this.avatarMap[uid] = localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60';
       }
       return this.avatarMap[uid];
     },

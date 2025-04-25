@@ -64,51 +64,55 @@ const tick = ref(0)
 let submitTimeout = null
 
 // Storage keys
-const hashKey = computed(() => `password_${uid.value.trim()}`)
-const saltKey = computed(() => `salt_${uid.value.trim()}`)
+const credKey = computed(() => `cred_${uid.value.trim()}`)
+const failKey = computed(() => `fail_${uid.value.trim()}`)
+const MAX_FAIL = 10
 
-// Reactive reads (force-refresh via tick)
-const storedHash = computed(() => { tick.value; return localStorage.getItem(hashKey.value) })
-const storedSalt = computed(() => { tick.value; return localStorage.getItem(saltKey.value) })
+// Reactive read
+const storedCred = computed(() => {
+  tick.value
+  return JSON.parse(localStorage.getItem(credKey.value) || 'null')
+})
 
 // Flags
-const isFirstLogin = computed(() => uid.value.trim() !== '' && !storedHash.value)
+const isFirstLogin = computed(() => uid.value.trim() !== '' && !storedCred.value)
 const canSubmit = computed(() => uid.value.trim() !== '' && password.value.trim() !== '')
 const visible = computed(() => props.show)
 
-// SHA-256 helper
-async function sha256Hex(str) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str))
-  return Array.from(new Uint8Array(buf))
+// PBKDF2 helper
+async function pbkdf2Hash(pwd, salt, iter = 100000) {
+  const enc = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw', enc.encode(pwd), { name: 'PBKDF2' }, false, ['deriveBits']
+  )
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: enc.encode(salt), iterations: iter, hash: 'SHA-256' },
+    key, 256
+  )
+  return Array.from(new Uint8Array(bits))
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
 }
 
-// Salted hash
-async function saltedHash(pwd, salt) {
-  const first = await sha256Hex(pwd + salt)
-  return await sha256Hex(first + salt)
-}
-
-// Generate or retrieve salt
-function getOrCreateSalt() {
-  let salt = localStorage.getItem(saltKey.value)
-  if (!salt) {
-    const arr = crypto.getRandomValues(new Uint8Array(8))
-    salt = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')
-    try {
-      localStorage.setItem(saltKey.value, salt)
-    } catch (err) {
-      console.error('写入 salt 失败：', err)
-    }
+// constant‑time hex compare
+function equalTiming(aHex, bHex) {
+  if (aHex.length !== bHex.length) return false
+  let diff = 0
+  for (let i = 0; i < aHex.length; i++) {
+    diff |= aHex.charCodeAt(i) ^ bHex.charCodeAt(i)
   }
-  return salt
+  return diff === 0
 }
 
-// Form submit handler
+// Generate random salt
+function createSalt() {
+  const arr = crypto.getRandomValues(new Uint8Array(8))
+  return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')
+}
+
+// Form submit
 async function handleSubmit() {
   loading.value = true
-
   try {
     error.value = ''
     const id = uid.value.trim()
@@ -118,70 +122,47 @@ async function handleSubmit() {
       return
     }
 
-    const pwd = password.value
-    const rawHash = storedHash.value
-    const salt = storedSalt.value
+    // brute‑force lock
+    let fails = Number(sessionStorage.getItem(failKey.value) || 0)
+    if (fails >= MAX_FAIL) {
+      error.value = '尝试过多，请稍后再试'
+      return
+    }
 
-    // First-time login
-    if (!rawHash) {
+    const pwd = password.value
+    const cred = storedCred.value
+
+    // first login
+    if (!cred) {
       if (pwd.length < 4) {
         error.value = '密码长度至少4位'
         return
       }
-      const newSalt = getOrCreateSalt()
-      const newHash = await saltedHash(pwd, newSalt)
-      try {
-        localStorage.setItem(hashKey.value, newHash)
-      } catch (err) {
-        console.error('写入密码哈希失败：', err)
-      }
+      const salt = createSalt()
+      const hash = await pbkdf2Hash(pwd, salt)
+      localStorage.setItem(credKey.value, JSON.stringify({ hash, salt, iter: 100000 }))
       tick.value++
-    }
-    // Salted login
-    else if (salt) {
-      const check = await saltedHash(pwd, salt)
-      if (check !== rawHash) {
+    } else {
+      const { hash, salt, iter = 100000 } = cred
+      const calc = await pbkdf2Hash(pwd, salt, iter)
+      if (!equalTiming(calc, hash)) {
+        sessionStorage.setItem(failKey.value, ++fails)
         error.value = '密码不正确，请重试'
         return
       }
-    }
-    // Legacy support
-    else {
-      let plain = null
-      try { plain = JSON.parse(rawHash) } catch {}
-      const simple = await sha256Hex(pwd)
-      if (pwd === plain || simple === rawHash) {
-        const newSalt = getOrCreateSalt()
-        const newHash = await saltedHash(pwd, newSalt)
-        try {
-          localStorage.setItem(hashKey.value, newHash)
-        } catch (err) {
-          console.error('写入升级哈希失败：', err)
-        }
-        tick.value++
-      } else {
-        error.value = '密码不正确，请重试'
-        return
-      }
+      sessionStorage.removeItem(failKey.value)
     }
 
-    // Save current user
-    try {
-      localStorage.setItem('currentUser', id)
-    } catch (err) {
-      console.error('写入当前用户失败：', err)
-    }
+    // save current user to sessionStorage
+    sessionStorage.setItem('currentUser', id)
     emit('login-success', id)
 
-    // Delay then submit real form
-    submitTimeout = setTimeout(() => {
-      if (loginForm.value?.submit) {
-        loginForm.value.submit()
-      } else {
-        console.warn('loginForm ref not found，无法提交表单')
-      }
-    }, 100)
+    // clear plaintext
+    password.value = ''
 
+    submitTimeout = setTimeout(() => {
+      loginForm.value?.submit?.()
+    }, 100)
   } catch (err) {
     console.error('登录异常：', err)
     error.value = '系统错误，请稍后重试'
@@ -201,7 +182,7 @@ watch(visible, v => {
   }
 })
 
-// Clean up pending timeout
+// Clean up
 onBeforeUnmount(() => {
   if (submitTimeout) clearTimeout(submitTimeout)
 })
