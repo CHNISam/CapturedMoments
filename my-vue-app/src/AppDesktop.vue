@@ -612,7 +612,7 @@ export default {
       loadStep: 5,     // 每次点击再加载 5 条
 
       /* 评论 */
-      localDisplayName: '',
+      // localDisplayName: localStorage.getItem('displayName_' + (storedUser || '')) || '',
       newComment: {},
 
       /* Modals */
@@ -812,6 +812,29 @@ export default {
       const date = d.toLocaleDateString();      // 本地化日期
       const time = d.toLocaleTimeString();      // 本地化时分秒
       return `${date} ${time}${post.place ? ' · ' + post.place : ''}`;
+    },
+
+    // —— 关闭贴图面板 —— //
+    handleClickToCloseSticker(e) {
+      if (this.stickerPickerVisible &&
+          !e.target.closest('.sticker-picker') &&
+          !e.target.closest('.emoji-fab')) {
+        this.stickerPickerVisible = false;
+      }
+    },
+
+    // —— 关闭头像下拉 —— //
+    handleClickToCloseNavDropdown(e) {
+      if (this.navDropdownVisible &&
+          !e.target.closest('.nav-avatar')) {
+        this.navDropdownVisible = false;
+      }
+    },
+
+    // —— 全局点击统一入口 —— //
+    handleGlobalClick(e) {
+      this.handleClickToCloseSticker(e);
+      this.handleClickToCloseNavDropdown(e);
     },
 
     badgeHTML(uid) {
@@ -1376,14 +1399,8 @@ export default {
     }));
 
 
-      // 点击贴图面板外部时收起
-      document.body.addEventListener('click', e => {
-        if (this.stickerPickerVisible &&
-            !e.target.closest('.sticker-picker') &&
-            !e.target.closest('.emoji-fab')) {
-          this.stickerPickerVisible = false;
-        }
-      });
+  // ✅ 统一绑定全局点击事件（只注册一次）
+  document.addEventListener('click', this.handleGlobalClick);
 
     // 同步主题
     document.body.classList.toggle('dark', this.theme === 'dark');
@@ -1395,15 +1412,11 @@ export default {
       }
     });
     
-    // 全局点击：点击头像外部时收起下拉
-    document.body.addEventListener('click', e => {
-      // 只有下拉打开时才处理
-      if (this.navDropdownVisible && !e.target.closest('.nav-avatar')) {
-        this.navDropdownVisible = false;
-      }
-    });
-  },
 
+  },
+  beforeUnmount() {
+    document.removeEventListener('click', this.handleGlobalClick);
+  },
   
 };
 </script>
