@@ -94,7 +94,7 @@ async function pbkdf2Hash(pwd, salt, iter = 100000) {
     .join('')
 }
 
-// constant‑time hex compare
+// constant-time hex compare
 function equalTiming(aHex, bHex) {
   if (aHex.length !== bHex.length) return false
   let diff = 0
@@ -122,7 +122,7 @@ async function handleSubmit() {
       return
     }
 
-    // brute‑force lock
+    // brute-force lock
     let fails = Number(sessionStorage.getItem(failKey.value) || 0)
     if (fails >= MAX_FAIL) {
       error.value = '尝试过多，请稍后再试'
@@ -189,39 +189,116 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.login-box { overflow: visible; }
-.login-box::-webkit-scrollbar { display: none; }
+/* 模态遮罩 & 居中 */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background-color: rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+  z-index: 1000;
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
+/* 登录框 */
 .login-box {
-  width: 90%; max-width: 360px;
-  margin: 0 auto; padding: 24px;
+  width: 90%;
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 24px;
   text-align: center;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
-.login-title { margin-bottom:20px; font-size:20px; font-weight:600; }
-.form-group { margin-bottom:16px; }
+
+/* 标题与表单项 */
+.login-title {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+}
+.form-group {
+  margin-bottom: 16px;
+}
 input {
-  width:100%; height:44px; padding:0 12px;
-  border:1px solid #ccc; border-radius:8px;
-  font-size:14px;
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
 }
-input:focus { outline:none; border-color:var(--primary); }
-.error-msg { color:#e00; font-size:13px; margin-bottom:12px; text-align:left; }
+input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.error-msg {
+  color: #e00;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+/* 按钮 */
 .btn-publish {
-  width:100%; height:48px;
-  background:var(--primary); color:#fff;
-  border:none; border-radius:8px;
-  font-size:15px; cursor:pointer;
+  width: 100%;
+  height: 48px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
   transition: transform 0.1s;
 }
-.btn-publish:disabled { opacity:0.6; cursor:not-allowed; }
-.btn-publish:not(:disabled):hover { transform: translateY(-1px); }
-@media (max-width:480px) {
-  .login-box { padding:16px; }
-  input { height:42px; font-size:13px; }
-  .btn-publish { height:44px; font-size:14px; }
+.btn-publish:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-publish:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+/* 大屏（PC）优化 */
+@media (min-width: 768px) {
+  .login-box {
+    max-width: 400px;
+    padding: 32px;
+  }
+  input {
+    height: 48px;
+    font-size: 15px;
+  }
+  .btn-publish {
+    height: 52px;
+    font-size: 16px;
+  }
+}
+
+/* 小屏（移动端）微调 */
+@media (max-width: 480px) {
+  .login-box {
+    padding: 16px;
+  }
+  input {
+    height: 42px;
+    font-size: 13px;
+  }
+  .btn-publish {
+    height: 44px;
+    font-size: 14px;
+  }
 }
 </style>
