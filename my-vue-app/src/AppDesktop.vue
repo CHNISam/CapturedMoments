@@ -262,14 +262,30 @@
                 <transition
                   name="options-pop"
                 >
-                  <div v-if="postOptionsPost===post" class="post-options">
-                    <button @click="openPlaceModal('post', post)">编辑地点</button>
-                    <button @click="deletePost(post)" class="trash-btn">
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </button>
+                <div v-if="postOptionsPost===post" class="post-options">
+                      <button 
+                        class="edit-place-btn" 
+                        @click="openPlaceModal('post', post)"
+                      >
+                        <!-- Location Marker 图标 -->
+                        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linejoin="round">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                          <circle cx="12" cy="9" r="2.5"/>
+                        </svg>
+                      </button>
+
+                      <button 
+                        class="trash-btn" 
+                        @click="deletePost(post)"
+                      >
+                        <!-- 这里是你的删除图标 -->
+                        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M3 6h18" />
+                          <path d="M9 6v12" />
+                          <path d="M15 6v12" />
+                          <path d="M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6" />
+                        </svg>
+                      </button>
                   </div>
                 </transition>
               </div>
@@ -539,7 +555,13 @@
             <!-- Modal 图片操作菜单 -->
             <transition name="options-pop">
               <div v-if="showImageOptions" class="modal-options">
-                <button @click="openPlaceModal('image', modalPost)">编辑地点</button>
+                <button class="edit-place-btn" @click="openPlaceModal('image', modalPost)">
+                   <!-- Location Marker 图标 -->
+                   <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linejoin="round">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                    <circle cx="12" cy="9" r="2.5"/>
+                  </svg>
+                </button>
               </div>
             </transition>
             <div class="slider-content">
@@ -1697,6 +1719,32 @@ body.dark .post-options { background: var(--card-dark); }
   margin: 0 auto;
   padding: 24px; /* 更舒适的PC内边距 */
 }
+.post-options .edit-place-btn {
+  /* same “glass” button look as .trash-btn */
+  background: rgba(120, 120, 120, 0.15);
+  border: 1px solid rgba(200, 200, 200, 0.4);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 6px rgba(120, 120, 120, 0.6);
+  cursor: pointer;
+  transition: transform .1s, box-shadow .2s, background .2s;
+}
+.post-options .edit-place-btn:hover {
+  background: rgba(120, 120, 120, 0.25);
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(120, 120, 120, 0.8);
+}
+/* make the SVG inside fill currentColor & size nicely */
+.post-options .edit-place-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
 
 
 
@@ -2572,5 +2620,26 @@ body.dark legend {
 .options-pop-enter-to,
 .options-pop-leave-from { transform: translateY(0) scale(1); opacity: 1; }
 
+.modal-options .edit-place-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(120, 120, 120, 0.15);
+  border: 1px solid rgba(200, 200, 200, 0.4);
+  width: auto;
+  padding: 6px 10px;
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+}
+.modal-options .edit-place-btn:hover {
+  background: rgba(120, 120, 120, 0.25);
+  transform: scale(1.1);
+}
+.modal-options .edit-place-btn svg {
+  width: 16px;
+  height: 16px;
+}
 
 </style>
