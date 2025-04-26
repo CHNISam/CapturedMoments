@@ -257,15 +257,21 @@
               <span style="font-size:12px">
                 {{ new Date(post.ts).toLocaleTimeString() }}<span v-if="post.place"> · {{ post.place }}</span>
               </span>
-              <span   v-if="post.uid === currentUser || currentUser === '217122260'" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
-              <div v-if="postOptionsPost===post" class="post-options">
-                <button @click="openPlaceModal('post', post)">编辑地点</button>
-                <button @click="deletePost(post)" class="trash-btn">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
+              <div class="more-wrapper">
+                <span   v-if="post.uid === currentUser || currentUser === '217122260'" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
+                <transition
+                  name="options-pop"
+                >
+                  <div v-if="postOptionsPost===post" class="post-options">
+                    <button @click="openPlaceModal('post', post)">编辑地点</button>
+                    <button @click="deletePost(post)" class="trash-btn">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                </transition>
               </div>
             </div>
           </div>
@@ -511,84 +517,86 @@
       </div>
 
       <!-- 图片 Slider Modal -->
-      <div v-if="showModal" class="modal show slider-modal" @click.self="closeInfoSidebar">
-        <div class="box">
-          <span class="close" @click="closeModal">×</span>
-          <!-- Modal 图片菜单按钮 -->
-          <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
-          <!-- Modal 信息按钮 -->
-          <span
-            class="info-btn"
-            @click="toggleInfoSidebar"
-            :aria-label="showInfoSidebar ? '收起信息' : '查看信息'"
-          >
-            <!-- 圆圈里的 i，和 iOS 类似 -->
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-              <line   x1="12" y1="8"  x2="12" y2="8"  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <line   x1="12" y1="11" x2="12" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </span>
-
-          <!-- Modal 图片操作菜单 -->
-          <div v-if="showImageOptions" class="modal-options">
-            <button @click="openPlaceModal('image', modalPost)">编辑地点</button>
-          </div>
-          <div class="slider-content">
-            <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
-            <!-- 桌面鼠标滚轮 -->
-            <img
-              class="slider-img"
-              :src="modalImgs[modalIndex]"
-              :style="{ transform: 'scale(' + modalZoom + ')', transition: 'transform .15s' }"
-              @load="handleImgLoad"
-              @wheel.prevent="onWheelZoom"
-            />
-
-            <button class="slider-btn right" @click="nextModalImg" :disabled="modalIndex===modalImgs.length-1">›</button>
-          </div>
-          <!-- 新增：固定在右下角的删除按钮 -->
-          <button class="modal-delete-btn" @click="deleteImage()">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <!-- 缩放条 + 放大镜 -->
-          <div class="zoom-control">
-            <svg class="zoom-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
-              <line   x1="16" y1="16" x2="22" y2="22" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round"/>
-            </svg>
-            <input
-              type="range"
-              :min="minZoom"
-              :max="maxZoom"
-              step="0.1"
-              v-model.number="modalZoom"
-            />
-          </div>
-          <!-- 侧边栏：照片信息 -->
-          <transition name="sidebar-slide">
-            <div
-              v-if="showInfoSidebar"
-              class="info-sidebar"
+        <div v-if="showModal" class="modal show slider-modal" @click.self="closeInfoSidebar">
+          <div class="box">
+            <span class="close" @click="closeModal">×</span>
+            <!-- Modal 图片菜单按钮 -->
+            <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
+            <!-- Modal 信息按钮 -->
+            <span
+              class="info-btn"
+              @click="toggleInfoSidebar"
+              :aria-label="showInfoSidebar ? '收起信息' : '查看信息'"
             >
-              <p><b>尺寸：</b>{{ infoSize }}</p>
-              <p>
-                <b>地点：</b>
-                {{ modalPost.imgPlaces[modalIndex] || modalPost.place || '未知' }}
-              </p>
-              <p><b>日期：</b>{{ new Date(modalPost.ts).toLocaleString() }}</p>
+              <!-- 圆圈里的 i，和 iOS 类似 -->
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+                <line   x1="12" y1="8"  x2="12" y2="8"  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line   x1="12" y1="11" x2="12" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+
+            <!-- Modal 图片操作菜单 -->
+            <transition name="options-pop">
+              <div v-if="showImageOptions" class="modal-options">
+                <button @click="openPlaceModal('image', modalPost)">编辑地点</button>
+              </div>
+            </transition>
+            <div class="slider-content">
+              <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
+              <!-- 桌面鼠标滚轮 -->
+              <img
+                class="slider-img"
+                :src="modalImgs[modalIndex]"
+                :style="{ transform: 'scale(' + modalZoom + ')', transition: 'transform .15s' }"
+                @load="handleImgLoad"
+                @wheel.prevent="onWheelZoom"
+              />
+
+              <button class="slider-btn right" @click="nextModalImg" :disabled="modalIndex===modalImgs.length-1">›</button>
             </div>
-          </transition>
-                    
-          <div class="modal-meta">
-            {{ modalIndex + 1 }} / {{ modalImgs.length }}
+            <!-- 新增：固定在右下角的删除按钮 -->
+            <button class="modal-delete-btn" @click="deleteImage()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <!-- 缩放条 + 放大镜 -->
+            <div class="zoom-control">
+              <svg class="zoom-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+                <line   x1="16" y1="16" x2="22" y2="22" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round"/>
+              </svg>
+              <input
+                type="range"
+                :min="minZoom"
+                :max="maxZoom"
+                step="0.1"
+                v-model.number="modalZoom"
+              />
+            </div>
+            <!-- 侧边栏：照片信息 -->
+            <transition name="sidebar-slide">
+              <div
+                v-if="showInfoSidebar"
+                class="info-sidebar"
+              >
+                <p><b>尺寸：</b>{{ infoSize }}</p>
+                <p>
+                  <b>地点：</b>
+                  {{ modalPost.imgPlaces[modalIndex] || modalPost.place || '未知' }}
+                </p>
+                <p><b>日期：</b>{{ new Date(modalPost.ts).toLocaleString() }}</p>
+              </div>
+            </transition>
+                      
+            <div class="modal-meta">
+              {{ modalIndex + 1 }} / {{ modalImgs.length }}
+            </div>
           </div>
         </div>
-      </div>
       <!-- 编辑地点 Modal -->
       <div v-if="showPlaceModal" class="modal show">
         <div class="box" style="max-width:320px;padding:16px;position:relative;">
@@ -1663,11 +1671,23 @@ body.dark .np-top textarea{background:var(--card-dark);color:var(--text-dark)}
 .actions svg{width:18px;height:18px;fill:currentColor}
 .more{cursor:pointer;font-size:18px;padding:2px 6px;border-radius:50%;transition:.2s background}
 .more:hover{background:rgba(0,0,0,0.08)}
+.post .head {
+  position: relative;
+}
+.post .more {
+  position: relative;
+  z-index: 101;           /* 略高于 .post-options */
+}
 .post-options {
-  position: absolute; top: 40px; right: 22px;
+  position: absolute; top: calc(100% + 4px); left: 0;
   background: var(--card-light); padding:4px; border-radius:6px;
   backdrop-filter: blur(calc(var(--blur)/2));
-  display:flex; flex-direction:column;
+  display:flex; flex-direction:column; z-index: 100; 
+  min-width: max-content;  
+}
+.more-wrapper {
+  position: relative;
+  display: inline-block;  /* 让宽度包裹按钮 */
 }
 body.dark .post-options { background: var(--card-dark); }
 .post-options button { background:none; border:none; cursor:pointer; text-align:left; padding:4px 8px;}
@@ -2544,6 +2564,13 @@ body.dark legend {
 .overlay-count {
   line-height: 1; /* 让数字垂直居中 */
 }
+
+.options-pop-enter-active { transition: transform .18s ease-out, opacity .18s ease-out; }
+.options-pop-leave-active { transition: transform .14s ease-in, opacity .14s ease-in; }
+.options-pop-enter-from,
+.options-pop-leave-to { transform: translateY(-8px) scale(0.95); opacity: 0; }
+.options-pop-enter-to,
+.options-pop-leave-from { transform: translateY(0) scale(1); opacity: 1; }
 
 
 </style>
