@@ -275,13 +275,24 @@
           </div>
 
           <div class="photos">
-            <img
-              v-for="(img,i) in post.imgs"
+            <div 
+              v-for="(img, i) in post.imgs.slice(0, 3)" 
               :key="i"
-              :src="img"
+              class="thumb"
               @click="openModal(post, i)"
-            />
+            >
+              <img :src="img" alt="" />
+            </div>
+            <div 
+              v-if="post.imgs.length > 3" 
+              class="thumb more-count"
+              @click="openModal(post, 3)"
+            >
+              +{{ post.imgs.length - 3 }}
+            </div>
           </div>
+
+
 
           <div class="actions">
             <!-- 观看次数图标 -->
@@ -2465,5 +2476,42 @@ legend {
 body.dark legend {
   border-color: rgba(255,255,255,0.2);
 }
+
+
+.photos {
+  display: flex;
+  gap: 12px;               /* 一致的间距 */
+}
+
+.photos .thumb {
+  width: 120px;           /* 固定宽度 */
+  aspect-ratio: 4 / 3;    /* 设定 4:3 的长宽比 */
+  object-fit: cover;
+  object-position: center;
+}
+
+.photos .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;       /* 中心裁切，保持填满 */
+  object-position: center; /* 聚焦中间 */
+  display: block;
+}
+
+/* “+N” 样式 */
+.photos .more-count {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%);
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  transition: background .2s;
+}
+.photos .more-count:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
 
 </style>
