@@ -415,69 +415,134 @@
       <section id="settings">
         <h2 class="big">设置</h2>
         <div class="card">
-          <fieldset>
-            <legend>外观</legend>
-            <div class="setting-item">
-              <span>暗黑模式</span><input type="checkbox" :checked="theme==='dark'" @change="toggleTheme"/>
-            </div>
-            <div class="setting-item">
-              <span>上传背景</span>
-              <label class="btn-ghost upload-btn">
-                <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
-                <input type="file" accept="image/*" @change="changeBackground"/>
-              </label>
-            </div>
-            <div class="setting-item"><span>背景透明度</span><input type="range" min="0" max="1" step="0.05" v-model.number="bgOpacity"/></div>
-            <div class="setting-item"><span>背景模糊</span><input type="range" min="0" max="20" step="1" v-model.number="bgBlur"/></div>
-          </fieldset>
-
-          <fieldset>
-            <legend>桌宠 / LLM</legend>
-            <div class="setting-item"><span>显示桌宠</span><input type="checkbox" v-model="petEnabled"/></div>
-            <div class="setting-item"><span>桌宠类型</span>
-              <select v-model="petType">
-                <option value="cat">猫娘</option><option value="bird">魈鸟</option>
-              </select>
-            </div>
-            <div class="setting-item"><span>启用 LLM</span><input type="checkbox" v-model="llmEnabled"/></div>
-            <div class="setting-item"><span>桌宠 Prompt</span><input v-model="petPrompt"/></div>
-          </fieldset>
-
-          <fieldset>
-            <legend>账户</legend>
-            <div class="setting-item">
-              <span>头像</span>
-              <div class="avatar-group">
-                <label class="btn-ghost upload-btn">
-                  <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
-                  <input type="file" accept="image/*" @change="changeAvatar"/>
-                </label>
-                <img 
-                  :src="getAvatar(currentUser)"
-                  alt="Avatar" 
-                  style="width:40px;height:40px;border-radius:50%;"/>
+          <!-- 外观 Accordion -->
+          <fieldset class="accordion">
+            <legend @click="collapsedSections.appearance = !collapsedSections.appearance">
+              <span>背景设置</span>
+              <svg class="accordion-icon" viewBox="0 0 24 24">
+                <path v-if="collapsedSections.appearance" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </legend>
+            <transition name="accordion">
+              <div v-show="!collapsedSections.appearance" class="accordion-content">
+                <div class="setting-item">
+                  <span>暗黑模式</span>
+                  <input type="checkbox" :checked="theme==='dark'" @change="toggleTheme"/>
+                </div>
+                <div class="setting-item">
+                  <span>上传背景</span>
+                  <label class="btn-ghost upload-btn">
+                    <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
+                    <input type="file" accept="image/*" @change="changeBackground"/>
+                  </label>
+                </div>
+                <div class="setting-item">
+                  <span>移除背景</span>
+                  <button class="btn-ghost" @click="clearBackground">移除背景</button>
+                </div>
+                <div class="setting-item">
+                  <span>背景透明度</span>
+                  <input type="range" min="0" max="1" step="0.05" v-model.number="bgOpacity"/>
+                </div>
+                <div class="setting-item">
+                  <span>背景模糊</span>
+                  <input type="range" min="0" max="20" step="1" v-model.number="bgBlur"/>
+                </div>
               </div>
-            </div>
-            <div class="setting-item"><span>我的昵称</span><input type="text" v-model="localDisplayName" @input="updateDisplayName"/></div>
-            <div class="setting-item"><span>更改密码</span><button class="btn-ghost" @click="openPasswordModal">更改密码</button></div>
+            </transition>
           </fieldset>
 
-          <fieldset id="badge-field">
-            <legend>勋章</legend>
-            <div class="setting-item" style="flex-direction:row;align-items:center;">
-              <button class="btn-ghost" @click="openBadgeModal">更换勋章</button>
-            </div>
+          <!-- 桌宠 / LLM Accordion -->
+          <fieldset class="accordion">
+            <legend @click="collapsedSections.pet = !collapsedSections.pet">
+              <span>桌宠 / AI</span>
+              <svg class="accordion-icon" viewBox="0 0 24 24">
+                <path v-if="collapsedSections.pet" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </legend>
+            <transition name="accordion">
+              <div v-show="!collapsedSections.pet" class="accordion-content">
+                <div class="setting-item"><span>显示桌宠</span><input type="checkbox" v-model="petEnabled"/></div>
+                <div class="setting-item"><span>桌宠类型</span>
+                  <select v-model="petType">
+                    <option value="cat">猫娘</option>
+                    <option value="bird">魈鸟</option>
+                  </select>
+                </div>
+                <div class="setting-item"><span>启用 LLM</span><input type="checkbox" v-model="llmEnabled"/></div>
+                <div class="setting-item"><span>桌宠 Prompt</span><input v-model="petPrompt"/></div>
+              </div>
+            </transition>
           </fieldset>
-          <fieldset>
-          <legend>上传偏好</legend>
-          <div class="setting-item">
-            <span>图片插入方式</span>
-            <select v-model="imageInsertMode" @change="saveImageInsertMode">
-              <option value="preview">预览区</option>
-              <option value="inline">正文</option>
-            </select>
-          </div>
-        </fieldset>
+
+          <!-- 账户 Accordion -->
+          <fieldset class="accordion">
+            <legend @click="collapsedSections.account = !collapsedSections.account">
+              <span>账户</span>
+              <svg class="accordion-icon" viewBox="0 0 24 24">
+                <path v-if="collapsedSections.account" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </legend>
+            <transition name="accordion">
+              <div v-show="!collapsedSections.account" class="accordion-content">
+                <div class="setting-item">
+                  <span>头像</span>
+                  <div class="avatar-group">
+                    <label class="btn-ghost upload-btn">
+                      <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
+                      <input type="file" accept="image/*" @change="changeAvatar"/>
+                    </label>
+                    <img :src="getAvatar(currentUser)" alt="Avatar" class="avatar-img"/>
+                  </div>
+                </div>
+                <div class="setting-item"><span>我的昵称</span><input type="text" v-model="localDisplayName" @input="updateDisplayName"/></div>
+                <div class="setting-item"><span>更改密码</span><button class="btn-ghost" @click="openPasswordModal">更改密码</button></div>
+              </div>
+            </transition>
+          </fieldset>
+
+          <!-- 勋章 Accordion -->
+          <fieldset class="accordion">
+            <legend @click="collapsedSections.badge = !collapsedSections.badge">
+              <span>勋章</span>
+              <svg class="accordion-icon" viewBox="0 0 24 24">
+                <path v-if="collapsedSections.badge" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </legend>
+            <transition name="accordion">
+              <div v-show="!collapsedSections.badge" class="accordion-content">
+                <div class="setting-item">
+                  <button class="btn-ghost" @click="openBadgeModal">更换勋章</button>
+                </div>
+              </div>
+            </transition>
+          </fieldset>
+
+          <!-- 上传偏好 Accordion -->
+          <fieldset class="accordion">
+            <legend @click="collapsedSections.uploadPref = !collapsedSections.uploadPref">
+              <span>上传偏好</span>
+              <svg class="accordion-icon" viewBox="0 0 24 24">
+                <path v-if="collapsedSections.uploadPref" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+            </legend>
+            <transition name="accordion">
+              <div v-show="!collapsedSections.uploadPref" class="accordion-content">
+                <div class="setting-item">
+                  <span>图片插入方式</span>
+                  <select v-model="imageInsertMode" @change="saveImageInsertMode">
+                    <option value="preview">预览区</option>
+                    <option value="inline">正文</option>
+                  </select>
+                </div>
+              </div>
+            </transition>
+          </fieldset>
 
           <!-- —— Admin 管理面板 —— -->
           <fieldset v-if="currentUser === '217122260'">
@@ -739,6 +804,14 @@ export default {
       maxZoom : 3,           // 上限
 
       /* 设置 */
+      collapsedSections: {
+        appearance: true,
+        pet: true,
+        account: true,
+        badge: true,
+        uploadPref: true,
+        admin: true,
+      },
       petEnabled: true,
       petType: 'cat',
       llmEnabled: true,
@@ -1396,6 +1469,11 @@ export default {
       const r=new FileReader();
       r.onload=ev=>{ this.bgSrc=ev.target.result; localStorage.setItem('bgSrc', this.bgSrc); };
       r.readAsDataURL(f);
+    },
+
+    clearBackground() {
+      this.bgSrc = '';
+      localStorage.removeItem('bgSrc');
     },
     saveBgOpacity(){ localStorage.setItem('bgOpacity', this.bgOpacity); },
     saveBgBlur(){ localStorage.setItem('bgBlur', this.bgBlur); },
@@ -2640,6 +2718,36 @@ body.dark legend {
 .modal-options .edit-place-btn svg {
   width: 16px;
   height: 16px;
+}
+/* 折叠过渡 */
+.accordion-content {
+  overflow: hidden;
+}
+.accordion-enter-active,
+.accordion-leave-active {
+  transition: max-height .25s ease, opacity .25s ease;
+}
+.accordion-enter-from,
+.accordion-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.accordion-enter-to,
+.accordion-leave-from {
+  max-height: 500px; /* 大于内容最高高度 */
+  opacity: 1;
+}
+
+/* legend 鼠标提示 */
+.accordion legend {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+.accordion-icon {
+  width: 18px;
+  height: 18px;
 }
 
 </style>
