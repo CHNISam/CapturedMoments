@@ -262,13 +262,30 @@
           </div>
 
           <div class="actions">
+            <!-- 观看次数图标 -->
             <svg viewBox="0 0 24 24">
               <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/>
             </svg>
             <span>{{ post.views }}</span>
+
+            <!-- 新增：评论切换按钮 -->
+            <svg
+              class="comment-toggle"
+              @click="toggleComments(post)"
+              style="cursor:pointer; margin-left:8px;"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+            </svg>
+            <span>{{ post.cmts.length }}</span>
           </div>
 
-          <div class="comments">
+          <div v-if="visibleComments[post.id]" class="comments">
             <div v-for="(c,idx) in post.cmts" :key="idx" class="comment">
               <div class="comment-left">
                 <span class="comment-display">{{ getDisplayName(c.who) }}: {{ c.txt }}</span>
@@ -713,7 +730,7 @@ export default {
 
       imageNewPlace: '',  // Modal 编辑时用的 v-model
       postNewPlace: '',   // 动态列表编辑时用的 v-model
-        
+      visibleComments: {},   // key: post.id, value: Boolean  
     };
   },
 
@@ -880,7 +897,10 @@ export default {
     toggleNavDropdown() {
       this.navDropdownVisible = !this.navDropdownVisible;
       },
-
+    toggleComments(post) {
+      // Vue3 响应式里直接赋值即可
+      this.visibleComments[post.id] = !this.visibleComments[post.id];
+    },
 
     /* ========== 投稿 ========== */
     handleInput(e) {
@@ -1606,6 +1626,13 @@ body.dark .np-top textarea{background:var(--card-dark);color:var(--text-dark)}
 }
 body.dark .post-options { background: var(--card-dark); }
 .post-options button { background:none; border:none; cursor:pointer; text-align:left; padding:4px 8px;}
+#moments-list .post.card {
+  width: 65%;
+  max-width: 700px;
+  min-width: 580px;
+  margin: 0 auto;
+}
+
 
 
 /* 评论 */
