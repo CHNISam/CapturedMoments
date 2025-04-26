@@ -1,4 +1,4 @@
-<!-- src/AppDesktop.vue -->
+<!-- src/AppMobile.vue -->
 <template>
   <div>
     <!-- 登录 Modal -->

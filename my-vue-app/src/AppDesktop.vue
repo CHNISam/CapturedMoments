@@ -198,7 +198,7 @@
         </div>
 
         <!-- 图片草稿预览 -->
-        <div v-if="draftImgs.length" class="np-preview">
+        <div v-if="draftImgs.length && imageInsertMode==='preview'" class="np-preview">
           <div v-for="(img,i) in draftImgs" :key="i" class="thumb">
             <img :src="img"/><span class="remove" @click="removeDraft(i)">×</span>
           </div>
@@ -384,6 +384,17 @@
               <button class="btn-ghost" @click="openBadgeModal">更换勋章</button>
             </div>
           </fieldset>
+          <fieldset>
+          <legend>上传偏好</legend>
+          <div class="setting-item">
+            <span>图片插入方式</span>
+            <select v-model="imageInsertMode" @change="saveImageInsertMode">
+              <option value="preview">插入到预览区</option>
+              <option value="inline">插入到正文</option>
+            </select>
+          </div>
+        </fieldset>
+
           <!-- —— Admin 管理面板 —— -->
           <fieldset v-if="currentUser === '217122260'">
             <legend>账号管理（Admin）</legend>
@@ -607,6 +618,7 @@ export default {
       isPublishing: false,    // 按钮 loading
       isListLoading: false,   // 列表骨架屏
 
+      
       // —— 分页加载配置 —— 
       loadedCount: 5,  // 初始加载 5 条
       loadStep: 5,     // 每次点击再加载 5 条
@@ -640,6 +652,7 @@ export default {
       llmEnabled: true,
       petPrompt: '喵～ 记得喝水喔！',
       localDisplayName: localStorage.getItem('displayName_' + (storedUser || '')) || '',
+      imageInsertMode: localStorage.getItem('imageInsertMode') || 'preview',
 
       /*头像 */ 
       avatarMap: {
@@ -885,7 +898,42 @@ export default {
       })
       this.newPostText = txt
     },
-    handlePostImages(e){ this.draftImgs=[]; Array.from(e.target.files).slice(0,50).forEach(f=>this.draftImgs.push(URL.createObjectURL(f))); },
+    handlePostImages(e) {
+      const files = Array.from(e.target.files).slice(0, 50);
+
+      // ① “正文内嵌” —— 像贴图一样插入 <img>
+      if (this.imageInsertMode === 'inline') {
+        files.forEach(f => {
+          const url = URL.createObjectURL(f);
+          this.draftImgs.push(url);
+
+          // —— 在光标处插入一张 <img.inline-sticker> —— 
+          this.restoreCaret();
+          const sel = window.getSelection();
+          if (!sel || !sel.rangeCount) return;
+          const range = sel.getRangeAt(0);
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = 'inline-sticker';
+          img.contentEditable = false;
+          range.insertNode(img);
+          range.collapse(false);
+
+          // 在图片后插入一个空格，保持输入流畅
+          this.insertAtCaret(' ');
+        });
+
+        // DOM 变动后，同步更新 markdown 内容
+        this.handleInput({ target: this.$refs.postInput });
+      }
+
+      // ② “预览区” —— 传统的图片预览模式
+      else {
+        this.draftImgs = [];
+        files.forEach(f => this.draftImgs.push(URL.createObjectURL(f)));
+      }
+    },
+
     removeDraft(i){ this.draftImgs.splice(i,1); },
     autoResize(e) {
       const el = e.target;
@@ -955,6 +1003,9 @@ export default {
         localStorage.setItem('posts', JSON.stringify(this.posts.map(q=>({...q,imgs:[]}))));
       }
     },
+    saveImageInsertMode() {
+      localStorage.setItem('imageInsertMode', this.imageInsertMode);
+      },
     /* === 自定义表情 === */
     toggleStickerPicker () {
       if (!this.stickerPickerVisible) {      // 正在“打开”面板
