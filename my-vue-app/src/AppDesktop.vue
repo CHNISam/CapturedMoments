@@ -96,11 +96,30 @@
               />
               <transition name="dropdown-fade">
                 <div v-if="navDropdownVisible" class="nav-dropdown">
-                  <button class="dropdown-item" @click="scrollTo('settings')">设置</button>
+                  <!-- 设置 -->
+                  <button class="dropdown-item" @click="scrollTo('settings')">
+                    <!-- 齿轮图标 -->
+                    <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09c.71 0 1.34-.41 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06c.48.48 1.14.67 1.82.33a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09c0 .71.41 1.34 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82c.17.59.8 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.71 0-1.34.41-1.51 1z"/>
+                    </svg>
+                    <span>设置</span>
+                  </button>
+
                   <div class="dropdown-divider"></div>
-                  <button class="dropdown-item" @click="logout">退出</button>
+
+                  <!-- 退出（关机图标） -->
+                  <button class="dropdown-item" @click="logout">
+                    <!-- Power-off 图标 -->
+                    <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18.364 5.636a9 9 0 1 1-12.728 0"></path>
+                      <line x1="12" y1="2" x2="12" y2="12"></line>
+                    </svg>
+                    <span>退出</span>
+                  </button>
                 </div>
               </transition>
+
               </div>
 
 
@@ -1630,11 +1649,12 @@ body.dark .np-top textarea{background:var(--card-dark);color:var(--text-dark)}
 body.dark .post-options { background: var(--card-dark); }
 .post-options button { background:none; border:none; cursor:pointer; text-align:left; padding:4px 8px;}
 #moments-list .post.card {
-  width: 65%;
-  max-width: 700px;
-  min-width: 580px;
+  width: 100%;
+  max-width: 680px;
   margin: 0 auto;
+  padding: 24px; /* 更舒适的PC内边距 */
 }
+
 
 
 
@@ -2409,6 +2429,41 @@ body.dark .ta-preview {
 .dropdown-fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;           /* 图标和文字之间的距离 */
+  padding: 12px 16px; /* 更大的点击区域 */
+  font-size: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background .25s;
+}
+
+.dropdown-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+/* —— 每个 fieldset 之间增加垂直间距 —— */
+fieldset + fieldset {
+  margin-top: 36px;
+}
+
+/* —— 更醒目的分组标题 —— */
+legend {
+  font-size: 18px;                      /* 字号调大 */
+  font-weight: 700;                     /* 加粗 */
+  margin-bottom: 16px;                  /* 与内容保持呼吸感 */
+  border-bottom: 1px solid rgba(0,0,0,0.1); /* 底部细线分隔 */
+  padding-bottom: 4px;                  /* 线和文字间距 */
+}
+
+/* —— 深色模式下调整分隔线颜色 —— */
+body.dark legend {
+  border-color: rgba(255,255,255,0.2);
 }
 
 </style>
