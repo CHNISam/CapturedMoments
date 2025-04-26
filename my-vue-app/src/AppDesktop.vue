@@ -275,22 +275,34 @@
           </div>
 
           <div class="photos">
-            <div 
-              v-for="(img, i) in post.imgs.slice(0, 3)" 
+            <div
+              v-for="(img, i) in post.imgs.slice(0, 3)"
               :key="i"
               class="thumb"
               @click="openModal(post, i)"
             >
               <img :src="img" alt="" />
-            </div>
-            <div 
-              v-if="post.imgs.length > 3" 
-              class="thumb more-count"
-              @click="openModal(post, 3)"
-            >
-              +{{ post.imgs.length - 3 }}
+              <!-- 只有在第三张，且还有多余图片时才显示 +N -->
+              <div
+                v-if="i === 2 && post.imgs.length > 3"
+                class="thumb-overlay"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg"
+                  class="stack-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2">
+                <!-- 上层矩形 -->
+                <rect x="3" y="4" width="18" height="6" rx="1" ry="1"/>
+                <!-- 下层矩形，略微偏移 -->
+                <rect x="6" y="12" width="18" height="6" rx="1" ry="1"/>
+            </svg>
+            <span class="overlay-count">+{{ post.imgs.length - 3 }}</span>
+              </div>
             </div>
           </div>
+
 
 
 
@@ -2478,39 +2490,59 @@ body.dark legend {
 }
 
 
-.photos {
-  display: flex;
-  gap: 12px;               /* 一致的间距 */
+/* 容器去掉滚动条，三列等宽 */
+.post .photos {
+  display: grid;
+  grid-template-columns: repeat(3, 0.5fr);
+  gap: 8px;
+  overflow: visible; /* 不要再 overflow-x:auto */
+  padding-right: 20%;
 }
 
-.photos .thumb {
-  width: 120px;           /* 固定宽度 */
-  aspect-ratio: 4 / 3;    /* 设定 4:3 的长宽比 */
-  object-fit: cover;
-  object-position: center;
+/* 缩略图容器保持裁剪逻辑 */
+.post .photos .thumb {
+  position: relative;       /* 为 overlay 提供定位上下文 */
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f0f0f0;
+  max-height: 120px; 
+  
 }
-
-.photos .thumb img {
+.post .photos .thumb img {
   width: 100%;
   height: 100%;
-  object-fit: cover;       /* 中心裁切，保持填满 */
-  object-position: center; /* 聚焦中间 */
+  object-fit: cover;
+  object-position: center;
   display: block;
 }
 
-/* “+N” 样式 */
-.photos .more-count {
-  display: flex;
+/* 第三张上的 +N 遮罩 */
+.post .photos .thumb-overlay {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%);
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  transition: background .2s;
-}
-.photos .more-count:hover {
+  gap: 4px;
   background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.stack-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.overlay-count {
+  line-height: 1; /* 让数字垂直居中 */
 }
 
 
