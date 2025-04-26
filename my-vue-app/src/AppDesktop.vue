@@ -94,10 +94,13 @@
                   alt="Avatar"
                   class="avatar-img"
               />
-              <div v-if="navDropdownVisible" class="nav-dropdown">
-                  <button @click="scrollTo('settings')" class="dropdown-item">设置</button>
-                  <button @click="logout"                 class="dropdown-item">退出</button>
-              </div>
+              <transition name="dropdown-fade">
+                <div v-if="navDropdownVisible" class="nav-dropdown">
+                  <button class="dropdown-item" @click="scrollTo('settings')">设置</button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item" @click="logout">退出</button>
+                </div>
+              </transition>
               </div>
 
 
@@ -406,8 +409,8 @@
           <div class="setting-item">
             <span>图片插入方式</span>
             <select v-model="imageInsertMode" @change="saveImageInsertMode">
-              <option value="preview">插入到预览区</option>
-              <option value="inline">插入到正文</option>
+              <option value="preview">预览区</option>
+              <option value="inline">正文</option>
             </select>
           </div>
         </fieldset>
@@ -1519,8 +1522,8 @@ a{color:inherit;text-decoration:none;cursor:pointer}
 
 /* 导航栏 */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
-  padding:10px 22px;background:rgba(255,255,255,0.15);backdrop-filter:blur(var(--blur));border-bottom:var(--glass-border)}
-body.dark nav{background:rgba(0,0,0,0.18);border-bottom:1px solid rgba(255,255,255,0.1)}
+  background:rgba(255,255,255,0.18);  backdrop-filter: blur(20px);border-bottom:var(--glass-border);padding: 14px 24px}
+body.dark nav{background:rgba(0,0,0,0.22);border-bottom:1px solid rgba(255,255,255,0.1)}
 .logo{font-weight:700;font-size:20px}
 .menu{display:flex;gap:18px;align-items:center}
 .menu a{padding:6px 12px;border-radius:var(--radius);transition:.25s background}
@@ -2165,7 +2168,7 @@ position: absolute;
 top: calc(100% + 8px);
 left: 0;
 background: var(--card-light);
-backdrop-filter: blur(calc(var(--blur)/2));
+backdrop-filter: blur(12px);
 border: var(--glass-border);
 border-radius: var(--radius);
 display: flex;
@@ -2181,17 +2184,17 @@ width: auto;
 white-space: normal;
 background: none;
 border: none;
-padding: 8px 16px;
+padding: 12px 16px;
 text-align: left;
 cursor: pointer;
 font-size: 14px;
 color: var(--text-light);
 }
 .dropdown-item:hover {
-background: rgba(0,0,0,0.08);
+background: rgba(0,0,0,0.1);
 }
 body.dark .nav-dropdown { background: var(--card-dark); }
-body.dark .dropdown-item:hover { background: rgba(255,255,255,0.12); }
+body.dark .dropdown-item:hover { background: rgba(255,255,255,0.15); }
 body.dark .dropdown-item {
 color: #fff;
 }
@@ -2200,7 +2203,7 @@ color: #fff;
 display: flex;
 flex-direction: column;
 align-items: center;
-gap: 4px;
+gap: 2px;
 padding: 6px 8px;
 border-radius: var(--radius);
 transition: background .25s;
@@ -2213,8 +2216,8 @@ background: rgba(255,255,255,0.12);
 }
 
 .nav-icon {
-width: 20px;
-height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .nav-label {
@@ -2395,6 +2398,17 @@ body.dark .ta-preview {
   content: attr(data-placeholder);
   color: #888;
   pointer-events: none;
+}
+/* 进场（enter）和离场（leave）的动画 */
+.dropdown-fade-enter-active,
+.dropdown-fade-leave-active {
+  transition: all 0.25s ease;
+}
+
+.dropdown-fade-enter-from,
+.dropdown-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 
 </style>
