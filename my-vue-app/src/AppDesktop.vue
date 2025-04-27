@@ -1693,10 +1693,11 @@ export default {
   --radius:14px;--blur:16px;--glass-border:1px solid rgba(0,0,0,0.1);
   --login-bg:#f5f5f5;--login-text:#333;--login-border:rgba(0,0,0,0.1);
   --bg-opacity:.35;--bg-blur:4px;
+  --card-hover-light: rgba(255,255,255,0.9);
 }
 body.dark{
   background:var(--bg-dark);color:var(--text-dark);
-  --login-bg:#1c1c1c;--login-text:#d2d2d2;--login-border:rgba(255,255,255,0.1);
+  --login-bg:#1c1c1c;--login-text:#d2d2d2;--login-border:rgba(255,255,255,0.1);--card-hover-dark: rgba(60,60,61,0.55);
 }
 html,body{margin:0;padding:0;height:100%;font-family:Inter,\"PingFang SC\",sans-serif;transition:.3s background-color,.3s color}
 a{color:inherit;text-decoration:none;cursor:pointer}
@@ -2828,9 +2829,8 @@ body.dark legend {
   transition: background .2s;
 }
 .tree-node:hover {
-  background: rgba(0,0,0,0.05);
+  background: transparent;
 }
-
 /* 二级列表 */
 .settings-tree ul ul {
   margin-top: 6px;
@@ -2901,12 +2901,35 @@ body.dark legend {
   box-shadow: 0 6px 18px rgba(0,0,0,0.1);
   padding: 24px 20px;
   width: 100%;
+  transition: 
+    background 0.3s ease, 
+    box-shadow 0.3s ease, 
+    transform 0.3s ease;
+  /* 确保盒模型一致 */
+  box-sizing: border-box;
 }
 
 /* 深色模式 */
 body.dark .settings-tree > ul > li {
   background: var(--card-dark);
   box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+.settings-tree > ul > li:hover {
+  /* 整体轻微提亮 */
+  background: var(--card-hover-light);
+  /* 深色模式下替换 */
+}
+body.dark .settings-tree > ul > li:hover {
+  background: var(--card-hover-dark);
+}
+
+.settings-tree > ul > li:hover {
+  /* 轻微上浮，制造“悬浮感” */
+  transform: translateY(-2px);
+  /* 阴影加强，让卡片更有层次 */
+  box-shadow: 
+    0 8px 24px rgba(0,0,0,0.12),
+    0 4px 12px rgba(0,0,0,0.06);
 }
 /* 使用 flex + gap 统一管理卡片之间的距离 */
 #settings .settings-tree .tree-root {
