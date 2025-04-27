@@ -1947,7 +1947,11 @@ body.dark .album-tabs button:hover{background:rgba(255,255,255,0.1)}
 .photo span{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.45);color:#fff;font-size:12px;padding:2px 6px;border-radius:var(--radius)}
 
 /* 设置 */
-#settings{padding:40px 8%}
+#settings {
+  padding: 40px 16px;   /* 顶下内边距保持 40px，左右缩为 16px */
+  margin: 0 auto;       /* 水平居中 */
+  max-width: 680px;     /* 与动态卡片 max-width 保持一致 */
+}
 #settings .settings-tree {
   max-width: 680px;
   margin: 0 auto;
