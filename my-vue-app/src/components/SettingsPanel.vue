@@ -175,77 +175,119 @@
   
   <style scoped>
   /* ===== 布局基础 ===== */
-  .settings-container{
-    display:flex;
-    gap:24px;
-    padding:40px 16px;
-    max-width:960px;
-    margin:0 auto;
-    height:80vh;             /* 保证固定高度，内部滚动 */
-    box-sizing:border-box;
+  .settings-container {
+    display: flex;
+    gap: 24px;
+    padding: 40px 16px;
+    max-width: 960px;
+    margin: 0 auto;
+    height: 80vh;             /* 保证固定高度，内部滚动 */
+    box-sizing: border-box;
   }
-  
+
   /* 左侧导航 */
-  .settings-nav{
-    width:200px;
-    border-right:1px solid rgba(0,0,0,0.1);
-    position:sticky;         /* 滚动时保持可见 */
-    top:40px;
-    align-self:flex-start;
+  .settings-nav {
+    width: 200px;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    position: sticky;         /* 滚动时保持可见 */
+    top: 40px;
+    align-self: flex-start;
   }
-  .nav-list{margin:0;padding:0;list-style:none;}
-  .nav-list li{
-    display:flex;align-items:center;
-    padding:12px 16px;cursor:pointer;user-select:none;
-    transition:background .2s;
+  .nav-list { margin: 0; padding: 0; list-style: none; }
+  .nav-list li {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .2s;
   }
-  .nav-list li:hover{background:rgba(0,0,0,0.04);}
-  .nav-list li.active{background:rgba(74,144,226,0.1);font-weight:600;}
-  .nav-icon{width:20px;height:20px;flex-shrink:0;margin-right:8px;}
-  
+  .nav-list li:hover { background: rgba(0, 0, 0, 0.04); }
+  .nav-list li.active {
+    background: rgba(74, 144, 226, 0.1);
+    font-weight: 600;
+  }
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    margin-right: 8px;
+  }
+
   /* 右侧内容 */
-  .settings-content{
-    flex:1;
-    overflow-y:auto;         /* 独立滚动区域 */
-    padding-right:8px;       /* 给滚动条留空间 */
-    scrollbar-width:thin;    /* Firefox */
+  .settings-content {
+    flex: 1;
+    overflow-y: auto;         /* 独立滚动区域 */
+    padding: 0 24px;          /* 左右留出足够空间 */
+    scrollbar-width: thin;    /* Firefox */
   }
-  
+
+  /* 分组标题 */
+  .group-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 32px 0 16px;
+  }
+  .group-title + .settings-group {
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+  }
+
   /* 分组列表 */
-  .settings-group{margin:0;padding:0;list-style:none;}
-  
+  .settings-group {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
   /* 单行项目：两列网格避免挤压 */
-  .setting-item{
-    display:grid;
-    grid-template-columns: auto 1fr;
-    align-items:center;
-    gap:24px;
-    margin:16px 0;
+  .setting-item {
+    display: grid;
+    grid-template-columns: 120px 1fr;  /* 固定标签宽度 */
+    align-items: center;
+    gap: 32px;                         /* 标签与控件间距 */
+    margin: 24px 0;                    /* 行间距 */
   }
-  
-  .btn-group{display:flex;gap:8px;flex-wrap:wrap;}
-  
+  .setting-item:hover {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 4px;
+  }
+
+  /* 控件宽度限制 */
+  .setting-item input[type="range"],
+  .setting-item select {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
   .rename-item input,
-  .rename-input{
-    width:160px;padding:6px 10px;
-    border:1px solid #ccc;border-radius:4px;
+  .rename-input {
+    width: 160px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
   }
-  .btn-ghost input[type="file"]{display:none;}
-/* 全局按钮基础 */
-.settings-container .btn-ghost,
-.settings-container .btn-publish {
-  display: inline-block;      /* 保证外部宽度随内容浮动 */
-  width: fit-content;         /* 根据内容收缩 */
-  padding: 6px 12px;          /* 保持一致的水平内边距 */
-  min-width: 64px;            /* 最小宽度，避免过短 */
-  text-align: center;         /* 文本居中 */
-}
+  .btn-ghost input[type="file"] {
+    display: none;
+  }
 
-/* 在网格/按钮组中靠左对齐 */
-.settings-container .btn-group button {
-  justify-self: start;
-}
+  /* 全局按钮基础 */
+  .settings-container .btn-ghost,
+  .settings-container .btn-publish {
+    display: inline-block;      /* 保证外部宽度随内容浮动 */
+    width: fit-content;         /* 根据内容收缩 */
+    padding: 6px 12px;          /* 保持一致的水平内边距 */
+    min-width: 64px;            /* 最小宽度，避免过短 */
+    text-align: center;         /* 文本居中 */
+  }
 
-
-  </style>
-  
+  /* 在网格/按钮组中靠左对齐 */
+  .settings-container .btn-group button {
+    justify-self: start;
+  }
+</style>
