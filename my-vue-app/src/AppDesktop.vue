@@ -88,14 +88,14 @@
             <span class="nav-label">投稿</span>
           </a>            
             <!-- ① 在 data() 里新增 navDropdownVisible -->
-            <div class="nav-avatar" @click="toggleNavDropdown">
+            <div class="nav-avatar" @mouseenter="navDropdownVisible = true" @mouseleave="navDropdownVisible = false">
               <img
                   :src="getAvatar(currentUser)"
                   alt="Avatar"
                   class="avatar-img"
               />
               <transition name="dropdown-fade">
-                <div v-if="navDropdownVisible" class="nav-dropdown">
+                <div v-show ="navDropdownVisible" class="nav-dropdown">
                   <!-- 设置 -->
                   <button class="dropdown-item" @click="scrollTo('settings')">
                     <!-- 齿轮图标 -->
@@ -456,7 +456,7 @@
           <!-- 桌宠 / LLM Accordion -->
           <fieldset class="accordion">
             <legend @click="collapsedSections.pet = !collapsedSections.pet">
-              <span>桌宠 / AI</span>
+              <span>交互助手</span>
               <svg class="accordion-icon" viewBox="0 0 24 24">
                 <path v-if="collapsedSections.pet" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
                 <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
@@ -507,7 +507,7 @@
           <!-- 勋章 Accordion -->
           <fieldset class="accordion">
             <legend @click="collapsedSections.badge = !collapsedSections.badge">
-              <span>勋章</span>
+              <span>勋章中心</span>
               <svg class="accordion-icon" viewBox="0 0 24 24">
                 <path v-if="collapsedSections.badge" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
                 <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
@@ -525,7 +525,7 @@
           <!-- 上传偏好 Accordion -->
           <fieldset class="accordion">
             <legend @click="collapsedSections.uploadPref = !collapsedSections.uploadPref">
-              <span>上传偏好</span>
+              <span>发布与上传</span>
               <svg class="accordion-icon" viewBox="0 0 24 24">
                 <path v-if="collapsedSections.uploadPref" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
                 <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
