@@ -34,11 +34,11 @@
                 </li>
                 <li class="setting-item">
                   <span>背景透明度</span>
-                  <input type="range" min="0" max="1" step="0.05" :value="bgOpacity" @input="saveBgOpacity($event.target.value)" />
+                  <input type="range" min="0" max="1" step="0.05" v-model.number="proxyBgOpacity" />
                 </li>
                 <li class="setting-item">
                   <span>背景模糊</span>
-                  <input type="range" min="0" max="20" step="1" :value="bgBlur" @input="saveBgBlur($event.target.value)" />
+                  <input type="range" min="0" max="20" step="1" v-model.number="proxyBgBlur" />
                 </li>
                 <li class="setting-item">
                   <span>动态加载模式</span>
@@ -221,6 +221,14 @@
         isAdmin () {
             // 现在拿 currentUser 跟 adminUid 去比
             return String(this.currentUser) === String(this.adminUid)
+        },
+        proxyBgOpacity: {
+            get() { return this.bgOpacity },
+            set(val) { this.$emit('update:bgOpacity', val) }
+        },
+        proxyBgBlur: {
+            get() { return this.bgBlur },
+            set(val) { this.$emit('update:bgBlur', val) }
         }
     },
     methods: {
