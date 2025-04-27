@@ -419,7 +419,14 @@
             <!-- 视觉／界面设置 -->
             <li>
               <div class="tree-node" @click="collapsedSections.visual = !collapsedSections.visual">
-                <span class="tree-label">🖌️ 视觉／界面设置</span>
+                <svg class="tree-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                  <!-- 刷子图标 -->
+                  <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z"/>
+                  <path d="M6 15l9-9 3 3-9 9"/>
+                  <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5"/>
+                </svg>
+                <span class="tree-label">视觉／界面设置</span>
+
                 <svg class="icon" viewBox="0 0 24 24">
                   <path v-if="collapsedSections.visual" d="M9 6l6 6-6 6"/>
                   <path v-else                d="M6 9l6 6 6-6"/>
@@ -450,7 +457,13 @@
             <!-- 个人资料 -->
             <li>
               <div class="tree-node" @click="collapsedSections.profile = !collapsedSections.profile">
-                <span class="tree-label">👤 个人资料</span>
+                <!-- 个人资料 -->
+                <svg class="tree-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                  <!-- 用户图标 -->
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
+                  <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2"/>
+                </svg>
+                <span class="tree-label">个人资料</span>
                 <svg class="icon" viewBox="0 0 24 24">
                   <path v-if="collapsedSections.profile" d="M9 6l6 6-6 6"/>
                   <path v-else                     d="M6 9l6 6 6-6"/>
@@ -480,7 +493,12 @@
             <!-- 交互助手 -->
             <li>
               <div class="tree-node" @click="collapsedSections.assistant = !collapsedSections.assistant">
-                <span class="tree-label">💬 交互助手</span>
+                <!-- 交互助手 -->
+              <svg class="tree-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                <!-- 聊天气泡图标 -->
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z"/>
+              </svg>
+              <span class="tree-label">交互助手</span>
                 <svg class="icon" viewBox="0 0 24 24">
                   <path v-if="collapsedSections.assistant" d="M9 6l6 6-6 6"/>
                   <path v-else                         d="M6 9l6 6 6-6"/>
@@ -499,7 +517,12 @@
             <!-- 发布与上传 -->
             <li>
               <div class="tree-node" @click="collapsedSections.publish = !collapsedSections.publish">
-                <span class="tree-label">🚀 发布与上传</span>
+                <svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 16v-6"/>
+                  <path d="M9 13l3-3 3 3"/>
+                  <path d="M20 16c0-2.21-1.79-4-4-4h-1.26C14.24 9.34 13.21 8 11.5 8c-1.71 0-2.74 1.34-3.24 2H7c-2.21 0-4 1.79-4 4 0 2.21 1.79 4 4 4h12c2.21 0 4-1.79 4-4z"/>
+                </svg>
+                <span class="tree-label">发布与上传</span>
                 <svg class="icon" viewBox="0 0 24 24">
                   <path v-if="collapsedSections.publish" d="M9 6l6 6-6 6"/>
                   <path v-else                 d="M6 9l6 6 6-6"/>
@@ -2671,9 +2694,9 @@ body.dark legend {
 /* 一级节点 */
 .tree-node {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  padding: 8px 12px;
+  padding: 8px 16px;
   cursor: pointer;
   user-select: none;
   border-radius: 6px;
@@ -2715,6 +2738,20 @@ body.dark legend {
 .rename-item input:focus {
   border-color: var(--primary);
   outline: none;
+}
+.tree-node {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tree-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.tree-label {
+  font-size: 15px;
+  font-weight: 600;
 }
 
 </style>
