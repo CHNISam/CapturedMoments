@@ -2405,6 +2405,9 @@ background: rgba(0,0,0,0.08);
 body.dark .menu .nav-item:hover {
 background: rgba(255,255,255,0.12);
 }
+.menu .nav-item.nav-item-submit {
+  gap: 1.5px;
+}
 
 .nav-icon {
   width: 22px;
