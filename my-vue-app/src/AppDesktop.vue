@@ -439,35 +439,37 @@
                   <path v-else                d="M6 9l6 6 6-6"/>
                 </svg>
               </div>
-              <ul v-show="!collapsedSections.visual">
-                <li class="setting-item">
-                  <span>主题模式</span>
-                  <input type="checkbox" :checked="theme==='dark'" @change="toggleTheme"/>
-                </li>
-                <li class="setting-item">
-                  <span>背景设置</span>
-                  <label class="btn-ghost upload-btn">
-                    上传背景 <input type="file" accept="image/*" @change="changeBackground"/>
-                  </label>
-                </li>
-                <li class="setting-item">
-                  <span>背景透明度</span>
-                  <input type="range" min="0" max="1" step="0.05" v-model.number="bgOpacity"/>
-                </li>
-                <li class="setting-item">
-                  <span>背景模糊</span>
-                  <input type="range" min="0" max="20" step="1" v-model.number="bgBlur"/>
-                </li>
-                <li class="setting-item">
-                  <span>动态加载模式</span>
-                  <select v-model="loadMode" @change="saveLoadMode">
-                    <option value="auto">自动</option>
-                    <option value="manual">手动</option>
-                  </select>
-                </li>
+              <transition name="slide-fade">
+                <ul v-show="!collapsedSections.visual" class="settings-group">
+                  <li class="setting-item">
+                    <span>主题模式</span>
+                    <input type="checkbox" :checked="theme==='dark'" @change="toggleTheme"/>
+                  </li>
+                  <li class="setting-item">
+                    <span>背景设置</span>
+                    <label class="btn-ghost upload-btn">
+                      上传背景 <input type="file" accept="image/*" @change="changeBackground"/>
+                    </label>
+                  </li>
+                  <li class="setting-item">
+                    <span>背景透明度</span>
+                    <input type="range" min="0" max="1" step="0.05" v-model.number="bgOpacity"/>
+                  </li>
+                  <li class="setting-item">
+                    <span>背景模糊</span>
+                    <input type="range" min="0" max="20" step="1" v-model.number="bgBlur"/>
+                  </li>
+                  <li class="setting-item">
+                    <span>动态加载模式</span>
+                    <select v-model="loadMode" @change="saveLoadMode">
+                      <option value="auto">自动</option>
+                      <option value="manual">手动</option>
+                    </select>
+                  </li>
 
 
-              </ul>
+                </ul>
+              </transition>
             </li>
 
             <!-- 个人资料 -->
@@ -485,25 +487,27 @@
                   <path v-else                     d="M6 9l6 6 6-6"/>
                 </svg>
               </div>
-              <ul v-show="!collapsedSections.profile">
-                <li class="setting-item">
-                  <span>账号与安全</span>
-                  <button class="btn-ghost" @click="openPasswordModal">更改密码</button>
-                </li>
-                <li class="setting-item rename-item">
-                  <span>我的昵称</span>
-                  <input
-                    type="text"
-                    v-model="localDisplayName"
-                    @input="updateDisplayName"
-                    placeholder="输入新的昵称"
-                  />
-                </li>
-                <li class="setting-item">
-                  <span>勋章中心</span>
-                  <button class="btn-ghost" @click="openBadgeModal">更换勋章</button>
-                </li>
-              </ul>
+              <transition name="slide-fade">
+                <ul v-show="!collapsedSections.profile" class="settings-group">
+                  <li class="setting-item">
+                    <span>账号与安全</span>
+                    <button class="btn-ghost" @click="openPasswordModal">更改密码</button>
+                  </li>
+                  <li class="setting-item rename-item">
+                    <span>我的昵称</span>
+                    <input
+                      type="text"
+                      v-model="localDisplayName"
+                      @input="updateDisplayName"
+                      placeholder="输入新的昵称"
+                    />
+                  </li>
+                  <li class="setting-item">
+                    <span>勋章中心</span>
+                    <button class="btn-ghost" @click="openBadgeModal">更换勋章</button>
+                  </li>
+                </ul>
+              </transition>
             </li>
 
             <!-- 交互助手 -->
@@ -520,14 +524,16 @@
                   <path v-else                         d="M6 9l6 6 6-6"/>
                 </svg>
               </div>
-              <ul v-show="!collapsedSections.assistant">
-                <li class="setting-item">
-                  <span>桌宠</span><input type="checkbox" v-model="petEnabled"/>
-                </li>
-                <li class="setting-item">
-                  <span>AI</span><input type="checkbox" v-model="llmEnabled"/>
-                </li>
-              </ul>
+              <transition name="slide-fade">
+                <ul v-show="!collapsedSections.assistant" class="settings-group">
+                  <li class="setting-item">
+                    <span>桌宠</span><input type="checkbox" v-model="petEnabled"/>
+                  </li>
+                  <li class="setting-item">
+                    <span>AI</span><input type="checkbox" v-model="llmEnabled"/>
+                  </li>
+                </ul>
+              </transition>
             </li>
 
             <!-- 发布与上传 -->
@@ -544,19 +550,21 @@
                   <path v-else                 d="M6 9l6 6 6-6"/>
                 </svg>
               </div>
-              <ul v-show="!collapsedSections.publish">
-                <li class="setting-item">
-                  <span>发布设置</span>
-                  <!-- 可插入更多发布相关控件 -->
-                </li>
-                <li class="setting-item">
-                  <span>图片上传方式</span>
-                  <select v-model="imageInsertMode" @change="saveImageInsertMode">
-                    <option value="preview">预览区</option>
-                    <option value="inline">正文内嵌</option>
-                  </select>
-                </li>
-              </ul>
+              <transition name="slide-fade">
+                <ul v-show="!collapsedSections.publish">
+                  <li class="setting-item">
+                    <span>发布设置</span>
+                    <!-- 可插入更多发布相关控件 -->
+                  </li>
+                  <li class="setting-item">
+                    <span>图片上传方式</span>
+                    <select v-model="imageInsertMode" @change="saveImageInsertMode">
+                      <option value="preview">预览区</option>
+                      <option value="inline">正文内嵌</option>
+                    </select>
+                  </li>
+                </ul>
+              </transition>
             </li>
             <li v-if="currentUser === '217122260'">
               <div class="tree-node" @click="collapsedSections.admin = !collapsedSections.admin">
@@ -574,18 +582,20 @@
                   <path v-else                 d="M6 9l6 6 6-6"/>
                 </svg>
               </div>
-              <ul v-show="!collapsedSections.admin">
-                <li class="setting-item" v-for="uid in allowedUids" :key="uid">
-                  <span>{{ uid }}</span>
-                  <button class="btn-ghost" @click="resetPassword(uid)">重置密码</button>
-                  <button class="btn-ghost" @click="removeAllowedUid(uid)">移除白名单</button>
-                  <button class="btn-ghost" @click="openAdminPwdModal(uid)">设定密码</button>
-                </li>
-                <li class="setting-item">
-                  <input v-model="newAdminUid" placeholder="新 UID" class="rename-input"/>
-                  <button class="btn-publish" @click="addAllowedUid">新增</button>
-                </li>
-              </ul>
+              <transition name="slide-fade">
+                <ul v-show="!collapsedSections.admin">
+                  <li class="setting-item" v-for="uid in allowedUids" :key="uid">
+                    <span>{{ uid }}</span>
+                    <button class="btn-ghost" @click="resetPassword(uid)">重置密码</button>
+                    <button class="btn-ghost" @click="removeAllowedUid(uid)">移除白名单</button>
+                    <button class="btn-ghost" @click="openAdminPwdModal(uid)">设定密码</button>
+                  </li>
+                  <li class="setting-item">
+                    <input v-model="newAdminUid" placeholder="新 UID" class="rename-input"/>
+                    <button class="btn-publish" @click="addAllowedUid">新增</button>
+                  </li>
+                </ul>
+              </transition>
             </li>
 
           </ul>
@@ -2949,6 +2959,29 @@ body.dark .settings-tree > ul > li:hover {
 #settings .settings-tree > .tree-root > li {
   padding: 24px 20px;   /* 上下 24px，左右 20px */
   box-sizing: border-box;
+}
+/* 1. 过渡类 */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-5px);
+}
+.slide-fade-enter-to,
+.slide-fade-leave-from {
+  /* 根据你每个分组的最大高度来设一个足够大的值 */
+  max-height: 400px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 2. 给二级列表加个专用 class，必要时做内边距收缩 */
+.settings-group {
+  overflow: hidden;
 }
 
 </style>
