@@ -418,190 +418,31 @@
         <div v-if="allPhotos.length===0" style="text-align:center;margin-top:30px;color:#888">暂无照片，快去上传吧~</div>
       </section>
 
-      <!-- ======================== 设置 ======================== -->
-      <section id="settings">
-        <h2 class="big">设置</h2>
-        <div class="card settings-tree">
-          <ul class="tree-root">
-            <!-- 视觉／界面设置 -->
-            <li>
-              <div class="tree-node" @click="collapsedSections.visual = !collapsedSections.visual">
-                <svg class="tree-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                  <!-- 刷子图标 -->
-                  <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z"/>
-                  <path d="M6 15l9-9 3 3-9 9"/>
-                  <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5"/>
-                </svg>
-                <span class="tree-label">视觉／界面设置</span>
+      <SettingsPanel
+        v-model:theme="theme"
+        v-model:bgSrc="bgSrc"
+        v-model:bgOpacity="bgOpacity"
+        v-model:bgBlur="bgBlur"
+        v-model:loadMode="loadMode"
+        v-model:imageInsertMode="imageInsertMode"
+        v-model:petEnabled="petEnabled"
+        v-model:llmEnabled="llmEnabled"
+        v-model:localDisplayName="localDisplayName"
+        v-model:selectedBadge="selectedBadge"
 
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path v-if="collapsedSections.visual" d="M9 6l6 6-6 6"/>
-                  <path v-else                d="M6 9l6 6 6-6"/>
-                </svg>
-              </div>
-              <transition name="slide-fade">
-                <ul v-show="!collapsedSections.visual" class="settings-group">
-                  <li class="setting-item">
-                    <span>主题模式</span>
-                    <input type="checkbox" :checked="theme==='dark'" @change="toggleTheme"/>
-                  </li>
-                  <li class="setting-item">
-                    <span>背景设置</span>
-                    <label class="btn-ghost upload-btn">
-                      上传背景 <input type="file" accept="image/*" @change="changeBackground"/>
-                    </label>
-                  </li>
-                  <li class="setting-item">
-                    <span>背景透明度</span>
-                    <input type="range" min="0" max="1" step="0.05" v-model.number="bgOpacity"/>
-                  </li>
-                  <li class="setting-item">
-                    <span>背景模糊</span>
-                    <input type="range" min="0" max="20" step="1" v-model.number="bgBlur"/>
-                  </li>
-                  <li class="setting-item">
-                    <span>动态加载模式</span>
-                    <select v-model="loadMode" @change="saveLoadMode">
-                      <option value="auto">自动</option>
-                      <option value="manual">手动</option>
-                    </select>
-                  </li>
+        :allowedBadges="allowedBadges"
+        :allowedUids="allowedUids"
+        :currentUser="currentUser"
+        bestBadgeUid="246490729"
+        adminUid="217122260"
 
-
-                </ul>
-              </transition>
-            </li>
-
-            <!-- 个人资料 -->
-            <li>
-              <div class="tree-node" @click="collapsedSections.profile = !collapsedSections.profile">
-                <!-- 个人资料 -->
-                <svg class="tree-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                  <!-- 用户图标 -->
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
-                  <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2"/>
-                </svg>
-                <span class="tree-label">个人资料</span>
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path v-if="collapsedSections.profile" d="M9 6l6 6-6 6"/>
-                  <path v-else                     d="M6 9l6 6 6-6"/>
-                </svg>
-              </div>
-              <transition name="slide-fade">
-                <ul v-show="!collapsedSections.profile" class="settings-group">
-                  <li class="setting-item">
-                    <span>账号与安全</span>
-                    <button class="btn-ghost" @click="openPasswordModal">更改密码</button>
-                  </li>
-                  <li class="setting-item rename-item">
-                    <span>我的昵称</span>
-                    <input
-                      type="text"
-                      v-model="localDisplayName"
-                      @input="updateDisplayName"
-                      placeholder="输入新的昵称"
-                    />
-                  </li>
-                  <li class="setting-item">
-                    <span>勋章中心</span>
-                    <button class="btn-ghost" @click="openBadgeModal">更换勋章</button>
-                  </li>
-                </ul>
-              </transition>
-            </li>
-
-            <!-- 交互助手 -->
-            <li>
-              <div class="tree-node" @click="collapsedSections.assistant = !collapsedSections.assistant">
-                <!-- 交互助手 -->
-              <svg class="tree-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <!-- 聊天气泡图标 -->
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z"/>
-              </svg>
-              <span class="tree-label">交互助手</span>
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path v-if="collapsedSections.assistant" d="M9 6l6 6-6 6"/>
-                  <path v-else                         d="M6 9l6 6 6-6"/>
-                </svg>
-              </div>
-              <transition name="slide-fade">
-                <ul v-show="!collapsedSections.assistant" class="settings-group">
-                  <li class="setting-item">
-                    <span>桌宠</span><input type="checkbox" v-model="petEnabled"/>
-                  </li>
-                  <li class="setting-item">
-                    <span>AI</span><input type="checkbox" v-model="llmEnabled"/>
-                  </li>
-                </ul>
-              </transition>
-            </li>
-
-            <!-- 发布与上传 -->
-            <li>
-              <div class="tree-node" @click="collapsedSections.publish = !collapsedSections.publish">
-                <!-- 发布与上传 图标 (Upload) -->
-                <svg class="tree-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10l5-5m0 0l5 5m-5-5v12"/>
-                </svg>
-                <span class="tree-label">发布与上传</span>
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path v-if="collapsedSections.publish" d="M9 6l6 6-6 6"/>
-                  <path v-else                 d="M6 9l6 6 6-6"/>
-                </svg>
-              </div>
-              <transition name="slide-fade">
-                <ul v-show="!collapsedSections.publish">
-                  <li class="setting-item">
-                    <span>发布设置</span>
-                    <!-- 可插入更多发布相关控件 -->
-                  </li>
-                  <li class="setting-item">
-                    <span>图片上传方式</span>
-                    <select v-model="imageInsertMode" @change="saveImageInsertMode">
-                      <option value="preview">预览区</option>
-                      <option value="inline">正文内嵌</option>
-                    </select>
-                  </li>
-                </ul>
-              </transition>
-            </li>
-            <li v-if="currentUser === '217122260'">
-              <div class="tree-node" @click="collapsedSections.admin = !collapsedSections.admin">
-                <!-- 这里可以换成你喜欢的图标 -->
-              <!-- Heroicons outline Key -->
-              <svg class="tree-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-              </svg>
-
-
-                <span class="tree-label">账号管理（Admin）</span>
-                <svg class="icon" viewBox="0 0 24 24">
-                  <path v-if="collapsedSections.admin" d="M9 6l6 6-6 6"/>
-                  <path v-else                 d="M6 9l6 6 6-6"/>
-                </svg>
-              </div>
-              <transition name="slide-fade">
-                <ul v-show="!collapsedSections.admin">
-                  <li class="setting-item" v-for="uid in allowedUids" :key="uid">
-                    <span>{{ uid }}</span>
-                    <button class="btn-ghost" @click="resetPassword(uid)">重置密码</button>
-                    <button class="btn-ghost" @click="removeAllowedUid(uid)">移除白名单</button>
-                    <button class="btn-ghost" @click="openAdminPwdModal(uid)">设定密码</button>
-                  </li>
-                  <li class="setting-item">
-                    <input v-model="newAdminUid" placeholder="新 UID" class="rename-input"/>
-                    <button class="btn-publish" @click="addAllowedUid">新增</button>
-                  </li>
-                </ul>
-              </transition>
-            </li>
-
-          </ul>
-        </div>
-      </section>
-
+        @open-password-modal="openPasswordModal"
+        @open-badge-modal="openBadgeModal"
+        @reset-password="resetPassword"
+        @add-allowed-uid="addAllowedUid"
+        @remove-allowed-uid="removeAllowedUid"
+        @open-admin-pwd-modal="openAdminPwdModal"
+      />
 
       <!-- 勋章 Modal -->
       <div v-if="showBadgeModal" class="modal show">
@@ -765,12 +606,13 @@
 /* ===== 登录白名单 & 常量 ===== */
 const BEST_BADGE_UID    = '246490729';                 // 佩戴「最好的大佬」勋章的 UID
 import LoginModal from '@/components/LoginModal.vue';
+import SettingsPanel from '@/components/SettingsPanel.vue';
 import { getAllowedUids, setAllowedUids } from '@/config/auth';
 import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
 
 export default {
   name: 'App',
-  components: { LoginModal },
+  components: { LoginModal, SettingsPanel },
   /* ---------- data ---------- */
   data() {
     const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
@@ -826,18 +668,7 @@ export default {
       minZoom : 0.5,         // 下限
       maxZoom : 3,           // 上限
 
-      /* 设置 */
-      collapsedSections: {
-        visual: true,
-        profile: true,
-        assistant: true,
-        publish: true,
-        // 保留旧的 admin，如果还要用
-        admin: true,
-      },
       loadMode: localStorage.getItem('loadMode') || 'manual', 
-      loadedCount: 5,
-      loadStep: 5,
       petEnabled: true,
       petType: 'cat',
       llmEnabled: true,
@@ -976,8 +807,21 @@ export default {
   },
 
   watch: {
+    theme (val) {
+      // 任何地方把 theme 改成 'dark' / 'light'，都会自动同步 DOM 和 localStorage
+      document.body.classList.toggle('dark', val === 'dark');
+      localStorage.setItem('theme', val);
+    },
     bgOpacity: 'saveBgOpacity',
     bgBlur: 'saveBgBlur',
+    loadMode(val) {
+      localStorage.setItem('loadMode', val);
+      this.updateLoadBehavior();
+    },
+    imageInsertMode(val) {
+      localStorage.setItem('imageInsertMode', val);
+    },
+
     // 本地改名时，立刻写入 localStorage
     localDisplayName(newName) {
       localStorage.setItem('displayName_' + (this.currentUser || ''), newName);
@@ -1196,14 +1040,7 @@ export default {
         this.posts=this.posts.filter(x=>x.id!==p.id);
         localStorage.setItem('posts', JSON.stringify(this.posts.map(q=>({...q,imgs:[]}))));
       }
-    },
-    saveImageInsertMode() {
-      localStorage.setItem('imageInsertMode', this.imageInsertMode);
-    },
-    saveLoadMode() {
-      localStorage.setItem('loadMode', this.loadMode);
-      this.updateLoadBehavior();
-    },    
+    },  
     /* === 自定义表情 === */
     toggleStickerPicker () {
       if (!this.stickerPickerVisible) {      // 正在“打开”面板
@@ -1604,8 +1441,8 @@ export default {
     closeAdminPwdModal() {
       this.adminPwdModalVisible = false;
     },
-    addAllowedUid() {
-      const u = this.newAdminUid.trim();
+    addAllowedUid(uid) { 
+      const u = (uid || '').trim(); 
       if (!u) return alert('请输入 UID');
       const list = Array.from(new Set([...this.allowedUids, u])); // ← 用当前响应式数据
       setAllowedUids(list);              // 写入 localStorage
@@ -1945,18 +1782,6 @@ body.dark .album-tabs button:hover{background:rgba(255,255,255,0.1)}
 .photo img{width:100%;height:120px;object-fit:cover;transition:.3s transform}
 .photo:hover img{transform:scale(1.05)}
 .photo span{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.45);color:#fff;font-size:12px;padding:2px 6px;border-radius:var(--radius)}
-
-/* 设置 */
-#settings {
-  padding: 40px 16px;   /* 顶下内边距保持 40px，左右缩为 16px */
-  margin: 0 auto;       /* 水平居中 */
-  max-width: 680px;     /* 与动态卡片 max-width 保持一致 */
-}
-#settings .settings-tree {
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 0 16px; /* 保留边距，防止触边 */
-}
 
 fieldset{border:none;padding:0;margin:0 0 24px}
 legend{font-weight:600;font-size:15px;margin-bottom:8px}
@@ -2827,30 +2652,7 @@ body.dark legend {
   width: 16px;
   height: 16px;
 }
-/* 树状结构基础 */
-.settings-tree ul { list-style: none; padding-left: 0; margin: 0; }
-.settings-tree .tree-root > li { margin-bottom: 16px; }
 
-/* 一级节点 */
-.tree-node {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 8px 16px;
-  cursor: pointer;
-  user-select: none;
-  border-radius: 6px;
-  transition: background .2s;
-}
-.tree-node:hover {
-  background: transparent;
-}
-/* 二级列表 */
-.settings-tree ul ul {
-  margin-top: 6px;
-  padding-left: 20px;
-  border-left: 2px dashed rgba(0,0,0,0.1);
-}
 
 /* 图标 */
 .icon {
@@ -2860,110 +2662,6 @@ body.dark legend {
   fill: none;
 }
 
-
-/* 重命名输入框 */
-.rename-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 8px 0;
-}
-.rename-item input {
-  width: 140px;
-  padding: 4px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.rename-item input:focus {
-  border-color: var(--primary);
-  outline: none;
-}
-.tree-node {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.tree-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-.tree-label {
-  font-size: 15px;
-  font-weight: 600;
-}
-/* 容器本身限制最大宽度并水平居中 */
-#settings .settings-tree {
-  max-width: 800px;    /* 你可以根据设计稿调这个值 */
-  margin: 0 auto;
-  padding: 0;          /* 移除多余内边距 */
-}
-
-/* 让列表自然一列排开，每张卡占满宽度 */
-.settings-tree > ul {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-/* 卡片风格 + 拉满宽度 */
-.settings-tree > ul > li {
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border: var(--glass-border);
-  border-radius: var(--radius);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-  padding: 24px 20px;
-  width: 100%;
-  transition: 
-    background 0.3s ease, 
-    box-shadow 0.3s ease, 
-    transform 0.3s ease;
-  /* 确保盒模型一致 */
-  box-sizing: border-box;
-}
-
-/* 深色模式 */
-body.dark .settings-tree > ul > li {
-  background: var(--card-dark);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
-}
-.settings-tree > ul > li:hover {
-  /* 整体轻微提亮 */
-  background: var(--card-hover-light);
-  /* 深色模式下替换 */
-}
-body.dark .settings-tree > ul > li:hover {
-  background: var(--card-hover-dark);
-}
-
-.settings-tree > ul > li:hover {
-  /* 轻微上浮，制造“悬浮感” */
-  transform: translateY(-2px);
-  /* 阴影加强，让卡片更有层次 */
-  box-shadow: 
-    0 8px 24px rgba(0,0,0,0.12),
-    0 4px 12px rgba(0,0,0,0.06);
-}
-/* 使用 flex + gap 统一管理卡片之间的距离 */
-#settings .settings-tree .tree-root {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;    /* 24px = 3 × 8px 基准栅格，既不太密也不过疏 */
-  padding: 0;   /* 去掉额外的内边距 */
-  margin: 0;
-  list-style: none;
-}
-/* 去掉原先单独给 li 加的 margin-bottom */
-#settings .settings-tree .tree-root > li {
-  margin: 0;
-  width: 100%;  /* 让 li 适应容器宽度 */
-}
-/* 卡片内部内容与边框保持一致的呼吸感 */
-#settings .settings-tree > .tree-root > li {
-  padding: 24px 20px;   /* 上下 24px，左右 20px */
-  box-sizing: border-box;
-}
 /* 1. 过渡类 */
 .slide-fade-enter-active,
 .slide-fade-leave-active {
@@ -2983,9 +2681,6 @@ body.dark .settings-tree > ul > li:hover {
   transform: translateY(0);
 }
 
-/* 2. 给二级列表加个专用 class，必要时做内边距收缩 */
-.settings-group {
-  overflow: hidden;
-}
+
 
 </style>
