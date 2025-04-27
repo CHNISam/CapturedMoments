@@ -418,7 +418,7 @@
       </section>
 
       <!-- Settings 弹窗 -->
-      <div v-if="showSettingsModal" class="modal show">
+      <div v-if="showSettingsModal" class="modal show settings-modal">
         <div class="box">
           <!-- 右上角关闭 -->
           <span class="close" @click="showSettingsModal = false">×</span>
@@ -2690,6 +2690,15 @@ body.dark legend {
   transform: translateY(0);
 }
 
+/* 只对 Settings 弹窗生效，去掉最大高度、内部滚动，拉满宽度 */
+.settings-modal .box {
+  /* 不再限制 max-height，允许自适应内容高度 */
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  /* 根据屏幕宽度自动伸缩，上限 1200px */
+  width: min(80vw, 1200px);
+}
 
 
 </style>

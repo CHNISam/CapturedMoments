@@ -187,12 +187,31 @@
 
   /* 左侧导航 */
   .settings-nav {
-    width: 200px;
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
+    width: 180px;
+    background: rgba(0, 0, 0, 0.02); /* 增加轻微背景色 */
+    border-right: none;              /* 移除边框，更柔和 */
+    border-radius: 8px;
+    padding: 8px;
     position: sticky;         /* 滚动时保持可见 */
     top: 40px;
     align-self: flex-start;
   }
+  .settings-content {
+  padding: 0 40px; /* 左右内边距扩大，减少压迫感 */
+}
+
+  .setting-item {
+  display: grid;
+  grid-template-columns: minmax(max-content, 150px) 1fr;
+  column-gap: 32px;
+}
+.setting-item span {
+  white-space: nowrap;       /* 标签文字不换行 */
+  max-width: 150px;          /* 当太长时可截断或ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
   .nav-list { margin: 0; padding: 0; list-style: none; }
   .nav-list li {
     display: flex;
@@ -203,10 +222,14 @@
     transition: background .2s;
   }
   .nav-list li:hover { background: rgba(0, 0, 0, 0.04); }
-  .nav-list li.active {
-    background: rgba(74, 144, 226, 0.1);
-    font-weight: 600;
-  }
+/* 柔和的激活态，不含侧边条 */
+.nav-list li.active {
+  background: rgba(74, 144, 226, 0.08); /* 透明度更低，颜色更柔和 */
+  /* 保留默认文字色，或根据需要使用深灰色 */
+  color: inherit;
+  font-weight: 600;
+}
+
   .nav-icon {
     width: 20px;
     height: 20px;

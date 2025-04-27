@@ -1,4 +1,4 @@
-<!-- src/AppMobile.vue -->
+<!-- src/AppDesktop.vue -->
 <template>
   <div>
     <!-- 登录 Modal -->
@@ -79,25 +79,51 @@
             @click.prevent="scrollTo('moments')"
             class="nav-item nav-item-submit"
           >
-          <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 11l-5 5v4h4l5-5" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 3a1.5 1.5 0 010 2.121L13.879 12.243a1.5 1.5 0 01-2.121 0L5 5.484a1.5 1.5 0 012.121-2.121l6.758 6.758a1.5 1.5 0 002.121 0L21 3z" />
+          <svg xmlns="http://www.w3.org/2000/svg"
+              class="nav-icon"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2">
+            <line x1="12" y1="5"  x2="12" y2="19" stroke-linecap="round"/>
+            <line x1="5"  y1="12" x2="19" y2="12" stroke-linecap="round"/>
           </svg>
 
             <span class="nav-label">投稿</span>
           </a>            
             <!-- ① 在 data() 里新增 navDropdownVisible -->
-            <div class="nav-avatar" @click="toggleNavDropdown">
+            <div class="nav-avatar" @mouseenter="navDropdownVisible = true" @mouseleave="navDropdownVisible = false">
               <img
                   :src="getAvatar(currentUser)"
                   alt="Avatar"
                   class="avatar-img"
               />
-              <div v-if="navDropdownVisible" class="nav-dropdown">
-                  <button @click="scrollTo('settings')" class="dropdown-item">设置</button>
-                  <button @click="logout"                 class="dropdown-item">退出</button>
-              </div>
+              <transition name="dropdown-fade">
+                <div v-show ="navDropdownVisible" class="nav-dropdown">
+                  <!-- 设置 -->
+                  <button class="dropdown-item" @click="showSettingsModal = true">
+                    <!-- 齿轮图标 -->
+                    <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="3"></circle>
+                      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09c.71 0 1.34-.41 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06c.48.48 1.14.67 1.82.33a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09c0 .71.41 1.34 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82c.17.59.8 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.71 0-1.34.41-1.51 1z"/>
+                    </svg>
+                    <span>设置</span>
+                  </button>
+
+                  <div class="dropdown-divider"></div>
+
+                  <!-- 退出（关机图标） -->
+                  <button class="dropdown-item" @click="logout">
+                    <!-- Power-off 图标 -->
+                    <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M18.364 5.636a9 9 0 1 1-12.728 0"></path>
+                      <line x1="12" y1="2" x2="12" y2="12"></line>
+                    </svg>
+                    <span>退出</span>
+                  </button>
+                </div>
+              </transition>
+
               </div>
 
 
@@ -198,7 +224,7 @@
         </div>
 
         <!-- 图片草稿预览 -->
-        <div v-if="draftImgs.length" class="np-preview">
+        <div v-if="draftImgs.length && imageInsertMode==='preview'" class="np-preview">
           <div v-for="(img,i) in draftImgs" :key="i" class="thumb">
             <img :src="img"/><span class="remove" @click="removeDraft(i)">×</span>
           </div>
@@ -235,15 +261,37 @@
               <span style="font-size:12px">
                 {{ new Date(post.ts).toLocaleTimeString() }}<span v-if="post.place"> · {{ post.place }}</span>
               </span>
-              <span   v-if="post.uid === currentUser || currentUser === '217122260'" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
-              <div v-if="postOptionsPost===post" class="post-options">
-                <button @click="openPlaceModal('post', post)">编辑地点</button>
-                <button @click="deletePost(post)" class="trash-btn">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
+              <div class="more-wrapper">
+                <span   v-if="post.uid === currentUser || currentUser === '217122260'" class="more" @click="postOptionsPost = postOptionsPost===post ? null : post">⋯</span>
+                <transition
+                  name="options-pop"
+                >
+                <div v-if="postOptionsPost===post" class="post-options">
+                      <button 
+                        class="edit-place-btn" 
+                        @click="openPlaceModal('post', post)"
+                      >
+                        <!-- Location Marker 图标 -->
+                        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linejoin="round">
+                          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                          <circle cx="12" cy="9" r="2.5"/>
+                        </svg>
+                      </button>
+
+                      <button 
+                        class="trash-btn" 
+                        @click="deletePost(post)"
+                      >
+                        <!-- 这里是你的删除图标 -->
+                        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M3 6h18" />
+                          <path d="M9 6v12" />
+                          <path d="M15 6v12" />
+                          <path d="M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6" />
+                        </svg>
+                      </button>
+                  </div>
+                </transition>
               </div>
             </div>
           </div>
@@ -253,22 +301,62 @@
           </div>
 
           <div class="photos">
-            <img
-              v-for="(img,i) in post.imgs"
+            <div
+              v-for="(img, i) in post.imgs.slice(0, 3)"
               :key="i"
-              :src="img"
+              class="thumb"
               @click="openModal(post, i)"
-            />
+            >
+              <img :src="img" alt="" />
+              <!-- 只有在第三张，且还有多余图片时才显示 +N -->
+              <div
+                v-if="i === 2 && post.imgs.length > 3"
+                class="thumb-overlay"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg"
+                  class="stack-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2">
+                <!-- 上层矩形 -->
+                <rect x="3" y="4" width="18" height="6" rx="1" ry="1"/>
+                <!-- 下层矩形，略微偏移 -->
+                <rect x="6" y="12" width="18" height="6" rx="1" ry="1"/>
+            </svg>
+            <span class="overlay-count">+{{ post.imgs.length - 3 }}</span>
+              </div>
+            </div>
           </div>
 
+
+
+
           <div class="actions">
+            <!-- 观看次数图标 -->
             <svg viewBox="0 0 24 24">
               <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z"/>
             </svg>
             <span>{{ post.views }}</span>
+
+            <!-- 新增：评论切换按钮 -->
+            <svg
+              class="comment-toggle"
+              @click="toggleComments(post)"
+              style="cursor:pointer; margin-left:8px;"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              />
+            </svg>
+            <span>{{ post.cmts.length }}</span>
           </div>
 
-          <div class="comments">
+          <div v-if="visibleComments[post.id]" class="comments">
             <div v-for="(c,idx) in post.cmts" :key="idx" class="comment">
               <div class="comment-left">
                 <span class="comment-display">{{ getDisplayName(c.who) }}: {{ c.txt }}</span>
@@ -296,9 +384,11 @@
           v-if="visiblePosts.length < posts.length"
           style="text-align:center;margin:16px 0;"
         >
-          <button class="btn-ghost" @click="loadMore">加载更多</button>
+          <div v-if="loadMode==='manual' && visiblePosts.length < posts.length"
+              style="text-align:center;margin:16px 0;">
+            <button class="btn-ghost" @click="loadMore">加载更多</button>
+          </div>
         </div>
-
       </section>
 
       <!-- ======================== 相册 ======================== -->
@@ -327,98 +417,39 @@
         <div v-if="allPhotos.length===0" style="text-align:center;margin-top:30px;color:#888">暂无照片，快去上传吧~</div>
       </section>
 
-      <!-- ======================== 设置 ======================== -->
-      <section id="settings">
-        <h2 class="big">设置</h2>
-        <div class="card">
-          <fieldset>
-            <legend>外观</legend>
-            <div class="setting-item">
-              <span>暗黑模式</span><input type="checkbox" :checked="theme==='dark'" @change="toggleTheme"/>
-            </div>
-            <div class="setting-item">
-              <span>上传背景</span>
-              <label class="btn-ghost upload-btn">
-                <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
-                <input type="file" accept="image/*" @change="changeBackground"/>
-              </label>
-            </div>
-            <div class="setting-item"><span>背景透明度</span><input type="range" min="0" max="1" step="0.05" v-model.number="bgOpacity"/></div>
-            <div class="setting-item"><span>背景模糊</span><input type="range" min="0" max="20" step="1" v-model.number="bgBlur"/></div>
-          </fieldset>
+      <!-- Settings 弹窗 -->
+      <div v-if="showSettingsModal" class="modal show settings-modal">
+        <div class="box">
+          <!-- 右上角关闭 -->
+          <span class="close" @click="showSettingsModal = false">×</span>
 
-          <fieldset>
-            <legend>桌宠 / LLM</legend>
-            <div class="setting-item"><span>显示桌宠</span><input type="checkbox" v-model="petEnabled"/></div>
-            <div class="setting-item"><span>桌宠类型</span>
-              <select v-model="petType">
-                <option value="cat">猫娘</option><option value="bird">魈鸟</option>
-              </select>
-            </div>
-            <div class="setting-item"><span>启用 LLM</span><input type="checkbox" v-model="llmEnabled"/></div>
-            <div class="setting-item"><span>桌宠 Prompt</span><input v-model="petPrompt"/></div>
-          </fieldset>
-
-          <fieldset>
-            <legend>账户</legend>
-            <div class="setting-item">
-              <span>头像</span>
-              <div class="avatar-group">
-                <label class="btn-ghost upload-btn">
-                  <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
-                  <input type="file" accept="image/*" @change="changeAvatar"/>
-                </label>
-                <img 
-                  :src="getAvatar(currentUser)"
-                  alt="Avatar" 
-                  style="width:40px;height:40px;border-radius:50%;"/>
-              </div>
-            </div>
-            <div class="setting-item"><span>我的昵称</span><input type="text" v-model="localDisplayName" @input="updateDisplayName"/></div>
-            <div class="setting-item"><span>更改密码</span><button class="btn-ghost" @click="openPasswordModal">更改密码</button></div>
-          </fieldset>
-
-          <fieldset id="badge-field">
-            <legend>勋章</legend>
-            <div class="setting-item" style="flex-direction:row;align-items:center;">
-              <button class="btn-ghost" @click="openBadgeModal">更换勋章</button>
-            </div>
-          </fieldset>
-          <!-- —— Admin 管理面板 —— -->
-          <fieldset v-if="currentUser === '217122260'">
-            <legend>账号管理（Admin）</legend>
-            <div v-for="uid in allowedUids" :key="uid" class="setting-item admin-row">
-              <span class="admin-uid">{{ uid }}</span>
-              <div class="admin-buttons">
-                <button class="btn-ghost" @click="resetPassword(uid)">重置密码</button>
-                <button class="btn-ghost" @click="removeAllowedUid(uid)">移除白名单</button>
-                <button class="btn-ghost" @click="openAdminPwdModal(uid)">设定密码</button>
-              </div>
-            </div>
-
-            <div class="setting-item">
-              <input v-model="newAdminUid" placeholder="新 UID" class="setting-item__input"/>
-              <button class="btn-publish" @click="addAllowedUid">新增</button>
-            </div>
-          </fieldset>
-          <!-- —— Admin 密码 Modal —— -->
-          <div v-if="adminPwdModalVisible" class="modal show">
-            <div class="box" style="max-width:360px;">
-              <span class="close" @click="closeAdminPwdModal">×</span>
-              <h3>为 {{ adminTargetUid }} 设置密码</h3>
-              <div style="margin:16px 0;">
-                <input
-                  v-model="adminNewPassword"
-                  type="password"
-                  placeholder="新密码（至少4位）"
-                  class="setting-item__input"
-                />
-              </div>
-              <button class="btn-publish" @click="confirmAdminSetPassword">确定</button>
-            </div>
-          </div>
+          <!-- 这里直接渲染 SettingsPanel -->
+          <SettingsPanel
+            v-model:theme="theme"
+            v-model:bgSrc="bgSrc"
+            v-model:bgOpacity="bgOpacity"
+            v-model:bgBlur="bgBlur"
+            v-model:loadMode="loadMode"
+            v-model:imageInsertMode="imageInsertMode"
+            v-model:petEnabled="petEnabled"
+            v-model:llmEnabled="llmEnabled"
+            v-model:localDisplayName="localDisplayName"
+            v-model:selectedBadge="selectedBadge"
+            :allowedBadges="allowedBadges"
+            :allowedUids="allowedUids"
+            :currentUser="currentUser"
+            bestBadgeUid="246490729"
+            adminUid="217122260"
+            @open-password-modal="openPasswordModal"
+            @open-badge-modal="openBadgeModal"
+            @reset-password="resetPassword"
+            @add-allowed-uid="addAllowedUid"
+            @remove-allowed-uid="removeAllowedUid"
+            @open-admin-pwd-modal="openAdminPwdModal"
+          />
         </div>
-      </section>
+      </div>
+
 
       <!-- 勋章 Modal -->
       <div v-if="showBadgeModal" class="modal show">
@@ -438,84 +469,92 @@
       </div>
 
       <!-- 图片 Slider Modal -->
-      <div v-if="showModal" class="modal show slider-modal" @click.self="closeInfoSidebar">
-        <div class="box">
-          <span class="close" @click="closeModal">×</span>
-          <!-- Modal 图片菜单按钮 -->
-          <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
-          <!-- Modal 信息按钮 -->
-          <span
-            class="info-btn"
-            @click="toggleInfoSidebar"
-            :aria-label="showInfoSidebar ? '收起信息' : '查看信息'"
-          >
-            <!-- 圆圈里的 i，和 iOS 类似 -->
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
-              <line   x1="12" y1="8"  x2="12" y2="8"  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <line   x1="12" y1="11" x2="12" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-          </span>
-
-          <!-- Modal 图片操作菜单 -->
-          <div v-if="showImageOptions" class="modal-options">
-            <button @click="openPlaceModal('image', modalPost)">编辑地点</button>
-          </div>
-          <div class="slider-content">
-            <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
-            <!-- 桌面鼠标滚轮 -->
-            <img
-              class="slider-img"
-              :src="modalImgs[modalIndex]"
-              :style="{ transform: 'scale(' + modalZoom + ')', transition: 'transform .15s' }"
-              @load="handleImgLoad"
-              @wheel.prevent="onWheelZoom"
-            />
-
-            <button class="slider-btn right" @click="nextModalImg" :disabled="modalIndex===modalImgs.length-1">›</button>
-          </div>
-          <!-- 新增：固定在右下角的删除按钮 -->
-          <button class="modal-delete-btn" @click="deleteImage()">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-          <!-- 缩放条 + 放大镜 -->
-          <div class="zoom-control">
-            <svg class="zoom-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
-              <line   x1="16" y1="16" x2="22" y2="22" stroke="currentColor" stroke-width="2"
-                      stroke-linecap="round"/>
-            </svg>
-            <input
-              type="range"
-              :min="minZoom"
-              :max="maxZoom"
-              step="0.1"
-              v-model.number="modalZoom"
-            />
-          </div>
-          <!-- 侧边栏：照片信息 -->
-          <transition name="sidebar-slide">
-            <div
-              v-if="showInfoSidebar"
-              class="info-sidebar"
+        <div v-if="showModal" class="modal show slider-modal" @click.self="closeInfoSidebar">
+          <div class="box">
+            <span class="close" @click="closeModal">×</span>
+            <!-- Modal 图片菜单按钮 -->
+            <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
+            <!-- Modal 信息按钮 -->
+            <span
+              class="info-btn"
+              @click="toggleInfoSidebar"
+              :aria-label="showInfoSidebar ? '收起信息' : '查看信息'"
             >
-              <p><b>尺寸：</b>{{ infoSize }}</p>
-              <p>
-                <b>地点：</b>
-                {{ modalPost.imgPlaces[modalIndex] || modalPost.place || '未知' }}
-              </p>
-              <p><b>日期：</b>{{ new Date(modalPost.ts).toLocaleString() }}</p>
+              <!-- 圆圈里的 i，和 iOS 类似 -->
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+                <line   x1="12" y1="8"  x2="12" y2="8"  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line   x1="12" y1="11" x2="12" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </span>
+
+            <!-- Modal 图片操作菜单 -->
+            <transition name="options-pop">
+              <div v-if="showImageOptions" class="modal-options">
+                <button class="edit-place-btn" @click="openPlaceModal('image', modalPost)">
+                   <!-- Location Marker 图标 -->
+                   <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linejoin="round">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                    <circle cx="12" cy="9" r="2.5"/>
+                  </svg>
+                </button>
+              </div>
+            </transition>
+            <div class="slider-content">
+              <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex===0">‹</button>
+              <!-- 桌面鼠标滚轮 -->
+              <img
+                class="slider-img"
+                :src="modalImgs[modalIndex]"
+                :style="{ transform: 'scale(' + modalZoom + ')', transition: 'transform .15s' }"
+                @load="handleImgLoad"
+                @wheel.prevent="onWheelZoom"
+              />
+
+              <button class="slider-btn right" @click="nextModalImg" :disabled="modalIndex===modalImgs.length-1">›</button>
             </div>
-          </transition>
-                    
-          <div class="modal-meta">
-            {{ modalIndex + 1 }} / {{ modalImgs.length }}
+            <!-- 新增：固定在右下角的删除按钮 -->
+            <button class="modal-delete-btn" @click="deleteImage()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6"
+                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <!-- 缩放条 + 放大镜 -->
+            <div class="zoom-control">
+              <svg class="zoom-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none"/>
+                <line   x1="16" y1="16" x2="22" y2="22" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round"/>
+              </svg>
+              <input
+                type="range"
+                :min="minZoom"
+                :max="maxZoom"
+                step="0.1"
+                v-model.number="modalZoom"
+              />
+            </div>
+            <!-- 侧边栏：照片信息 -->
+            <transition name="sidebar-slide">
+              <div
+                v-if="showInfoSidebar"
+                class="info-sidebar"
+              >
+                <p><b>尺寸：</b>{{ infoSize }}</p>
+                <p>
+                  <b>地点：</b>
+                  {{ modalPost.imgPlaces[modalIndex] || modalPost.place || '未知' }}
+                </p>
+                <p><b>日期：</b>{{ new Date(modalPost.ts).toLocaleString() }}</p>
+              </div>
+            </transition>
+                      
+            <div class="modal-meta">
+              {{ modalIndex + 1 }} / {{ modalImgs.length }}
+            </div>
           </div>
         </div>
-      </div>
       <!-- 编辑地点 Modal -->
       <div v-if="showPlaceModal" class="modal show">
         <div class="box" style="max-width:320px;padding:16px;position:relative;">
@@ -574,12 +613,13 @@
 /* ===== 登录白名单 & 常量 ===== */
 const BEST_BADGE_UID    = '246490729';                 // 佩戴「最好的大佬」勋章的 UID
 import LoginModal from '@/components/LoginModal.vue';
+import SettingsPanel from '@/components/SettingsPanel.vue';
 import { getAllowedUids, setAllowedUids } from '@/config/auth';
 import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
 
 export default {
   name: 'App',
-  components: { LoginModal },
+  components: { LoginModal, SettingsPanel },
   /* ---------- data ---------- */
   data() {
     const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
@@ -607,6 +647,7 @@ export default {
       isPublishing: false,    // 按钮 loading
       isListLoading: false,   // 列表骨架屏
 
+      
       // —— 分页加载配置 —— 
       loadedCount: 5,  // 初始加载 5 条
       loadStep: 5,     // 每次点击再加载 5 条
@@ -634,12 +675,13 @@ export default {
       minZoom : 0.5,         // 下限
       maxZoom : 3,           // 上限
 
-      /* 设置 */
+      loadMode: localStorage.getItem('loadMode') || 'manual', 
       petEnabled: true,
       petType: 'cat',
       llmEnabled: true,
       petPrompt: '喵～ 记得喝水喔！',
       localDisplayName: localStorage.getItem('displayName_' + (storedUser || '')) || '',
+      imageInsertMode: localStorage.getItem('imageInsertMode') || 'preview',
 
       /*头像 */ 
       avatarMap: {
@@ -682,6 +724,8 @@ export default {
       stickerPage      : 0,   // 当前页
       stickersPerPage  : 32,  // 每页多少张
       savedRange       : null,   // ⭐︎ 光标缓存
+        
+      showSettingsModal: false,
 
       /* 管理员 */
       adminPwdModalVisible: false,
@@ -700,7 +744,7 @@ export default {
 
       imageNewPlace: '',  // Modal 编辑时用的 v-model
       postNewPlace: '',   // 动态列表编辑时用的 v-model
-        
+      visibleComments: {},   // key: post.id, value: Boolean  
     };
   },
 
@@ -772,8 +816,21 @@ export default {
   },
 
   watch: {
+    theme (val) {
+      // 任何地方把 theme 改成 'dark' / 'light'，都会自动同步 DOM 和 localStorage
+      document.body.classList.toggle('dark', val === 'dark');
+      localStorage.setItem('theme', val);
+    },
     bgOpacity: 'saveBgOpacity',
     bgBlur: 'saveBgBlur',
+    loadMode(val) {
+      localStorage.setItem('loadMode', val);
+      this.updateLoadBehavior();
+    },
+    imageInsertMode(val) {
+      localStorage.setItem('imageInsertMode', val);
+    },
+
     // 本地改名时，立刻写入 localStorage
     localDisplayName(newName) {
       localStorage.setItem('displayName_' + (this.currentUser || ''), newName);
@@ -851,8 +908,7 @@ export default {
     scrollTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); },
     getAvatar(uid){
       if (!this.avatarMap[uid]){
-        this.$set(this.avatarMap, uid,
-          localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60');
+        this.avatarMap[uid] = localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60';
       }
       return this.avatarMap[uid];
     },
@@ -868,7 +924,10 @@ export default {
     toggleNavDropdown() {
       this.navDropdownVisible = !this.navDropdownVisible;
       },
-
+    toggleComments(post) {
+      // Vue3 响应式里直接赋值即可
+      this.visibleComments[post.id] = !this.visibleComments[post.id];
+    },
 
     /* ========== 投稿 ========== */
     handleInput(e) {
@@ -886,7 +945,42 @@ export default {
       })
       this.newPostText = txt
     },
-    handlePostImages(e){ this.draftImgs=[]; Array.from(e.target.files).slice(0,50).forEach(f=>this.draftImgs.push(URL.createObjectURL(f))); },
+    handlePostImages(e) {
+      const files = Array.from(e.target.files).slice(0, 50);
+
+      // ① “正文内嵌” —— 像贴图一样插入 <img>
+      if (this.imageInsertMode === 'inline') {
+        files.forEach(f => {
+          const url = URL.createObjectURL(f);
+          this.draftImgs.push(url);
+
+          // —— 在光标处插入一张 <img.inline-sticker> —— 
+          this.restoreCaret();
+          const sel = window.getSelection();
+          if (!sel || !sel.rangeCount) return;
+          const range = sel.getRangeAt(0);
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = 'inline-sticker';
+          img.contentEditable = false;
+          range.insertNode(img);
+          range.collapse(false);
+
+          // 在图片后插入一个空格，保持输入流畅
+          this.insertAtCaret(' ');
+        });
+
+        // DOM 变动后，同步更新 markdown 内容
+        this.handleInput({ target: this.$refs.postInput });
+      }
+
+      // ② “预览区” —— 传统的图片预览模式
+      else {
+        this.draftImgs = [];
+        files.forEach(f => this.draftImgs.push(URL.createObjectURL(f)));
+      }
+    },
+    
     removeDraft(i){ this.draftImgs.splice(i,1); },
     autoResize(e) {
       const el = e.target;
@@ -955,7 +1049,7 @@ export default {
         this.posts=this.posts.filter(x=>x.id!==p.id);
         localStorage.setItem('posts', JSON.stringify(this.posts.map(q=>({...q,imgs:[]}))));
       }
-    },
+    },  
     /* === 自定义表情 === */
     toggleStickerPicker () {
       if (!this.stickerPickerVisible) {      // 正在“打开”面板
@@ -1225,6 +1319,20 @@ export default {
       this.postOptionsPost = null;
     },
     // 点击“加载更多”
+    updateLoadBehavior() {
+      window.removeEventListener('scroll', this.onScrollLoad);
+      if (this.loadMode === 'auto') {
+        window.addEventListener('scroll', this.onScrollLoad);
+      }
+    },
+    onScrollLoad() {
+      const scrollBottom = window.innerHeight + window.scrollY;
+      const listBottom  = document.getElementById('moments-list').offsetHeight;
+      // 如果滚动到接近底部，就加载更多
+      if (scrollBottom >= listBottom - 200) {
+        this.loadMore();
+      }
+    },
     loadMore() {
       this.loadedCount += this.loadStep;
     },
@@ -1251,6 +1359,11 @@ export default {
       const r=new FileReader();
       r.onload=ev=>{ this.bgSrc=ev.target.result; localStorage.setItem('bgSrc', this.bgSrc); };
       r.readAsDataURL(f);
+    },
+
+    clearBackground() {
+      this.bgSrc = '';
+      localStorage.removeItem('bgSrc');
     },
     saveBgOpacity(){ localStorage.setItem('bgOpacity', this.bgOpacity); },
     saveBgBlur(){ localStorage.setItem('bgBlur', this.bgBlur); },
@@ -1337,8 +1450,8 @@ export default {
     closeAdminPwdModal() {
       this.adminPwdModalVisible = false;
     },
-    addAllowedUid() {
-      const u = this.newAdminUid.trim();
+    addAllowedUid(uid) { 
+      const u = (uid || '').trim(); 
       if (!u) return alert('请输入 UID');
       const list = Array.from(new Set([...this.allowedUids, u])); // ← 用当前响应式数据
       setAllowedUids(list);              // 写入 localStorage
@@ -1393,6 +1506,7 @@ export default {
   },
 
   mounted() {
+    this.updateLoadBehavior();
     const ctx = require.context(
       '@/assets/stickers/原神表情', // 表情图的根目录
       true,                        // 递归子目录
@@ -1421,6 +1535,7 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleGlobalClick);
+    window.removeEventListener('scroll', this.onScrollLoad);
   },
   
 };
@@ -1434,10 +1549,11 @@ export default {
   --radius:14px;--blur:16px;--glass-border:1px solid rgba(0,0,0,0.1);
   --login-bg:#f5f5f5;--login-text:#333;--login-border:rgba(0,0,0,0.1);
   --bg-opacity:.35;--bg-blur:4px;
+  --card-hover-light: rgba(255,255,255,0.9);
 }
 body.dark{
   background:var(--bg-dark);color:var(--text-dark);
-  --login-bg:#1c1c1c;--login-text:#d2d2d2;--login-border:rgba(255,255,255,0.1);
+  --login-bg:#1c1c1c;--login-text:#d2d2d2;--login-border:rgba(255,255,255,0.1);--card-hover-dark: rgba(60,60,61,0.55);
 }
 html,body{margin:0;padding:0;height:100%;font-family:Inter,\"PingFang SC\",sans-serif;transition:.3s background-color,.3s color}
 a{color:inherit;text-decoration:none;cursor:pointer}
@@ -1449,8 +1565,8 @@ a{color:inherit;text-decoration:none;cursor:pointer}
 
 /* 导航栏 */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
-  padding:10px 22px;background:rgba(255,255,255,0.15);backdrop-filter:blur(var(--blur));border-bottom:var(--glass-border)}
-body.dark nav{background:rgba(0,0,0,0.18);border-bottom:1px solid rgba(255,255,255,0.1)}
+  background:rgba(255,255,255,0.18);  backdrop-filter: blur(20px);border-bottom:var(--glass-border);padding: 14px 24px}
+body.dark nav{background:rgba(0,0,0,0.22);border-bottom:1px solid rgba(255,255,255,0.1)}
 .logo{font-weight:700;font-size:20px}
 .menu{display:flex;gap:18px;align-items:center}
 .menu a{padding:6px 12px;border-radius:var(--radius);transition:.25s background}
@@ -1458,32 +1574,75 @@ body.dark nav{background:rgba(0,0,0,0.18);border-bottom:1px solid rgba(255,255,2
 body.dark .menu a:hover{background:rgba(255,255,255,0.12)}
 .red{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:4px}
 /* ---------- 玻璃背景·系统原生下拉 ---------- */
+/* —— Select 外观 —— */
 .np-toolbar select,
-.setting-item select{
-  /* 半透明卡片背景 + 毛玻璃，别动箭头 */
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border: var(--glass-border);
+.setting-item select {
+  background: #fff;                    /* 亮色模式：纯白底 */
+  color: #333;                         /* 高对比深色文字 */
+  border: 1px solid #ccc;             /* 温和灰边，不抢眼 */
+  box-shadow: none;
   border-radius: var(--radius);
-
-  padding: 6px 12px;          /* 正常左右内边距 */
-  font-size: 14px;
-  color: var(--text-light);   /* 白天深灰字 */
-  cursor: pointer;
+  padding: 6px 12px;
+  appearance: none;                    /* 去掉系统默认样式 */
 }
 
-/* 深色主题：保持同色系即可，别再灰白 */
+/* 深色模式 */
 body.dark .np-toolbar select,
-body.dark .setting-item select{
-  background: var(--card-dark);  /* 半透明黑 */
-  color: var(--text-dark);       /* 亮灰字（易读） */
+body.dark .setting-item select {
+  background: #1e1e1e;                 /* 深色模式：纯暗底 */
+  color: #d2d2d2;                      /* 亮灰文字 */
+  border: 1px solid #444;
 }
-/* 深色模式：给 option 单行上色 */
+
+/* 聚焦态用主题色框住 */
+.np-toolbar select:focus,
+.setting-item select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-alpha, rgba(74,144,226,0.2));
+}
+
+/* —— Option 外观 —— */
+/* 纯色底，保证对比 */
+.np-toolbar select option,
+.setting-item select option {
+  background: inherit;                 /* 跟随父 select 的底色 */
+  color: inherit;
+  padding: 0.5em 1em;
+  line-height: 1.6;
+}
+
+/* Hover／选中反馈 */
+.np-toolbar select option:hover,
+.setting-item select option:hover {
+  background: rgba(74,144,226,0.1);    /* 主色 10% 透明度 */
+}
+
+/* 暗色下的下拉选项：深灰 + 亮灰文字 */
 body.dark .np-toolbar select option,
 body.dark .setting-item select option {
-  background-color: rgba(30,30,31,0.9);  /* 深底 */
-  color: #f0f0f0;                         /* 浅字 */
+  background: #2a2a2a;    /* 深灰：比纯黑柔和 */
+  color: #e0e0e0;         /* 亮灰，减少眼睛疲劳 */
 }
+
+/* hover 时微微提亮，给出反馈 */
+body.dark .np-toolbar select option:hover,
+body.dark .setting-item select option:hover {
+  background: #3a3a3a;    /* Hover 深灰，比默认提亮约 10% */
+}
+
+/* 自定义下拉箭头 */
+.np-toolbar select {
+  background-image:
+    url("data:image/svg+xml;charset=UTF-8,<svg fill='%23333' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'><path d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 12px) center;
+}
+body.dark .np-toolbar select {
+  background-image:
+    url("data:image/svg+xml;charset=UTF-8,<svg fill='%23d2d2d2' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'><path d='M0 0l5 6 5-6z'/></svg>");
+}
+
 
 
 /* 获得焦点时给 1px 黑边就够 */
@@ -1548,14 +1707,60 @@ body.dark .np-top textarea{background:var(--card-dark);color:var(--text-dark)}
 .actions svg{width:18px;height:18px;fill:currentColor}
 .more{cursor:pointer;font-size:18px;padding:2px 6px;border-radius:50%;transition:.2s background}
 .more:hover{background:rgba(0,0,0,0.08)}
+.post .head {
+  position: relative;
+}
+.post .more {
+  position: relative;
+  z-index: 101;           /* 略高于 .post-options */
+}
 .post-options {
-  position: absolute; top: 40px; right: 22px;
+  position: absolute; top: calc(100% + 4px); left: 0;
   background: var(--card-light); padding:4px; border-radius:6px;
   backdrop-filter: blur(calc(var(--blur)/2));
-  display:flex; flex-direction:column;
+  display:flex; flex-direction:column; z-index: 100; 
+  min-width: max-content;  
+}
+.more-wrapper {
+  position: relative;
+  display: inline-block;  /* 让宽度包裹按钮 */
 }
 body.dark .post-options { background: var(--card-dark); }
 .post-options button { background:none; border:none; cursor:pointer; text-align:left; padding:4px 8px;}
+#moments-list .post.card {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px; /* 更舒适的PC内边距 */
+}
+.post-options .edit-place-btn {
+  /* same “glass” button look as .trash-btn */
+  background: rgba(120, 120, 120, 0.15);
+  border: 1px solid rgba(200, 200, 200, 0.4);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 6px rgba(120, 120, 120, 0.6);
+  cursor: pointer;
+  transition: transform .1s, box-shadow .2s, background .2s;
+}
+.post-options .edit-place-btn:hover {
+  background: rgba(120, 120, 120, 0.25);
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(120, 120, 120, 0.8);
+}
+/* make the SVG inside fill currentColor & size nicely */
+.post-options .edit-place-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+
+
 
 
 /* 评论 */
@@ -1587,8 +1792,6 @@ body.dark .album-tabs button:hover{background:rgba(255,255,255,0.1)}
 .photo:hover img{transform:scale(1.05)}
 .photo span{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.45);color:#fff;font-size:12px;padding:2px 6px;border-radius:var(--radius)}
 
-/* 设置 */
-#settings{padding:40px 8%}
 fieldset{border:none;padding:0;margin:0 0 24px}
 legend{font-weight:600;font-size:15px;margin-bottom:8px}
 .setting-item{display:flex;justify-content:space-between;align-items:center;margin:12px 0}
@@ -2088,7 +2291,7 @@ position: absolute;
 top: calc(100% + 8px);
 left: 0;
 background: var(--card-light);
-backdrop-filter: blur(calc(var(--blur)/2));
+backdrop-filter: blur(12px);
 border: var(--glass-border);
 border-radius: var(--radius);
 display: flex;
@@ -2104,17 +2307,17 @@ width: auto;
 white-space: normal;
 background: none;
 border: none;
-padding: 8px 16px;
+padding: 12px 16px;
 text-align: left;
 cursor: pointer;
 font-size: 14px;
 color: var(--text-light);
 }
 .dropdown-item:hover {
-background: rgba(0,0,0,0.08);
+background: rgba(0,0,0,0.1);
 }
 body.dark .nav-dropdown { background: var(--card-dark); }
-body.dark .dropdown-item:hover { background: rgba(255,255,255,0.12); }
+body.dark .dropdown-item:hover { background: rgba(255,255,255,0.15); }
 body.dark .dropdown-item {
 color: #fff;
 }
@@ -2123,7 +2326,7 @@ color: #fff;
 display: flex;
 flex-direction: column;
 align-items: center;
-gap: 4px;
+gap: 2px;
 padding: 6px 8px;
 border-radius: var(--radius);
 transition: background .25s;
@@ -2134,10 +2337,13 @@ background: rgba(0,0,0,0.08);
 body.dark .menu .nav-item:hover {
 background: rgba(255,255,255,0.12);
 }
+.menu .nav-item.nav-item-submit {
+  gap: 1.5px;
+}
 
 .nav-icon {
-width: 20px;
-height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .nav-label {
@@ -2147,6 +2353,11 @@ color: var(--text-light);
 body.dark .nav-label {
 color: var(--text-dark);
 }
+.nav-item-submit .nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
 /* 让 textarea 成为相对定位的参照物 */
 .np-input-wrapper{
 position: relative;
@@ -2319,5 +2530,175 @@ body.dark .ta-preview {
   color: #888;
   pointer-events: none;
 }
+/* 进场（enter）和离场（leave）的动画 */
+.dropdown-fade-enter-active,
+.dropdown-fade-leave-active {
+  transition: all 0.25s ease;
+}
+
+.dropdown-fade-enter-from,
+.dropdown-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;           /* 图标和文字之间的距离 */
+  padding: 12px 16px; /* 更大的点击区域 */
+  font-size: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background .25s;
+}
+
+.dropdown-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+}
+/* —— 每个 fieldset 之间增加垂直间距 —— */
+fieldset + fieldset {
+  margin-top: 36px;
+}
+
+/* —— 更醒目的分组标题 —— */
+legend {
+  font-size: 18px;                      /* 字号调大 */
+  font-weight: 700;                     /* 加粗 */
+  margin-bottom: 16px;                  /* 与内容保持呼吸感 */
+  border-bottom: 1px solid rgba(0,0,0,0.1); /* 底部细线分隔 */
+  padding-bottom: 4px;                  /* 线和文字间距 */
+}
+
+/* —— 深色模式下调整分隔线颜色 —— */
+body.dark legend {
+  border-color: rgba(255,255,255,0.2);
+}
+
+
+/* 容器去掉滚动条，三列等宽 */
+.post .photos {
+  display: grid;
+  grid-template-columns: repeat(3, 0.5fr);
+  gap: 8px;
+  overflow: visible; /* 不要再 overflow-x:auto */
+  padding-right: 20%;
+}
+
+/* 缩略图容器保持裁剪逻辑 */
+.post .photos .thumb {
+  position: relative;       /* 为 overlay 提供定位上下文 */
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f0f0f0;
+  max-height: 120px; 
+  
+}
+.post .photos .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* 第三张上的 +N 遮罩 */
+.post .photos .thumb-overlay {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.stack-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.overlay-count {
+  line-height: 1; /* 让数字垂直居中 */
+}
+
+.options-pop-enter-active { transition: transform .18s ease-out, opacity .18s ease-out; }
+.options-pop-leave-active { transition: transform .14s ease-in, opacity .14s ease-in; }
+.options-pop-enter-from,
+.options-pop-leave-to { transform: translateY(-8px) scale(0.95); opacity: 0; }
+.options-pop-enter-to,
+.options-pop-leave-from { transform: translateY(0) scale(1); opacity: 1; }
+
+.modal-options .edit-place-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(120, 120, 120, 0.15);
+  border: 1px solid rgba(200, 200, 200, 0.4);
+  width: auto;
+  padding: 6px 10px;
+  border-radius: 50%;
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+}
+.modal-options .edit-place-btn:hover {
+  background: rgba(120, 120, 120, 0.25);
+  transform: scale(1.1);
+}
+.modal-options .edit-place-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* 图标 */
+.icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* 1. 过渡类 */
+.slide-fade-enter-active,
+.slide-fade-leave-active {
+  transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-5px);
+}
+.slide-fade-enter-to,
+.slide-fade-leave-from {
+  /* 根据你每个分组的最大高度来设一个足够大的值 */
+  max-height: 400px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 只对 Settings 弹窗生效，去掉最大高度、内部滚动，拉满宽度 */
+.settings-modal .box {
+  /* 不再限制 max-height，允许自适应内容高度 */
+  max-height: none !important;
+  height: auto !important;
+  overflow: visible !important;
+  /* 根据屏幕宽度自动伸缩，上限 1200px */
+  width: min(80vw, 1200px);
+}
+
 
 </style>
