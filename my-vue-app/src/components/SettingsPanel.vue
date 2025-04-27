@@ -212,7 +212,8 @@
           profile: true,
           assistant: true,
           publish: true,
-          admin: true
+          admin: true,
+          showSettingsModal: false,
         },
         newAdminUid: ''
       };

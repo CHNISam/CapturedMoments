@@ -101,7 +101,7 @@
               <transition name="dropdown-fade">
                 <div v-show ="navDropdownVisible" class="nav-dropdown">
                   <!-- 设置 -->
-                  <button class="dropdown-item" @click="scrollTo('settings')">
+                  <button class="dropdown-item" @click="showSettingsModal = true">
                     <!-- 齿轮图标 -->
                     <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <circle cx="12" cy="12" r="3"></circle>
@@ -389,7 +389,6 @@
             <button class="btn-ghost" @click="loadMore">加载更多</button>
           </div>
         </div>
-
       </section>
 
       <!-- ======================== 相册 ======================== -->
@@ -418,31 +417,39 @@
         <div v-if="allPhotos.length===0" style="text-align:center;margin-top:30px;color:#888">暂无照片，快去上传吧~</div>
       </section>
 
-      <SettingsPanel
-        v-model:theme="theme"
-        v-model:bgSrc="bgSrc"
-        v-model:bgOpacity="bgOpacity"
-        v-model:bgBlur="bgBlur"
-        v-model:loadMode="loadMode"
-        v-model:imageInsertMode="imageInsertMode"
-        v-model:petEnabled="petEnabled"
-        v-model:llmEnabled="llmEnabled"
-        v-model:localDisplayName="localDisplayName"
-        v-model:selectedBadge="selectedBadge"
+      <!-- Settings 弹窗 -->
+      <div v-if="showSettingsModal" class="modal show">
+        <div class="box">
+          <!-- 右上角关闭 -->
+          <span class="close" @click="showSettingsModal = false">×</span>
 
-        :allowedBadges="allowedBadges"
-        :allowedUids="allowedUids"
-        :currentUser="currentUser"
-        bestBadgeUid="246490729"
-        adminUid="217122260"
+          <!-- 这里直接渲染 SettingsPanel -->
+          <SettingsPanel
+            v-model:theme="theme"
+            v-model:bgSrc="bgSrc"
+            v-model:bgOpacity="bgOpacity"
+            v-model:bgBlur="bgBlur"
+            v-model:loadMode="loadMode"
+            v-model:imageInsertMode="imageInsertMode"
+            v-model:petEnabled="petEnabled"
+            v-model:llmEnabled="llmEnabled"
+            v-model:localDisplayName="localDisplayName"
+            v-model:selectedBadge="selectedBadge"
+            :allowedBadges="allowedBadges"
+            :allowedUids="allowedUids"
+            :currentUser="currentUser"
+            bestBadgeUid="246490729"
+            adminUid="217122260"
+            @open-password-modal="openPasswordModal"
+            @open-badge-modal="openBadgeModal"
+            @reset-password="resetPassword"
+            @add-allowed-uid="addAllowedUid"
+            @remove-allowed-uid="removeAllowedUid"
+            @open-admin-pwd-modal="openAdminPwdModal"
+          />
+        </div>
+      </div>
 
-        @open-password-modal="openPasswordModal"
-        @open-badge-modal="openBadgeModal"
-        @reset-password="resetPassword"
-        @add-allowed-uid="addAllowedUid"
-        @remove-allowed-uid="removeAllowedUid"
-        @open-admin-pwd-modal="openAdminPwdModal"
-      />
 
       <!-- 勋章 Modal -->
       <div v-if="showBadgeModal" class="modal show">
@@ -717,6 +724,8 @@ export default {
       stickerPage      : 0,   // 当前页
       stickersPerPage  : 32,  // 每页多少张
       savedRange       : null,   // ⭐︎ 光标缓存
+        
+      showSettingsModal: false,
 
       /* 管理员 */
       adminPwdModalVisible: false,
