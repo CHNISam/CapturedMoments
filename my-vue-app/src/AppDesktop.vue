@@ -517,10 +517,10 @@
             <!-- 发布与上传 -->
             <li>
               <div class="tree-node" @click="collapsedSections.publish = !collapsedSections.publish">
-                <svg class="tree-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 16v-6"/>
-                  <path d="M9 13l3-3 3 3"/>
-                  <path d="M20 16c0-2.21-1.79-4-4-4h-1.26C14.24 9.34 13.21 8 11.5 8c-1.71 0-2.74 1.34-3.24 2H7c-2.21 0-4 1.79-4 4 0 2.21 1.79 4 4 4h12c2.21 0 4-1.79 4-4z"/>
+                <!-- 发布与上传 图标 (Upload) -->
+                <svg class="tree-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10l5-5m0 0l5 5m-5-5v12"/>
                 </svg>
                 <span class="tree-label">发布与上传</span>
                 <svg class="icon" viewBox="0 0 24 24">
@@ -542,6 +542,36 @@
                 </li>
               </ul>
             </li>
+            <li v-if="currentUser === '217122260'">
+              <div class="tree-node" @click="collapsedSections.admin = !collapsedSections.admin">
+                <!-- 这里可以换成你喜欢的图标 -->
+              <!-- Heroicons outline Key -->
+              <svg class="tree-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+              </svg>
+
+
+                <span class="tree-label">账号管理（Admin）</span>
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path v-if="collapsedSections.admin" d="M9 6l6 6-6 6"/>
+                  <path v-else                 d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <ul v-show="!collapsedSections.admin">
+                <li class="setting-item" v-for="uid in allowedUids" :key="uid">
+                  <span>{{ uid }}</span>
+                  <button class="btn-ghost" @click="resetPassword(uid)">重置密码</button>
+                  <button class="btn-ghost" @click="removeAllowedUid(uid)">移除白名单</button>
+                  <button class="btn-ghost" @click="openAdminPwdModal(uid)">设定密码</button>
+                </li>
+                <li class="setting-item">
+                  <input v-model="newAdminUid" placeholder="新 UID" class="rename-input"/>
+                  <button class="btn-publish" @click="addAllowedUid">新增</button>
+                </li>
+              </ul>
+            </li>
+
           </ul>
         </div>
       </section>
