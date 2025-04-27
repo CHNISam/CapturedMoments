@@ -414,171 +414,115 @@
       <!-- ======================== 设置 ======================== -->
       <section id="settings">
         <h2 class="big">设置</h2>
-        <div class="card">
-          <!-- 外观 Accordion -->
-          <fieldset class="accordion">
-            <legend @click="collapsedSections.appearance = !collapsedSections.appearance">
-              <span>背景设置</span>
-              <svg class="accordion-icon" viewBox="0 0 24 24">
-                <path v-if="collapsedSections.appearance" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </svg>
-            </legend>
-            <transition name="accordion">
-              <div v-show="!collapsedSections.appearance" class="accordion-content">
-                <div class="setting-item">
-                  <span>暗黑模式</span>
+        <div class="card settings-tree">
+          <ul class="tree-root">
+            <!-- 视觉／界面设置 -->
+            <li>
+              <div class="tree-node" @click="collapsedSections.visual = !collapsedSections.visual">
+                <span class="tree-label">🖌️ 视觉／界面设置</span>
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path v-if="collapsedSections.visual" d="M9 6l6 6-6 6"/>
+                  <path v-else                d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <ul v-show="!collapsedSections.visual">
+                <li class="setting-item">
+                  <span>主题模式</span>
                   <input type="checkbox" :checked="theme==='dark'" @change="toggleTheme"/>
-                </div>
-                <div class="setting-item">
-                  <span>上传背景</span>
+                </li>
+                <li class="setting-item">
+                  <span>背景设置</span>
                   <label class="btn-ghost upload-btn">
-                    <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
-                    <input type="file" accept="image/*" @change="changeBackground"/>
+                    上传背景 <input type="file" accept="image/*" @change="changeBackground"/>
                   </label>
-                </div>
-                <div class="setting-item">
-                  <span>移除背景</span>
-                  <button class="btn-ghost" @click="clearBackground">移除背景</button>
-                </div>
-                <div class="setting-item">
+                </li>
+                <li class="setting-item">
                   <span>背景透明度</span>
                   <input type="range" min="0" max="1" step="0.05" v-model.number="bgOpacity"/>
-                </div>
-                <div class="setting-item">
+                </li>
+                <li class="setting-item">
                   <span>背景模糊</span>
                   <input type="range" min="0" max="20" step="1" v-model.number="bgBlur"/>
-                </div>
-              </div>
-            </transition>
-          </fieldset>
+                </li>
+              </ul>
+            </li>
 
-          <!-- 桌宠 / LLM Accordion -->
-          <fieldset class="accordion">
-            <legend @click="collapsedSections.pet = !collapsedSections.pet">
-              <span>交互助手</span>
-              <svg class="accordion-icon" viewBox="0 0 24 24">
-                <path v-if="collapsedSections.pet" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </svg>
-            </legend>
-            <transition name="accordion">
-              <div v-show="!collapsedSections.pet" class="accordion-content">
-                <div class="setting-item"><span>显示桌宠</span><input type="checkbox" v-model="petEnabled"/></div>
-                <div class="setting-item"><span>桌宠类型</span>
-                  <select v-model="petType">
-                    <option value="cat">猫娘</option>
-                    <option value="bird">魈鸟</option>
-                  </select>
-                </div>
-                <div class="setting-item"><span>启用 LLM</span><input type="checkbox" v-model="llmEnabled"/></div>
-                <div class="setting-item"><span>桌宠 Prompt</span><input v-model="petPrompt"/></div>
+            <!-- 个人资料 -->
+            <li>
+              <div class="tree-node" @click="collapsedSections.profile = !collapsedSections.profile">
+                <span class="tree-label">👤 个人资料</span>
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path v-if="collapsedSections.profile" d="M9 6l6 6-6 6"/>
+                  <path v-else                     d="M6 9l6 6 6-6"/>
+                </svg>
               </div>
-            </transition>
-          </fieldset>
-
-          <!-- 账户 Accordion -->
-          <fieldset class="accordion">
-            <legend @click="collapsedSections.account = !collapsedSections.account">
-              <span>账户</span>
-              <svg class="accordion-icon" viewBox="0 0 24 24">
-                <path v-if="collapsedSections.account" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </svg>
-            </legend>
-            <transition name="accordion">
-              <div v-show="!collapsedSections.account" class="accordion-content">
-                <div class="setting-item">
-                  <span>头像</span>
-                  <div class="avatar-group">
-                    <label class="btn-ghost upload-btn">
-                      <svg viewBox="0 0 24 24"><path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2"/></svg>
-                      <input type="file" accept="image/*" @change="changeAvatar"/>
-                    </label>
-                    <img :src="getAvatar(currentUser)" alt="Avatar" class="avatar-img"/>
-                  </div>
-                </div>
-                <div class="setting-item"><span>我的昵称</span><input type="text" v-model="localDisplayName" @input="updateDisplayName"/></div>
-                <div class="setting-item"><span>更改密码</span><button class="btn-ghost" @click="openPasswordModal">更改密码</button></div>
-              </div>
-            </transition>
-          </fieldset>
-
-          <!-- 勋章 Accordion -->
-          <fieldset class="accordion">
-            <legend @click="collapsedSections.badge = !collapsedSections.badge">
-              <span>勋章中心</span>
-              <svg class="accordion-icon" viewBox="0 0 24 24">
-                <path v-if="collapsedSections.badge" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </svg>
-            </legend>
-            <transition name="accordion">
-              <div v-show="!collapsedSections.badge" class="accordion-content">
-                <div class="setting-item">
+              <ul v-show="!collapsedSections.profile">
+                <li class="setting-item">
+                  <span>账号与安全</span>
+                  <button class="btn-ghost" @click="openPasswordModal">更改密码</button>
+                </li>
+                <li class="setting-item rename-item">
+                  <span>我的昵称</span>
+                  <input
+                    type="text"
+                    v-model="localDisplayName"
+                    @input="updateDisplayName"
+                    placeholder="输入新的昵称"
+                  />
+                </li>
+                <li class="setting-item">
+                  <span>勋章中心</span>
                   <button class="btn-ghost" @click="openBadgeModal">更换勋章</button>
-                </div>
-              </div>
-            </transition>
-          </fieldset>
+                </li>
+              </ul>
+            </li>
 
-          <!-- 上传偏好 Accordion -->
-          <fieldset class="accordion">
-            <legend @click="collapsedSections.uploadPref = !collapsedSections.uploadPref">
-              <span>发布与上传</span>
-              <svg class="accordion-icon" viewBox="0 0 24 24">
-                <path v-if="collapsedSections.uploadPref" d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-                <path v-else d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </svg>
-            </legend>
-            <transition name="accordion">
-              <div v-show="!collapsedSections.uploadPref" class="accordion-content">
-                <div class="setting-item">
-                  <span>图片插入方式</span>
+            <!-- 交互助手 -->
+            <li>
+              <div class="tree-node" @click="collapsedSections.assistant = !collapsedSections.assistant">
+                <span class="tree-label">💬 交互助手</span>
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path v-if="collapsedSections.assistant" d="M9 6l6 6-6 6"/>
+                  <path v-else                         d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <ul v-show="!collapsedSections.assistant">
+                <li class="setting-item">
+                  <span>桌宠</span><input type="checkbox" v-model="petEnabled"/>
+                </li>
+                <li class="setting-item">
+                  <span>智能助手</span><input type="checkbox" v-model="llmEnabled"/>
+                </li>
+              </ul>
+            </li>
+
+            <!-- 发布与上传 -->
+            <li>
+              <div class="tree-node" @click="collapsedSections.publish = !collapsedSections.publish">
+                <span class="tree-label">🚀 发布与上传</span>
+                <svg class="icon" viewBox="0 0 24 24">
+                  <path v-if="collapsedSections.publish" d="M9 6l6 6-6 6"/>
+                  <path v-else                 d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+              <ul v-show="!collapsedSections.publish">
+                <li class="setting-item">
+                  <span>发布设置</span>
+                  <!-- 可插入更多发布相关控件 -->
+                </li>
+                <li class="setting-item">
+                  <span>图片上传方式</span>
                   <select v-model="imageInsertMode" @change="saveImageInsertMode">
                     <option value="preview">预览区</option>
-                    <option value="inline">正文</option>
+                    <option value="inline">正文内嵌</option>
                   </select>
-                </div>
-              </div>
-            </transition>
-          </fieldset>
-
-          <!-- —— Admin 管理面板 —— -->
-          <fieldset v-if="currentUser === '217122260'">
-            <legend>账号管理（Admin）</legend>
-            <div v-for="uid in allowedUids" :key="uid" class="setting-item admin-row">
-              <span class="admin-uid">{{ uid }}</span>
-              <div class="admin-buttons">
-                <button class="btn-ghost" @click="resetPassword(uid)">重置密码</button>
-                <button class="btn-ghost" @click="removeAllowedUid(uid)">移除白名单</button>
-                <button class="btn-ghost" @click="openAdminPwdModal(uid)">设定密码</button>
-              </div>
-            </div>
-
-            <div class="setting-item">
-              <input v-model="newAdminUid" placeholder="新 UID" class="setting-item__input"/>
-              <button class="btn-publish" @click="addAllowedUid">新增</button>
-            </div>
-          </fieldset>
-          <!-- —— Admin 密码 Modal —— -->
-          <div v-if="adminPwdModalVisible" class="modal show">
-            <div class="box" style="max-width:360px;">
-              <span class="close" @click="closeAdminPwdModal">×</span>
-              <h3>为 {{ adminTargetUid }} 设置密码</h3>
-              <div style="margin:16px 0;">
-                <input
-                  v-model="adminNewPassword"
-                  type="password"
-                  placeholder="新密码（至少4位）"
-                  class="setting-item__input"
-                />
-              </div>
-              <button class="btn-publish" @click="confirmAdminSetPassword">确定</button>
-            </div>
-          </div>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </section>
+
 
       <!-- 勋章 Modal -->
       <div v-if="showBadgeModal" class="modal show">
@@ -805,13 +749,14 @@ export default {
 
       /* 设置 */
       collapsedSections: {
-        appearance: true,
-        pet: true,
-        account: true,
-        badge: true,
-        uploadPref: true,
+        visual: true,
+        profile: true,
+        assistant: true,
+        publish: true,
+        // 保留旧的 admin，如果还要用
         admin: true,
       },
+
       petEnabled: true,
       petType: 'cat',
       llmEnabled: true,
@@ -2719,35 +2664,57 @@ body.dark legend {
   width: 16px;
   height: 16px;
 }
-/* 折叠过渡 */
-.accordion-content {
-  overflow: hidden;
-}
-.accordion-enter-active,
-.accordion-leave-active {
-  transition: max-height .25s ease, opacity .25s ease;
-}
-.accordion-enter-from,
-.accordion-leave-to {
-  max-height: 0;
-  opacity: 0;
-}
-.accordion-enter-to,
-.accordion-leave-from {
-  max-height: 500px; /* 大于内容最高高度 */
-  opacity: 1;
-}
+/* 树状结构基础 */
+.settings-tree ul { list-style: none; padding-left: 0; margin: 0; }
+.settings-tree .tree-root > li { margin-bottom: 16px; }
 
-/* legend 鼠标提示 */
-.accordion legend {
+/* 一级节点 */
+.tree-node {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 8px 12px;
   cursor: pointer;
+  user-select: none;
+  border-radius: 6px;
+  transition: background .2s;
 }
-.accordion-icon {
-  width: 18px;
-  height: 18px;
+.tree-node:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+/* 二级列表 */
+.settings-tree ul ul {
+  margin-top: 6px;
+  padding-left: 20px;
+  border-left: 2px dashed rgba(0,0,0,0.1);
+}
+
+/* 图标 */
+.icon {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+}
+
+
+/* 重命名输入框 */
+.rename-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0;
+}
+.rename-item input {
+  width: 140px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.rename-item input:focus {
+  border-color: var(--primary);
+  outline: none;
 }
 
 </style>
