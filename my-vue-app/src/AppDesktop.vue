@@ -79,10 +79,14 @@
             @click.prevent="scrollTo('moments')"
             class="nav-item nav-item-submit"
           >
-          <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 11l-5 5v4h4l5-5" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 3a1.5 1.5 0 010 2.121L13.879 12.243a1.5 1.5 0 01-2.121 0L5 5.484a1.5 1.5 0 012.121-2.121l6.758 6.758a1.5 1.5 0 002.121 0L21 3z" />
+          <svg xmlns="http://www.w3.org/2000/svg"
+              class="nav-icon"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2">
+            <line x1="12" y1="5"  x2="12" y2="19" stroke-linecap="round"/>
+            <line x1="5"  y1="12" x2="19" y2="12" stroke-linecap="round"/>
           </svg>
 
             <span class="nav-label">投稿</span>
@@ -2414,6 +2418,11 @@ color: var(--text-light);
 body.dark .nav-label {
 color: var(--text-dark);
 }
+.nav-item-submit .nav-icon {
+  width: 24px;
+  height: 24px;
+}
+
 /* 让 textarea 成为相对定位的参照物 */
 .np-input-wrapper{
 position: relative;
