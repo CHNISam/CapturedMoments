@@ -461,8 +461,8 @@
                 <li class="setting-item">
                   <span>动态加载模式</span>
                   <select v-model="loadMode" @change="saveLoadMode">
-                    <option value="auto">自动加载</option>
-                    <option value="manual">手动加载</option>
+                    <option value="auto">自动</option>
+                    <option value="manual">手动</option>
                   </select>
                 </li>
 
@@ -525,7 +525,7 @@
                   <span>桌宠</span><input type="checkbox" v-model="petEnabled"/>
                 </li>
                 <li class="setting-item">
-                  <span>智能助手</span><input type="checkbox" v-model="llmEnabled"/>
+                  <span>AI</span><input type="checkbox" v-model="llmEnabled"/>
                 </li>
               </ul>
             </li>
@@ -1717,32 +1717,75 @@ body.dark nav{background:rgba(0,0,0,0.22);border-bottom:1px solid rgba(255,255,2
 body.dark .menu a:hover{background:rgba(255,255,255,0.12)}
 .red{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:4px}
 /* ---------- 玻璃背景·系统原生下拉 ---------- */
+/* —— Select 外观 —— */
 .np-toolbar select,
-.setting-item select{
-  /* 半透明卡片背景 + 毛玻璃，别动箭头 */
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border: var(--glass-border);
+.setting-item select {
+  background: #fff;                    /* 亮色模式：纯白底 */
+  color: #333;                         /* 高对比深色文字 */
+  border: 1px solid #ccc;             /* 温和灰边，不抢眼 */
+  box-shadow: none;
   border-radius: var(--radius);
-
-  padding: 6px 12px;          /* 正常左右内边距 */
-  font-size: 14px;
-  color: var(--text-light);   /* 白天深灰字 */
-  cursor: pointer;
+  padding: 6px 12px;
+  appearance: none;                    /* 去掉系统默认样式 */
 }
 
-/* 深色主题：保持同色系即可，别再灰白 */
+/* 深色模式 */
 body.dark .np-toolbar select,
-body.dark .setting-item select{
-  background: var(--card-dark);  /* 半透明黑 */
-  color: var(--text-dark);       /* 亮灰字（易读） */
+body.dark .setting-item select {
+  background: #1e1e1e;                 /* 深色模式：纯暗底 */
+  color: #d2d2d2;                      /* 亮灰文字 */
+  border: 1px solid #444;
 }
-/* 深色模式：给 option 单行上色 */
+
+/* 聚焦态用主题色框住 */
+.np-toolbar select:focus,
+.setting-item select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-alpha, rgba(74,144,226,0.2));
+}
+
+/* —— Option 外观 —— */
+/* 纯色底，保证对比 */
+.np-toolbar select option,
+.setting-item select option {
+  background: inherit;                 /* 跟随父 select 的底色 */
+  color: inherit;
+  padding: 0.5em 1em;
+  line-height: 1.6;
+}
+
+/* Hover／选中反馈 */
+.np-toolbar select option:hover,
+.setting-item select option:hover {
+  background: rgba(74,144,226,0.1);    /* 主色 10% 透明度 */
+}
+
+/* 暗色下的下拉选项：深灰 + 亮灰文字 */
 body.dark .np-toolbar select option,
 body.dark .setting-item select option {
-  background-color: rgba(30,30,31,0.9);  /* 深底 */
-  color: #f0f0f0;                         /* 浅字 */
+  background: #2a2a2a;    /* 深灰：比纯黑柔和 */
+  color: #e0e0e0;         /* 亮灰，减少眼睛疲劳 */
 }
+
+/* hover 时微微提亮，给出反馈 */
+body.dark .np-toolbar select option:hover,
+body.dark .setting-item select option:hover {
+  background: #3a3a3a;    /* Hover 深灰，比默认提亮约 10% */
+}
+
+/* 自定义下拉箭头 */
+.np-toolbar select {
+  background-image:
+    url("data:image/svg+xml;charset=UTF-8,<svg fill='%23333' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'><path d='M0 0l5 6 5-6z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 12px) center;
+}
+body.dark .np-toolbar select {
+  background-image:
+    url("data:image/svg+xml;charset=UTF-8,<svg fill='%23d2d2d2' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'><path d='M0 0l5 6 5-6z'/></svg>");
+}
+
 
 
 /* 获得焦点时给 1px 黑边就够 */
