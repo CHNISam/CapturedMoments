@@ -1937,6 +1937,12 @@ body.dark .album-tabs button:hover{background:rgba(255,255,255,0.1)}
 
 /* 设置 */
 #settings{padding:40px 8%}
+#settings .settings-tree {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 16px; /* 保留边距，防止触边 */
+}
+
 fieldset{border:none;padding:0;margin:0 0 24px}
 legend{font-weight:600;font-size:15px;margin-bottom:8px}
 .setting-item{display:flex;justify-content:space-between;align-items:center;margin:12px 0}
@@ -2871,6 +2877,55 @@ body.dark legend {
 .tree-label {
   font-size: 15px;
   font-weight: 600;
+}
+/* 容器本身限制最大宽度并水平居中 */
+#settings .settings-tree {
+  max-width: 800px;    /* 你可以根据设计稿调这个值 */
+  margin: 0 auto;
+  padding: 0;          /* 移除多余内边距 */
+}
+
+/* 让列表自然一列排开，每张卡占满宽度 */
+.settings-tree > ul {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 卡片风格 + 拉满宽度 */
+.settings-tree > ul > li {
+  background: var(--card-light);
+  backdrop-filter: blur(calc(var(--blur)/2));
+  border: var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  padding: 24px 20px;
+  width: 100%;
+}
+
+/* 深色模式 */
+body.dark .settings-tree > ul > li {
+  background: var(--card-dark);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+}
+/* 使用 flex + gap 统一管理卡片之间的距离 */
+#settings .settings-tree .tree-root {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;    /* 24px = 3 × 8px 基准栅格，既不太密也不过疏 */
+  padding: 0;   /* 去掉额外的内边距 */
+  margin: 0;
+  list-style: none;
+}
+/* 去掉原先单独给 li 加的 margin-bottom */
+#settings .settings-tree .tree-root > li {
+  margin: 0;
+  width: 100%;  /* 让 li 适应容器宽度 */
+}
+/* 卡片内部内容与边框保持一致的呼吸感 */
+#settings .settings-tree > .tree-root > li {
+  padding: 24px 20px;   /* 上下 24px，左右 20px */
+  box-sizing: border-box;
 }
 
 </style>
