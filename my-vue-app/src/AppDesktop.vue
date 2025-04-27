@@ -384,7 +384,10 @@
           v-if="visiblePosts.length < posts.length"
           style="text-align:center;margin:16px 0;"
         >
-          <button class="btn-ghost" @click="loadMore">加载更多</button>
+          <div v-if="loadMode==='manual' && visiblePosts.length < posts.length"
+              style="text-align:center;margin:16px 0;">
+            <button class="btn-ghost" @click="loadMore">加载更多</button>
+          </div>
         </div>
 
       </section>
@@ -455,6 +458,15 @@
                   <span>背景模糊</span>
                   <input type="range" min="0" max="20" step="1" v-model.number="bgBlur"/>
                 </li>
+                <li class="setting-item">
+                  <span>动态加载模式</span>
+                  <select v-model="loadMode" @change="saveLoadMode">
+                    <option value="auto">自动加载</option>
+                    <option value="manual">手动加载</option>
+                  </select>
+                </li>
+
+
               </ul>
             </li>
 
@@ -813,7 +825,9 @@ export default {
         // 保留旧的 admin，如果还要用
         admin: true,
       },
-
+      loadMode: localStorage.getItem('loadMode') || 'manual', 
+      loadedCount: 5,
+      loadStep: 5,
       petEnabled: true,
       petType: 'cat',
       llmEnabled: true,
@@ -1103,7 +1117,7 @@ export default {
         files.forEach(f => this.draftImgs.push(URL.createObjectURL(f)));
       }
     },
-
+    
     removeDraft(i){ this.draftImgs.splice(i,1); },
     autoResize(e) {
       const el = e.target;
@@ -1175,7 +1189,11 @@ export default {
     },
     saveImageInsertMode() {
       localStorage.setItem('imageInsertMode', this.imageInsertMode);
-      },
+    },
+    saveLoadMode() {
+      localStorage.setItem('loadMode', this.loadMode);
+      this.updateLoadBehavior();
+    },    
     /* === 自定义表情 === */
     toggleStickerPicker () {
       if (!this.stickerPickerVisible) {      // 正在“打开”面板
@@ -1445,6 +1463,20 @@ export default {
       this.postOptionsPost = null;
     },
     // 点击“加载更多”
+    updateLoadBehavior() {
+      window.removeEventListener('scroll', this.onScrollLoad);
+      if (this.loadMode === 'auto') {
+        window.addEventListener('scroll', this.onScrollLoad);
+      }
+    },
+    onScrollLoad() {
+      const scrollBottom = window.innerHeight + window.scrollY;
+      const listBottom  = document.getElementById('moments-list').offsetHeight;
+      // 如果滚动到接近底部，就加载更多
+      if (scrollBottom >= listBottom - 200) {
+        this.loadMore();
+      }
+    },
     loadMore() {
       this.loadedCount += this.loadStep;
     },
@@ -1618,6 +1650,7 @@ export default {
   },
 
   mounted() {
+    this.updateLoadBehavior();
     const ctx = require.context(
       '@/assets/stickers/原神表情', // 表情图的根目录
       true,                        // 递归子目录
@@ -1646,6 +1679,7 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleGlobalClick);
+    window.removeEventListener('scroll', this.onScrollLoad);
   },
   
 };
