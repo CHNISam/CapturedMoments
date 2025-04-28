@@ -172,11 +172,28 @@
           </div>
           <div class="np-toolbar">
             <span class="char-count">{{ newPostCharCount }}/30000</span>
-            <select v-model="newPostPlace">
-              <option value="">无地点</option>
-              <option>蒙德</option><option>璃月</option><option>稻妻</option>
-              <option>须弥</option><option>枫丹</option><option>纳塔</option>
-            </select>
+            <!-- —— Location picker —— -->
+            <div class="place-picker" @click.stop>
+              <button class="place-btn" @click="togglePlacePicker">
+                <svg class="location-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" style="width:24px;height:24px;">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                  <circle cx="12" cy="9" r="2.5"/>
+                </svg>
+                <span class="place-label">{{ newPostPlace || '选择地点' }}</span>
+              </button>
+              
+              <div v-show="placePickerVisible" class="place-options">
+                <button
+                  v-for="place in placeOptions"
+                  :key="place"
+                  class="place-item"
+                  @click="selectNewPostPlace(place)"
+                >
+                  {{ place || '无地点' }}
+                </button>
+              </div>
+            </div>
+
 
             <button
               class="btn-publish"
@@ -617,6 +634,10 @@ export default {
       isListLoading: false,   // 列表骨架屏
 
       
+      placePickerVisible: false,
+      placeOptions: ['', '蒙德', '璃月', '稻妻', '须弥', '枫丹', '纳塔'],
+
+      
       // —— 分页加载配置 —— 
       loadedCount: 5,  // 初始加载 5 条
       loadStep: 5,     // 每次点击再加载 5 条
@@ -875,6 +896,14 @@ export default {
   },
 
     scrollTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); },
+    togglePlacePicker() {
+      this.placePickerVisible = !this.placePickerVisible;
+    },
+    selectNewPostPlace(place) {
+      this.newPostPlace = place;
+      this.placePickerVisible = false;
+    },
+
     getAvatar(uid){
       if (!this.avatarMap[uid]){
         this.avatarMap[uid] = localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60';
@@ -1543,26 +1572,30 @@ body.dark nav{background:rgba(0,0,0,0.22);border-bottom:1px solid rgba(255,255,2
 body.dark .menu a:hover{background:rgba(255,255,255,0.12)}
 .red{width:8px;height:8px;border-radius:50%;background:var(--accent);margin-left:4px}
 /* ---------- 玻璃背景·系统原生下拉 ---------- */
-/* —— Select 外观 —— */
+/* 让 select 看起来和 .btn-publish 一样，且不显示箭头 */
 .np-toolbar select,
 .setting-item select {
-  background: #fff;                    /* 亮色模式：纯白底 */
-  color: #333;                         /* 高对比深色文字 */
-  border: 1px solid #ccc;             /* 温和灰边，不抢眼 */
-  box-shadow: none;
+  appearance: none;           /* 还原原生布局 */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background: #333;           /* 跟 .btn-publish 一致的深灰背景 */
+  color: #fff;                /* 白色文字 */
+  border: none;               /* 去掉边框 */
   border-radius: var(--radius);
-  padding: 6px 12px;
-  appearance: none;                    /* 去掉系统默认样式 */
+  padding: 6px 12px;          /* 调整内边距 */
+  font-size: 14px;
+  cursor: pointer;
   background-image: none !important;
 }
 
-/* 深色模式 */
+/* 深色模式下保持同样效果（如果你有暗色主题也可以留空） */
 body.dark .np-toolbar select,
 body.dark .setting-item select {
-  background: #1e1e1e;                 /* 深色模式：纯暗底 */
-  color: #d2d2d2;                      /* 亮灰文字 */
-  border: 1px solid #444;
+  background: #333;
+  color: #fff;
 }
+
 
 /* 聚焦态用主题色框住 */
 .np-toolbar select:focus,
@@ -1937,17 +1970,27 @@ body.dark .modal-options {
 .modal-options button {
   color: inherit;
 }
-/* 确保 Modal 里的 np-toolbar select 在亮色模式下也用同样的背景 / 文字色 */
-.modal .np-toolbar select {
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border: var(--glass-border);
-  border-radius: var(--radius);
-  padding: 6px 12px;
-  font-size: 14px;
-  color: var(--text-light);
-  cursor: pointer;
+/* -----------------------------------------------------------------------------
+   Override global focus/option styles for any np-toolbar select inside a modal
+   ----------------------------------------------------------------------------- */
+.modal.show .np-toolbar select:focus {
+  outline: none !important;
+  /* match the glass-border used everywhere else */
+  border: var(--glass-border) !important;
+  box-shadow: none !important;
 }
+
+.modal.show .np-toolbar select option {
+  /* 👇 same flat background & text color as 投稿区 select options */
+  background: var(--card-light) !important;
+  color: var(--text-light) !important;
+}
+
+body.dark .modal.show .np-toolbar select option {
+  background: var(--card-dark) !important;
+  color: var(--text-dark) !important;
+}
+
 .modal-delete-btn {
   position: absolute;
   bottom: 16px;
@@ -2656,6 +2699,63 @@ body.dark legend {
   overflow: visible !important;
   /* 根据屏幕宽度自动伸缩，上限 1200px */
   width: min(80vw, 1200px);
+}
+.place-picker {
+  position: relative;
+  display: inline-block;
+}
+.place-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.place-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--card-light);
+  border: var(--glass-border);
+  backdrop-filter: blur(calc(var(--blur)/2));
+  border-radius: var(--radius);
+  margin-top: 4px;
+  padding: 6px 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+}
+.place-item {
+  padding: 6px 12px;
+  font-size: 14px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+.place-item:hover {
+  background: rgba(74,144,226,0.1);
+}
+/* 暗色模式下，地点选择器背景和文字颜色 */
+body.dark .place-btn {
+  color: var(--text-dark);
+}
+body.dark .place-btn .location-icon {
+  stroke: currentColor;
+}
+
+body.dark .place-options {
+  background: var(--card-dark);
+  border-color: rgba(255,255,255,0.15);
+}
+
+body.dark .place-item {
+  color: var(--text-dark);
+}
+body.dark .place-item:hover {
+  background: rgba(255,255,255,0.1);
 }
 
 
