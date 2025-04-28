@@ -1584,6 +1584,7 @@ body.dark .menu a:hover{background:rgba(255,255,255,0.12)}
   border-radius: var(--radius);
   padding: 6px 12px;
   appearance: none;                    /* 去掉系统默认样式 */
+  background-image: none !important;
 }
 
 /* 深色模式 */
@@ -1629,18 +1630,6 @@ body.dark .setting-item select option {
 body.dark .np-toolbar select option:hover,
 body.dark .setting-item select option:hover {
   background: #3a3a3a;    /* Hover 深灰，比默认提亮约 10% */
-}
-
-/* 自定义下拉箭头 */
-.np-toolbar select {
-  background-image:
-    url("data:image/svg+xml;charset=UTF-8,<svg fill='%23333' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'><path d='M0 0l5 6 5-6z'/></svg>");
-  background-repeat: no-repeat;
-  background-position: calc(100% - 12px) center;
-}
-body.dark .np-toolbar select {
-  background-image:
-    url("data:image/svg+xml;charset=UTF-8,<svg fill='%23d2d2d2' viewBox='0 0 10 6' xmlns='http://www.w3.org/2000/svg'><path d='M0 0l5 6 5-6z'/></svg>");
 }
 
 
