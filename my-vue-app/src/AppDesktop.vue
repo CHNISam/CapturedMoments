@@ -18,9 +18,16 @@
             @click.prevent="scrollTo('moments')"
             class="nav-item nav-item-moments"
           >
-          <svg viewBox="0 0 24 24" class="nav-icon" fill="currentColor">
-                <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3z"/>
-              </svg>
+          <svg viewBox="0 0 24 24"
+              class="nav-icon"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round">
+            <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3z"/>
+          </svg>
+
 
 
             <span class="nav-label">
