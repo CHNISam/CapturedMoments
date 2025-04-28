@@ -174,7 +174,7 @@
             <span class="char-count">{{ newPostCharCount }}/30000</span>
             <!-- —— Location picker —— -->
             <div class="place-picker" @click.stop>
-              <button class="place-btn" @click="togglePlacePicker">
+              <button class="place-btn" @click="toggleNewPostPicker">
                 <svg class="location-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" style="width:24px;height:24px;">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
                   <circle cx="12" cy="9" r="2.5"/>
@@ -182,7 +182,7 @@
                 <span class="place-label">{{ newPostPlace || '选择地点' }}</span>
               </button>
               
-              <div v-show="placePickerVisible" class="place-options">
+              <div v-show="newPostPickerVisible" class="place-options">
                 <button
                   v-for="place in placeOptions"
                   :key="place"
@@ -193,6 +193,9 @@
                 </button>
               </div>
             </div>
+
+
+            <!-- ③ 新的“发布”按钮，圆形、尺寸更小 -->
 
 
             <button
@@ -547,13 +550,31 @@
           <span class="close" @click="closePlaceModal">×</span>
           <h3 style="margin-bottom:12px;">编辑地点</h3>
            <!-- 跟发帖区一模一样的 np-toolbar -->
-        <div class="np-toolbar" style="margin-bottom:12px;">
-          <select v-model="placeModalValue">
-            <option value="">无地点</option>
-            <option>蒙德</option><option>璃月</option><option>稻妻</option>
-            <option>须弥</option><option>枫丹</option><option>纳塔</option>
-          </select>
-        </div>
+           <div class="np-toolbar" style="margin-bottom:12px;">
+            <!-- —— 同发帖区的 place-picker —— -->
+            <div class="place-picker" @click.stop>
+              <button class="place-btn" @click="toggleModalPicker">
+                <svg class="location-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" style="width:24px;height:24px;">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                  <circle cx="12" cy="9" r="2.5"/>
+                </svg>
+                <span class="place-label">{{ placeModalValue || '无地点' }}</span>
+              </button>
+
+              <div v-show="modalPickerVisible" class="place-options">
+                <button
+                  v-for="place in placeOptions"
+                  :key="place"
+                  class="place-item"
+                  @click="selectModalPlace(place)"
+                >
+                  {{ place || '无地点' }}
+                </button>
+              </div>
+            </div>
+
+          </div>
+
           <div style="text-align:right;">
             <button class="btn-ghost" @click="closePlaceModal" style="margin-right:8px;">取消</button>
             <button class="btn-publish" @click="confirmPlaceEdit">确定</button>
@@ -634,7 +655,8 @@ export default {
       isListLoading: false,   // 列表骨架屏
 
       
-      placePickerVisible: false,
+      newPostPickerVisible: false,
+      modalPickerVisible: false,
       placeOptions: ['', '蒙德', '璃月', '稻妻', '须弥', '枫丹', '纳塔'],
 
       
@@ -896,12 +918,22 @@ export default {
   },
 
     scrollTo(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); },
-    togglePlacePicker() {
-      this.placePickerVisible = !this.placePickerVisible;
+      // 投稿区 Picker
+    toggleNewPostPicker() {
+      this.newPostPickerVisible = !this.newPostPickerVisible;
     },
     selectNewPostPlace(place) {
       this.newPostPlace = place;
-      this.placePickerVisible = false;
+      this.newPostPickerVisible = false;
+    },
+
+    // Modal 区 Picker
+    toggleModalPicker() {
+      this.modalPickerVisible = !this.modalPickerVisible;
+    },
+    selectModalPlace(place) {
+      this.placeModalValue = place;
+      this.modalPickerVisible = false;
     },
 
     getAvatar(uid){
