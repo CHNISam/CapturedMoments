@@ -18,44 +18,13 @@
             @click.prevent="scrollTo('moments')"
             class="nav-item nav-item-moments"
           >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 21"
-            class="nav-icon"
-            fill="none"
-          >
-            <g clip-path="url(#clip0)">
-              <path
-                d="M10 10.743C7.69883 10.743 5.83333 8.87747 5.83333 6.5763C5.83333 4.27512 7.69883 2.40964 10 2.40964V10.743Z"
-                stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
-              />
-              <path
-                d="M10 10.743C10 13.0441 8.1345 14.9096 5.83333 14.9096C3.53217 14.9096 1.66667 13.0441 1.66667 10.743H10Z"
-                stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
-              />
-              <path
-                d="M10 10.743C10 8.44182 11.8655 6.57632 14.1667 6.57632C16.4679 6.57632 18.3333 8.44182 18.3333 10.743H10Z"
-                stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
-              />
-              <path
-                d="M9.99999 10.743C12.3012 10.743 14.1667 12.6085 14.1667 14.9096C14.1667 17.2108 12.3012 19.0763 9.99999 19.0763V10.743Z"
-                stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
-              />
-            </g>
-            <defs>
-              <clipPath id="clip0">
-                <rect
-                  width="20"
-                  height="20"
-                  fill="currentColor"
-                  transform="matrix(-1 0 0 1 20 0.742981)"
-                />
-              </clipPath>
-            </defs>
-          </svg>
+          <svg viewBox="0 0 24 24" class="nav-icon" fill="currentColor">
+                <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3z"/>
+              </svg>
+
 
             <span class="nav-label">
-              动态
+              主页
               <span class="red" :class="{ hidden: !hasUnread }"></span>
             </span>
           </a>
