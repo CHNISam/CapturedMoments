@@ -1508,6 +1508,9 @@ export default {
 };
 </script>
 <style>
+/* ========================================================================== */
+/* 1. CSS 变量定义                                                              */
+/* ========================================================================== */
 :root {
   --bg-light: #f5f5f5;
   --bg-dark: #0f0f11;
@@ -1522,7 +1525,7 @@ export default {
   --glass-border: 1px solid rgba(0, 0, 0, 0.1);
   --login-bg: #f5f5f5;
   --login-text: #333;
-  --login-border: rgba(0, 0, 0, 0.1);
+  --login-border: rgba(0, 0, 0, .1);
   --bg-opacity: .35;
   --bg-blur: 4px;
   --card-hover-light: rgba(255, 255, 255, 0.9);
@@ -1537,26 +1540,31 @@ body.dark {
   --card-hover-dark: rgba(60, 60, 61, 0.55);
 }
 
+/* ========================================================================== */
+/* 2. 全局重置与基础样式                                                        */
+/* ========================================================================== */
 html,
 body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: Inter, \"PingFang SC\", sans-serif;
-  transition: .3s background-color, .3s color
+  font-family: Inter, "PingFang SC", sans-serif;
+  transition: .3s background-color, .3s color;
 }
 
 a {
   color: inherit;
   text-decoration: none;
-  cursor: pointer
+  cursor: pointer;
 }
 
 .hidden {
-  display: none
+  display: none;
 }
 
-/* 背景层 */
+/* ========================================================================== */
+/* 3. 背景层                                                                     */
+/* ========================================================================== */
 #bgLayer {
   position: fixed;
   inset: 0;
@@ -1565,10 +1573,12 @@ a {
   background: center/cover no-repeat;
   opacity: var(--bg-opacity);
   filter: blur(var(--bg-blur));
-  transition: .3s opacity, .3s filter
+  transition: .3s opacity, .3s filter;
 }
 
-/* 导航栏 */
+/* ========================================================================== */
+/* 4. 导航栏                                                                     */
+/* ========================================================================== */
 nav {
   position: fixed;
   top: 0;
@@ -1581,37 +1591,40 @@ nav {
   background: rgba(255, 255, 255, 0.18);
   backdrop-filter: blur(20px);
   border-bottom: var(--glass-border);
-  padding: 14px 24px
+  padding: 14px 24px;
 }
 
 body.dark nav {
   background: rgba(0, 0, 0, 0.22);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1)
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* ========================================================================== */
+/* 5. Logo & 菜单                                                               */
+/* ========================================================================== */
 .logo {
   font-weight: 700;
-  font-size: 20px
+  font-size: 20px;
 }
 
 .menu {
   display: flex;
   gap: 18px;
-  align-items: center
+  align-items: center;
 }
 
 .menu a {
   padding: 6px 12px;
   border-radius: var(--radius);
-  transition: .25s background
+  transition: .25s background;
 }
 
 .menu a:hover {
-  background: rgba(0, 0, 0, 0.08)
+  background: rgba(0, 0, 0, 0.08);
 }
 
 body.dark .menu a:hover {
-  background: rgba(255, 255, 255, 0.12)
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .red {
@@ -1619,49 +1632,40 @@ body.dark .menu a:hover {
   height: 8px;
   border-radius: 50%;
   background: var(--accent);
-  margin-left: 4px
+  margin-left: 4px;
 }
 
-/* ---------- 玻璃背景·系统原生下拉 ---------- */
-/* 让 select 看起来和 .btn-publish 一样，且不显示箭头 */
+/* ========================================================================== */
+/* 6. 玻璃背景·原生下拉（Select）                                                */
+/* ========================================================================== */
 .np-toolbar select,
 .setting-item select {
   appearance: none;
-  /* 还原原生布局 */
   -webkit-appearance: none;
   -moz-appearance: none;
-
   background: #333;
-  /* 跟 .btn-publish 一致的深灰背景 */
   color: #fff;
-  /* 白色文字 */
   border: none;
-  /* 去掉边框 */
   border-radius: var(--radius);
   padding: 6px 12px;
-  /* 调整内边距 */
   font-size: 14px;
   cursor: pointer;
   background-image: none !important;
 }
 
-/* 深色模式下保持同样效果（如果你有暗色主题也可以留空） */
 body.dark .np-toolbar select,
 body.dark .setting-item select {
   background: #333;
   color: #fff;
 }
 
-/* 投稿按钮改为横向布局并加宽 */
-.menu .nav-item.nav-item-submit {
-  flex-direction: row;      /* 横向排列 icon + 文字 */
-  align-items: center;      /* 垂直居中对齐 */
-  gap: 4px;                 /* 图标和文字间距 */
-  padding: 6px 12px;        /* 左右内边距增大点 */
-  min-width: 64px;          /* 最小宽度，你可以按需调大 */
+/* 聚焦态 */
+.np-toolbar select:focus,
+.setting-item select:focus {
+  outline: none;
+  border: 1px solid #000;
 }
 
-/* 聚焦态用主题色框住 */
 .np-toolbar select:focus,
 .setting-item select:focus {
   outline: none;
@@ -1669,50 +1673,34 @@ body.dark .setting-item select {
   box-shadow: 0 0 0 2px var(--primary-alpha, rgba(74, 144, 226, 0.2));
 }
 
-/* —— Option 外观 —— */
-/* 纯色底，保证对比 */
+/* Option 外观 */
 .np-toolbar select option,
 .setting-item select option {
   background: inherit;
-  /* 跟随父 select 的底色 */
   color: inherit;
   padding: 0.5em 1em;
   line-height: 1.6;
 }
 
-/* Hover／选中反馈 */
 .np-toolbar select option:hover,
 .setting-item select option:hover {
   background: rgba(74, 144, 226, 0.1);
-  /* 主色 10% 透明度 */
 }
 
-/* 暗色下的下拉选项：深灰 + 亮灰文字 */
 body.dark .np-toolbar select option,
 body.dark .setting-item select option {
   background: #2a2a2a;
-  /* 深灰：比纯黑柔和 */
   color: #e0e0e0;
-  /* 亮灰，减少眼睛疲劳 */
 }
 
-/* hover 时微微提亮，给出反馈 */
 body.dark .np-toolbar select option:hover,
 body.dark .setting-item select option:hover {
   background: #3a3a3a;
-  /* Hover 深灰，比默认提亮约 10% */
 }
 
-
-
-/* 获得焦点时给 1px 黑边就够 */
-.np-toolbar select:focus,
-.setting-item select:focus {
-  outline: none;
-  border: 1px solid #000;
-}
-
-/* 按钮 */
+/* ========================================================================== */
+/* 7. 按钮（Buttons）                                                          */
+/* ========================================================================== */
 .btn-ghost,
 .btn-publish {
   display: inline-flex;
@@ -1722,84 +1710,99 @@ body.dark .setting-item select option:hover {
   font-size: 14px;
   border-radius: var(--radius);
   cursor: pointer;
-  transition: .25s background, .2s transform
+  transition: .25s background, .2s transform;
 }
 
 .btn-ghost {
   background: var(--card-light);
   border: var(--glass-border);
-  backdrop-filter: blur(calc(var(--blur)/2))
+  backdrop-filter: blur(calc(var(--blur)/2));
 }
 
 body.dark .btn-ghost {
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15)
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .btn-ghost:hover {
-  background: rgba(0, 0, 0, 0.08)
+  background: rgba(0, 0, 0, 0.08);
 }
 
 body.dark .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.15)
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .btn-publish {
   background: #333;
   color: #fff;
-  border: none
+  border: none;
 }
 
 .btn-publish:hover {
   transform: scale(1.03);
-  background: #2a2a2a
+  background: #2a2a2a;
 }
 
 body.dark .btn-publish {
-  background: #444
+  background: #444;
 }
 
 body.dark .btn-publish:hover {
-  background: #3a3a3a
+  background: #3a3a3a;
 }
 
-/* 统一卡片 */
+/* 投稿按钮横排样式 */
+.menu .nav-item.nav-item-submit {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  min-width: 64px;
+}
+
+/* ========================================================================== */
+/* 8. 统一卡片（Cards）                                                        */
+/* ========================================================================== */
 .card {
   background: var(--card-light);
   backdrop-filter: blur(calc(var(--blur)/2));
   border-radius: var(--radius);
   border: var(--glass-border);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-  padding: 18px
+  padding: 18px;
 }
 
 body.dark .card {
   background: var(--card-dark);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45)
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
-/* 页面标题 */
+/* ========================================================================== */
+/* 9. 标题与排版                                                                */
+/* ========================================================================== */
 h2.big {
   margin: 70px 0 22px;
-  font-size: 26px
+  font-size: 26px;
 }
 
-/* 投稿 */
+/* ========================================================================== */
+/* 10. 投稿区 (#moments)                                                        */
+/* ========================================================================== */
 #moments {
-  padding: 40px 8%
+  padding: 40px 8%;
 }
 
 .np-top {
   display: flex;
   flex-direction: column;
-  gap: 8px
+  gap: 8px;
 }
 
 .np-toolbar {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  align-items: center
+  align-items: center;
 }
 
 .np-top textarea {
@@ -1811,30 +1814,32 @@ h2.big {
   backdrop-filter: blur(calc(var(--blur)/2));
   padding: 10px;
   font-size: 14px;
-  width: 100%
+  width: 100%;
 }
 
 body.dark .np-top textarea {
   background: var(--card-dark);
-  color: var(--text-dark)
+  color: var(--text-dark);
 }
 
 .char-count {
   font-size: 12px;
-  color: #888
+  color: #888;
 }
 
+/* 预览区 */
 .np-preview {
   display: flex;
   gap: 8px;
-  overflow-x: auto
+  overflow-x: auto;
+  margin-top: 8px;
 }
 
 .np-preview img {
   width: 70px;
   height: 50px;
   border-radius: 8px;
-  object-fit: cover
+  object-fit: cover;
 }
 
 .np-preview .remove {
@@ -1850,58 +1855,51 @@ body.dark .np-top textarea {
   line-height: 18px;
   text-align: center;
   cursor: pointer;
-  transition: background .2s
+  transition: background .2s;
 }
 
 .np-preview .remove:hover {
-  background: rgba(0, 0, 0, 0.85)
+  background: rgba(0, 0, 0, 0.85);
 }
 
 .np-preview .thumb {
   position: relative;
 }
 
-.np-preview {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin-top: 8px;
-  /* ← 增加这一句 */
-}
-
-
-/* 动态列表 */
+/* ========================================================================== */
+/* 11. 动态列表 (#moments-list & posts)                                         */
+/* ========================================================================== */
 #moments-list {
   display: flex;
   flex-direction: column;
-  gap: 26px
+  gap: 26px;
 }
 
 .post .photos {
   display: flex;
   gap: 8px;
   margin-top: 8px;
-  overflow-x: auto
+  overflow-x: auto;
 }
 
 .post .photos img {
   width: 96px;
   height: 68px;
   border-radius: 8px;
-  object-fit: cover
+  object-fit: cover;
 }
 
 .post .body p {
   margin: 0 0 6px;
   white-space: pre-wrap;
-  line-height: 1.5
+  line-height: 1.5;
 }
 
 .post small {
   display: block;
   margin-top: 4px;
   font-size: 12px;
-  color: #888
+  color: #888;
 }
 
 .actions {
@@ -1910,27 +1908,29 @@ body.dark .np-top textarea {
   font-size: 13px;
   margin-top: 8px;
   align-items: center;
-  color: var(--primary)
+  color: var(--primary);
 }
 
 .actions svg {
   width: 18px;
   height: 18px;
-  fill: currentColor
+  fill: currentColor;
 }
 
+/* 更多按钮 */
 .more {
   cursor: pointer;
   font-size: 18px;
   padding: 2px 6px;
   border-radius: 50%;
-  transition: .2s background
+  transition: .2s background;
 }
 
 .more:hover {
-  background: rgba(0, 0, 0, 0.08)
+  background: rgba(0, 0, 0, 0.08);
 }
 
+/* 弹窗选项 */
 .post .head {
   position: relative;
 }
@@ -1938,7 +1938,6 @@ body.dark .np-top textarea {
 .post .more {
   position: relative;
   z-index: 101;
-  /* 略高于 .post-options */
 }
 
 .post-options {
@@ -1958,7 +1957,6 @@ body.dark .np-top textarea {
 .more-wrapper {
   position: relative;
   display: inline-block;
-  /* 让宽度包裹按钮 */
 }
 
 body.dark .post-options {
@@ -1973,16 +1971,8 @@ body.dark .post-options {
   padding: 4px 8px;
 }
 
-#moments-list .post.card {
-  width: 100%;
-  max-width: 680px;
-  margin: 0 auto;
-  padding: 24px;
-  /* 更舒适的PC内边距 */
-}
-
+/* 编辑地点按钮 */
 .post-options .edit-place-btn {
-  /* same “glass” button look as .trash-btn */
   background: rgba(120, 120, 120, 0.15);
   border: 1px solid rgba(200, 200, 200, 0.4);
   width: 32px;
@@ -2003,21 +1993,27 @@ body.dark .post-options {
   box-shadow: 0 0 12px rgba(120, 120, 120, 0.8);
 }
 
-/* make the SVG inside fill currentColor & size nicely */
 .post-options .edit-place-btn svg {
   width: 16px;
   height: 16px;
   stroke: currentColor;
 }
 
+/* 卡片宽度 */
+#moments-list .post.card {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px;
+}
 
-
-
-/* 评论 */
+/* ========================================================================== */
+/* 12. 评论区                                                                  */
+/* ========================================================================== */
 .comments {
   margin-top: 8px;
   padding-top: 4px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1)
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .comment {
@@ -2028,11 +2024,11 @@ body.dark .post-options {
   padding: 6px 8px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.03);
-  font-size: 13px
+  font-size: 13px;
 }
 
 body.dark .comment {
-  background: rgba(255, 255, 255, 0.05)
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .comment-edit,
@@ -2040,18 +2036,19 @@ body.dark .comment {
   cursor: pointer;
   padding: 2px 6px;
   border-radius: 4px;
-  transition: background .2s
+  transition: background .2s;
 }
 
 .comment-edit:hover,
 .comment-delete:hover {
-  background: rgba(0, 0, 0, 0.1)
+  background: rgba(0, 0, 0, 0.1);
 }
 
+/* 输入框 */
 .c-input {
   display: flex;
   gap: 8px;
-  margin-top: 8px
+  margin-top: 8px;
 }
 
 .c-input input {
@@ -2062,32 +2059,31 @@ body.dark .comment {
   background: var(--card-light);
   backdrop-filter: blur(calc(var(--blur)/2));
   font-size: 14px;
-  transition: box-shadow .2s
+  transition: box-shadow .2s;
 }
 
 body.dark .c-input input {
   background: var(--card-dark);
-  color: var(--text-dark)
+  color: var(--text-dark);
 }
 
 .c-input input:focus {
   outline: none;
-  /* 去掉浏览器默认的白色 outline */
   box-shadow: none;
-  /* 关闭原来的阴影 */
   border: 1px solid #000;
-  /* 只要 1px 黑色边框 */
 }
 
-/* 相册 */
+/* ========================================================================== */
+/* 13. 相册 (#album)                                                           */
+/* ========================================================================== */
 #album {
-  padding: 40px 8%
+  padding: 40px 8%;
 }
 
 .album-tabs {
   display: flex;
   gap: 16px;
-  margin-bottom: 18px
+  margin-bottom: 18px;
 }
 
 .album-tabs button {
@@ -2098,39 +2094,39 @@ body.dark .c-input input {
   font-size: 15px;
   padding: 6px 10px;
   border-radius: var(--radius);
-  transition: .25s background
+  transition: .25s background;
 }
 
 .album-tabs .on {
-  background: rgba(0, 0, 0, 0.08)
+  background: rgba(0, 0, 0, 0.08);
 }
 
 body.dark .album-tabs button:hover {
-  background: rgba(255, 255, 255, 0.1)
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 18px
+  gap: 18px;
 }
 
 .photo {
   border-radius: var(--radius);
   overflow: hidden;
   position: relative;
-  cursor: pointer
+  cursor: pointer;
 }
 
 .photo img {
   width: 100%;
   height: 120px;
   object-fit: cover;
-  transition: .3s transform
+  transition: .3s transform;
 }
 
 .photo:hover img {
-  transform: scale(1.05)
+  transform: scale(1.05);
 }
 
 .photo span {
@@ -2141,63 +2137,64 @@ body.dark .album-tabs button:hover {
   color: #fff;
   font-size: 12px;
   padding: 2px 6px;
-  border-radius: var(--radius)
+  border-radius: var(--radius);
 }
 
+/* ========================================================================== */
+/* 14. 表单 & 设置项                                                          */
+/* ========================================================================== */
 fieldset {
   border: none;
   padding: 0;
-  margin: 0 0 24px
+  margin: 0 0 24px;
 }
 
 legend {
   font-weight: 600;
   font-size: 15px;
-  margin-bottom: 8px
+  margin-bottom: 8px;
 }
 
 .setting-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 12px 0
+  margin: 12px 0;
 }
 
-.setting-item+.setting-item {
+.setting-item + .setting-item {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
-  padding-top: 12px
+  padding-top: 12px;
 }
 
-body.dark .setting-item+.setting-item {
-  border-top: 1px solid rgba(255, 255, 255, 0.1)
+body.dark .setting-item + .setting-item {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.setting-item input[type=text] {
+.setting-item input[type="text"] {
   width: 60%;
   padding: 6px;
   border-radius: var(--radius);
   border: var(--glass-border);
   background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2))
+  backdrop-filter: blur(calc(var(--blur)/2));
 }
 
-body.dark .setting-item input[type=text] {
+body.dark .setting-item input[type="text"] {
   background: var(--card-dark);
-  color: var(--text-dark)
+  color: var(--text-dark);
 }
 
-/* 重写所有文字输入框和多行输入框的聚焦效果 */
 .setting-item input[type="text"]:focus,
 .np-top textarea:focus {
   outline: none;
-  /* 去掉默认 outline */
   box-shadow: none;
-  /* 去掉阴影 */
   border: 1px solid #000;
-  /* 1px 黑色实线边框 */
 }
 
-/* Badge */
+/* ========================================================================== */
+/* 15. 徽章（Badges）                                                          */
+/* ========================================================================== */
 .badge {
   font-size: 10px;
   padding: 2px 4px;
@@ -2206,57 +2203,40 @@ body.dark .setting-item input[type=text] {
   display: inline-block;
   min-width: 40px;
   text-align: center;
-  color: #fff
+  color: #fff;
 }
 
 .badge.best {
   background: linear-gradient(270deg, #4a90e2, #e91e63, #4a90e2);
   background-size: 400% 400%;
-  animation: gradient 10s ease infinite
+  animation: gradient 10s ease infinite;
 }
 
 .badge.catgirl {
-  background: linear-gradient(135deg, #ff87c3, #ffb6c1)
+  background: linear-gradient(135deg, #ff87c3, #ffb6c1);
 }
 
 .badge.badge-none {
   background: none;
   border: 1px dashed #aaa;
-  color: #aaa
+  color: #aaa;
 }
 
 @keyframes gradient {
   0% {
-    background-position: 0% 50%
+    background-position: 0% 50%;
   }
-
   50% {
-    background-position: 100% 50%
+    background-position: 100% 50%;
   }
-
   100% {
-    background-position: 0% 50%
+    background-position: 0% 50%;
   }
 }
 
-.admin-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.admin-uid {
-  min-width: 100px;
-  font-weight: bold;
-}
-
-.admin-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-/* Modal 通用 */
+/* ========================================================================== */
+/* 16. Modal 通用                                                              */
+/* ========================================================================== */
 .modal {
   z-index: 9999;
   position: fixed;
@@ -2267,75 +2247,31 @@ body.dark .setting-item input[type=text] {
   align-items: center;
   opacity: 0;
   visibility: hidden;
-  transition: opacity .25s ease
+  transition: opacity .25s ease;
 }
 
 .modal.show {
   opacity: 1;
-  visibility: visible
+  visibility: visible;
 }
 
-/* 1. 固定 Modal 大小：替换原有 .box 定义 */
+/* 固定 Modal 大小：替换原有 .box 定义 */
 .box {
   background: var(--card-light);
   backdrop-filter: blur(var(--blur));
   border: var(--glass-border);
   border-radius: var(--radius);
-
-  /* 固定宽度，高度自适应，但在小屏幕时不超出 */
   width: 600px;
   max-width: 90vw;
   max-height: 80vh;
-
   overflow: auto;
   padding: 20px;
   position: relative;
 }
 
-/* 2. 列表里 “删除” 按钮，复用 modal-delete-btn 风格，文本跟随主题 */
-.post-options .trash-btn {
-  /* 复制 modal-delete-btn 的核心风格 */
-  background: rgba(120, 120, 120, 0.15);
-  border: 1px solid rgba(200, 200, 200, 0.4);
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 0 6px rgba(120, 120, 120, 0.6);
-  transition: transform .1s, box-shadow .2s, background .2s;
-  cursor: pointer;
-
-  /* 文字 / 图标 跟随主题色 */
-  color: inherit;
-}
-
-.post-options .trash-btn:hover {
-  background: rgba(120, 120, 120, 0.25);
-  transform: scale(1.1);
-  box-shadow: 0 0 12px rgba(120, 120, 120, 0.8);
-}
-
-/* 确保 svg 图标大小合适 */
-.post-options .trash-btn svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-}
-
-@media (max-width: 480px) {
-  .box {
-    width: 95vw;
-    padding: 12px;
-  }
-}
-
 body.dark .box {
   background: var(--card-dark);
-  border: 1px solid rgba(255, 255, 255, 0.2)
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .close {
@@ -2343,7 +2279,7 @@ body.dark .box {
   top: 10px;
   right: 16px;
   font-size: 24px;
-  cursor: pointer
+  cursor: pointer;
 }
 
 /* Slider Modal 箭头按钮 */
@@ -2376,38 +2312,26 @@ body.dark .slider-btn {
   right: 10px;
 }
 
-/* 保证 .box 是定位容器 */
-.slider-modal .box {
-  position: relative;
-}
-
 /* 固定页码到底部中央 */
 .slider-modal .modal-meta {
   position: absolute;
   bottom: 16px;
-  /* 距底部 16px，可调 */
   left: 50%;
   transform: translateX(-50%);
   margin-top: 0;
-  /* 覆盖原 margin-top */
   font-size: 13px;
   padding: 4px 8px;
-  /* 可选：加点内边距，提高可读性 */
   border-radius: 4px;
-  /* 可选：圆角框 */
   background: rgba(0, 0, 0, 0.3);
-  /* 可选：半透明底，确保对比度 */
   color: #fff !important;
-  /* 强制白色文字 */
   z-index: 10;
-  /* 确保浮在图片之上 */
 }
 
-/* 深色模式下调整文字色 */
 body.dark .slider-modal .modal-meta {
   color: #ddd !important;
 }
 
+/* 更多 & 信息 按钮 */
 .modal-more {
   position: absolute;
   top: 10px;
@@ -2419,7 +2343,6 @@ body.dark .slider-modal .modal-meta {
   position: absolute;
   top: 10px;
   right: 82px;
-  /* 刚好挨着 ⋯，可自行微调 */
   cursor: pointer;
   font-size: 18px;
   padding: 2px 6px;
@@ -2444,62 +2367,17 @@ body.dark .info-btn:hover {
   width: 20px;
   height: 20px;
   display: block;
-  /* 确保可以用 margin 调整 */
   margin-top: 4px;
-  /* 向下移动 icon */
 }
 
-.modal-options {
-  position: absolute;
-  top: 36px;
-  right: 50px;
-  background: var(--card-light);
-  padding: 6px;
-  border-radius: 6px;
-  backdrop-filter: blur(calc(var(--blur)/2));
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-body.dark .modal-options {
-  background: var(--card-dark);
-}
-
-.modal-options button {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.post-options,
-.modal-options {
-  color: var(--text-light);
-}
-
-body.dark .post-options,
-body.dark .modal-options {
-  color: var(--text-dark);
-}
-
-/* 按钮文字也要跟随主题 */
-.post-options button,
-.modal-options button {
-  color: inherit;
-}
-
-/* -----------------------------------------------------------------------------
-   Override global focus/option styles for any np-toolbar select inside a modal
-   ----------------------------------------------------------------------------- */
+/* Modal 内下拉聚焦 & Option */
 .modal.show .np-toolbar select:focus {
   outline: none !important;
-  /* match the glass-border used everywhere else */
   border: var(--glass-border) !important;
   box-shadow: none !important;
 }
 
 .modal.show .np-toolbar select option {
-  /* 👇 same flat background & text color as 投稿区 select options */
   background: var(--card-light) !important;
   color: var(--text-light) !important;
 }
@@ -2509,6 +2387,7 @@ body.dark .modal.show .np-toolbar select option {
   color: var(--text-dark) !important;
 }
 
+/* 删除按钮 */
 .modal-delete-btn {
   position: absolute;
   bottom: 16px;
@@ -2519,175 +2398,58 @@ body.dark .modal.show .np-toolbar select option {
   align-items: center;
   justify-content: center;
   background: rgba(120, 120, 120, 0.15);
-  /* 浅灰半透明背景 */
   border: 1px solid rgba(200, 200, 200, 0.4);
-  /* 细灰边框 */
   color: #e0e0e0;
-  /* 图标浅灰色 */
   border-radius: 50%;
   backdrop-filter: blur(4px);
-  /* 玻璃模糊效果 */
   box-shadow: 0 0 6px rgba(120, 120, 120, 0.6);
-  /* 科技感微光 */
   transition: transform .1s, box-shadow .2s, background .2s;
   cursor: pointer;
 }
 
 .modal-delete-btn:hover {
   background: rgba(120, 120, 120, 0.25);
-  /* 深一点的灰 */
   transform: scale(1.1);
-  /* 放大反馈 */
   box-shadow: 0 0 12px rgba(120, 120, 120, 0.8);
-  /* 更强的光晕 */
 }
 
 .modal-delete-btn svg {
   width: 20px;
   height: 20px;
   stroke: currentColor;
-  /* 跟随 color */
   fill: none;
 }
 
-
-
-
-/* 桌宠 */
+/* ========================================================================== */
+/* 17. 桌宠（Pet）                                                             */
+/* ========================================================================== */
 #pet svg {
   width: 100%;
-  animation: breathe 3s ease-in-out infinite
+  animation: breathe 3s ease-in-out infinite;
 }
 
 @keyframes breathe {
-
-  0%,
-  100% {
-    transform: translateY(0)
+  0%, 100% {
+    transform: translateY(0);
   }
-
   50% {
-    transform: translateY(-4px)
+    transform: translateY(-4px);
   }
 }
 
-/* 过渡 */
+/* ========================================================================== */
+/* 18. 过渡 & 动画                                                             */
+/* ========================================================================== */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity .3s ease
+  transition: opacity .3s ease;
 }
 
 .fade-enter,
 .fade-leave-to {
-  opacity: 0
+  opacity: 0;
 }
 
-/* 更多按钮主题自适应 */
-.more,
-.modal-more {
-  color: var(--text-light);
-}
-
-body.dark .more,
-body.dark .modal-more {
-  color: var(--text-dark);
-}
-
-/* 小型环形 loading */
-.spinner {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid transparent;
-  border-top-color: currentColor;
-  border-radius: 50%;
-  animation: spin .8s linear infinite;
-  vertical-align: middle;
-  margin-right: 4px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg)
-  }
-}
-
-/* —— 优化后的骨架屏（玻璃 + 流光） —— */
-.skeleton-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.skeleton-card {
-  position: relative;
-  border-radius: var(--radius);
-  background: var(--card-light);
-  /* 浅色模式下半透明玻璃 */
-  backdrop-filter: blur(calc(var(--blur)/2));
-  overflow: hidden;
-  padding: 12px;
-}
-
-body.dark .skeleton-card {
-  background: var(--card-dark);
-  /* 深色模式下半透明玻璃 */
-}
-
-.skeleton-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.6),
-      transparent);
-  animation: shimmer 1.2s ease-in-out infinite;
-}
-
-.skeleton-head,
-.skeleton-body {
-  background: rgba(255, 255, 255, 0.2);
-  /* 统一浅色打底 */
-  border-radius: 4px;
-  margin-bottom: 8px;
-}
-
-body.dark .skeleton-head,
-body.dark .skeleton-body {
-  background: rgba(0, 0, 0, 0.2);
-  /* 深色模式调整为暗色调 */
-}
-
-.skeleton-head {
-  width: 40%;
-  height: 16px;
-}
-
-.skeleton-body {
-  width: 100%;
-  height: 60px;
-}
-
-/* 流光动画 */
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  50% {
-    transform: translateX(100%);
-  }
-
-  100% {
-    transform: translateX(200%);
-  }
-}
-
-/* 保留进场动画 */
 .post-fade-enter-active {
   transition: all .3s ease;
 }
@@ -2701,551 +2463,7 @@ body.dark .skeleton-body {
   transform: translateY(-10px);
 }
 
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.lightbox {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 16px;
-}
-
-.lightbox img {
-  max-width: 90vw;
-  max-height: 90vh;
-  object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-
-.close-btn {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: none;
-  border: none;
-  font-size: 28px;
-  color: #fff;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.nav-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  font-size: 32px;
-  color: #fff;
-  width: 48px;
-  height: 48px;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.nav-btn:hover {
-  background: rgba(255, 255, 255, 0.4);
-}
-
-.prev {
-  left: 16px;
-}
-
-.next {
-  right: 16px;
-}
-
-.caption {
-  margin-top: 12px;
-  font-size: 14px;
-  color: #eee;
-}
-
-/* —— 针对 Slider Modal —— */
-/* —— Slider Modal 重写 —— */
-.slider-modal .box {
-  position: relative;
-  /* 变为定位容器 */
-  display: block;
-  /* 去掉 flex 布局 */
-  width: 80vw;
-  max-width: 90vw;
-  height: 80vh;
-  max-height: 90vh;
-  background: var(--card-light);
-  border-radius: var(--radius);
-  overflow: hidden;
-}
-
-.slider-modal .slider-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  /* 其它你喜欢的样式… */
-}
-
-.slider-modal .slider-btn.left {
-  left: 16px;
-}
-
-.slider-modal .slider-btn.right {
-  right: 16px;
-}
-
-/* —— Slider Modal 最终版 —— */
-.slider-modal .slider-content {
-  text-align: center;
-  /* 水平居中 */
-  padding: 20px 0;
-  /* 上下留白 */
-}
-
-.slider-modal .slider-img {
-  display: inline-block;
-  /* 保持内联块，不要被 flex 或 width:100% 拉伸 */
-  width: auto !important;
-  /* 让浏览器用图片本身宽度 */
-  height: auto !important;
-  /* 让浏览器用图片本身高度 */
-  max-width: 90vw;
-  /* 只有超宽时才缩到 90vw */
-  max-height: 80vh;
-  /* 超高时才缩到 80vh */
-
-}
-
-/* 1. 让 box 继续作 flex column 布局 */
-.slider-modal .box {
-  display: flex;
-  flex-direction: column;
-}
-
-/* 2. slider-content 占满剩余空间，并水平/垂直双向居中 */
-.slider-modal .slider-content {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* 3. 图片只在过大时缩放，平常按原始大小 */
-.slider-modal .slider-img {
-  display: block;
-  /* block 或 inline-block 都可 */
-  width: auto !important;
-  height: auto !important;
-  max-width: 90vw;
-  max-height: 80vh;
-}
-
-/* ---- Info 侧边栏 ---- */
-.info-sidebar {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  /* 占满横向 */
-  padding: 18px 22px 28px;
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border-top: var(--glass-border);
-  border-bottom-left-radius: var(--radius);
-  border-bottom-right-radius: var(--radius);
-  font-size: 14px;
-  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.15);
-}
-
-body.dark .info-sidebar {
-  background: var(--card-dark);
-}
-
-/* Slide-up 过渡 */
-.sidebar-slide-enter-from,
-.sidebar-slide-leave-to {
-  transform: translateY(100%);
-  opacity: 0;
-}
-
-.sidebar-slide-enter-active,
-.sidebar-slide-leave-active {
-  transition: .25s ease transform, .25s ease opacity;
-}
-
-.zoom-control {
-  position: absolute;
-  /* 右下角贴边 */
-  bottom: 18px;
-  right: 62px;
-  /* 不挡删除按钮 */
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(120, 120, 120, .15);
-  border: 1px solid rgba(200, 200, 200, .4);
-  padding: 4px 8px;
-  border-radius: 20px;
-  backdrop-filter: blur(4px);
-}
-
-body.dark .zoom-control {
-  background: rgba(255, 255, 255, .08);
-}
-
-.zoom-control input[type=range] {
-  width: 100px;
-  /* 长度随意 */
-}
-
-.zoom-icon {
-  width: 18px;
-  height: 18px;
-  stroke: currentColor;
-  fill: none;
-}
-
-.nav-avatar {
-  position: relative;
-  /* 关键：让子元素 .nav-dropdown 参照它定位 */
-  display: inline-block;
-  /* 确保宽度包裹头像 */
-  cursor: pointer;
-}
-
-.avatar-img {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.nav-dropdown {
-  /* 让下拉菜单至少宽到能容纳其内容 */
-  min-width: max-content;
-  /* 其余保持不变 */
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  background: var(--card-light);
-  backdrop-filter: blur(12px);
-  border: var(--glass-border);
-  border-radius: var(--radius);
-  display: flex;
-  flex-direction: column;
-  padding: 6px 0;
-  z-index: 200;
-}
-
-.dropdown-item {
-  /* 自动根据自己内容撑宽，不要限制成 100% */
-  width: auto;
-  /* 允许文字在需要的时候换行（默认即可） */
-  white-space: normal;
-  background: none;
-  border: none;
-  padding: 12px 16px;
-  text-align: left;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--text-light);
-}
-
-.dropdown-item:hover {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-body.dark .nav-dropdown {
-  background: var(--card-dark);
-}
-
-body.dark .dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-body.dark .dropdown-item {
-  color: #fff;
-}
-
-.menu .nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 6px 8px;
-  border-radius: var(--radius);
-  transition: background .25s;
-}
-
-.menu .nav-item:hover {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-body.dark .menu .nav-item:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.menu .nav-item.nav-item-submit {
-  gap: 1.5px;
-}
-
-.nav-icon {
-  width: 22px;
-  height: 22px;
-}
-
-.nav-label {
-  font-size: 12px;
-  color: var(--text-light);
-}
-
-body.dark .nav-label {
-  color: var(--text-dark);
-}
-
-.nav-item-submit .nav-icon {
-  width: 24px;
-  height: 24px;
-}
-
-/* 让 textarea 成为相对定位的参照物 */
-.np-input-wrapper {
-  position: relative;
-}
-
-.np-input-wrapper {
-  position: relative;
-  /* 如果你之前给它加了 overflow:hidden，也请改成 visible */
-}
-
-.ta-preview {
-  position: relative;
-  /* 跟普通块一样排版 */
-  pointer-events: auto;
-  /* 能接收点击、聚焦、输入 */
-  z-index: 1;
-  /* 背景层级 */
-  min-height: 78px;
-  /* 和 textarea 原来高度一致 */
-  padding: 10px;
-  border-radius: var(--radius);
-  border: var(--glass-border);
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  white-space: pre-wrap;
-  word-break: break-word;
-  outline: none;
-}
-
-/* 深色模式下底色、文字色 */
-body.dark .ta-preview {
-  background: var(--card-dark);
-  color: var(--text-dark);
-}
-
-/* 浮动按钮都放在 ta-preview 之上 */
-.upload-fab,
-.emoji-fab {
-  position: absolute;
-  z-index: 2;
-  /* 你的 bottom/left/right/top 坐标照旧 */
-}
-
-/* 举例： */
-.upload-fab {
-  bottom: 10px;
-  left: 10px;
-}
-
-.emoji-fab {
-  bottom: 10px;
-  left: 48px;
-}
-
-
-
-
-/* 圆形玻璃按钮 —— 复用 btn-ghost 的配色 */
-.upload-fab {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  width: 28px;
-  /* ← 直径调小 */
-  height: 28px;
-  border-radius: 50%;
-  background: var(--card-light);
-  border: var(--glass-border);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  color: var(--text-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background .25s, transform .15s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
-}
-
-body.dark .upload-fab {
-  background: var(--card-dark);
-  color: var(--text-dark);
-}
-
-/* hover 效果沿用 btn-ghost */
-.upload-fab:hover {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-body.dark .upload-fab:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.upload-fab svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* 图标跟着缩小 */
-.upload-fab input {
-  display: none;
-}
-
-/* 隐藏真正的 file input */
-
-/* —— Emoji 按钮 —— */
-.emoji-fab {
-  position: absolute;
-  bottom: 10px;
-  left: 48px;
-  /* upload-fab（10px） + 宽度28px + 间距10px = 48px */
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--card-light);
-  border: var(--glass-border);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  color: var(--text-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background .25s, transform .15s;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
-}
-
-body.dark .emoji-fab {
-  background: var(--card-dark);
-  color: var(--text-dark);
-}
-
-.emoji-fab:hover {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-body.dark .emoji-fab:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* SVG 图标缩放 */
-.emoji-fab svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* === Sticker 选择面板 === */
-.sticker-picker {
-  position: absolute;
-  bottom: 48px;
-  /* 紧贴两个圆钮上方 */
-  left: 48px;
-  display: grid;
-  grid-template-columns: repeat(4, 40px);
-  gap: 8px;
-  padding: 10px;
-  background: var(--card-light);
-  border: var(--glass-border);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border-radius: var(--radius);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
-  z-index: 400;
-}
-
-body.dark .sticker-picker {
-  background: var(--card-dark);
-}
-
-.sticker-picker img {
-  width: 40px;
-  height: 40px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: transform .15s;
-}
-
-.sticker-picker img:hover {
-  transform: scale(1.15);
-}
-
-/* 行内贴图：跟随字体，默认≈1行文字高 */
-.inline-sticker {
-  height: 3em;
-  /* 高度 ≈ 一行字 */
-  width: auto;
-  /* 宽度等比缩放 */
-  vertical-align: -.25em;
-  /* 略微下沉，使中心对齐文字基线 */
-  display: inline-block;
-  /* 防止被视为文本行高 */
-}
-
-body.dark .ta-preview {
-  background: var(--card-dark);
-  color: var(--text-dark);
-}
-
-.ta-preview {
-  /* —— 日常字体 —— */
-  font-family: Arial, sans-serif;
-
-  position: relative;
-  pointer-events: auto;
-  z-index: 1;
-  min-height: 78px;
-  padding: 10px;
-  border-radius: var(--radius);
-  border: var(--glass-border);
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  white-space: pre-wrap;
-  word-break: break-word;
-  outline: none;
-}
-
-/* —— 占位文字 —— */
-.ta-preview:empty::before {
-  content: attr(data-placeholder);
-  color: #888;
-  pointer-events: none;
-}
-
-/* 进场（enter）和离场（leave）的动画 */
+/* 下拉过渡 */
 .dropdown-fade-enter-active,
 .dropdown-fade-leave-active {
   transition: all 0.25s ease;
@@ -3257,164 +2475,7 @@ body.dark .ta-preview {
   transform: translateY(-10px);
 }
 
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  /* 图标和文字之间的距离 */
-  padding: 12px 16px;
-  /* 更大的点击区域 */
-  font-size: 14px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: background .25s;
-}
-
-.dropdown-icon {
-  width: 18px;
-  height: 18px;
-  stroke: currentColor;
-}
-
-/* —— 每个 fieldset 之间增加垂直间距 —— */
-fieldset+fieldset {
-  margin-top: 36px;
-}
-
-/* —— 更醒目的分组标题 —— */
-legend {
-  font-size: 18px;
-  /* 字号调大 */
-  font-weight: 700;
-  /* 加粗 */
-  margin-bottom: 16px;
-  /* 与内容保持呼吸感 */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  /* 底部细线分隔 */
-  padding-bottom: 4px;
-  /* 线和文字间距 */
-}
-
-/* —— 深色模式下调整分隔线颜色 —— */
-body.dark legend {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-
-/* 容器去掉滚动条，三列等宽 */
-.post .photos {
-  display: grid;
-  grid-template-columns: repeat(3, 0.5fr);
-  gap: 8px;
-  overflow: visible;
-  /* 不要再 overflow-x:auto */
-  padding-right: 20%;
-}
-
-/* 缩略图容器保持裁剪逻辑 */
-.post .photos .thumb {
-  position: relative;
-  /* 为 overlay 提供定位上下文 */
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  border-radius: 8px;
-  background: #f0f0f0;
-  max-height: 120px;
-
-}
-
-.post .photos .thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
-
-/* 第三张上的 +N 遮罩 */
-.post .photos .thumb-overlay {
-  position: absolute;
-  bottom: 6px;
-  right: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  font-size: 14px;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 4px;
-  pointer-events: none;
-}
-
-.stack-icon {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
-.overlay-count {
-  line-height: 1;
-  /* 让数字垂直居中 */
-}
-
-.options-pop-enter-active {
-  transition: transform .18s ease-out, opacity .18s ease-out;
-}
-
-.options-pop-leave-active {
-  transition: transform .14s ease-in, opacity .14s ease-in;
-}
-
-.options-pop-enter-from,
-.options-pop-leave-to {
-  transform: translateY(-8px) scale(0.95);
-  opacity: 0;
-}
-
-.options-pop-enter-to,
-.options-pop-leave-from {
-  transform: translateY(0) scale(1);
-  opacity: 1;
-}
-
-.modal-options .edit-place-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(120, 120, 120, 0.15);
-  border: 1px solid rgba(200, 200, 200, 0.4);
-  width: auto;
-  padding: 6px 10px;
-  border-radius: 50%;
-  backdrop-filter: blur(4px);
-  cursor: pointer;
-  transition: background .2s, transform .1s;
-}
-
-.modal-options .edit-place-btn:hover {
-  background: rgba(120, 120, 120, 0.25);
-  transform: scale(1.1);
-}
-
-.modal-options .edit-place-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
-
-/* 图标 */
-.icon {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-}
-
-/* 1. 过渡类 */
+/* SlideFade */
 .slide-fade-enter-active,
 .slide-fade-leave-active {
   transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
@@ -3429,22 +2490,75 @@ body.dark legend {
 
 .slide-fade-enter-to,
 .slide-fade-leave-from {
-  /* 根据你每个分组的最大高度来设一个足够大的值 */
   max-height: 400px;
   opacity: 1;
   transform: translateY(0);
 }
 
-/* 只对 Settings 弹窗生效，去掉最大高度、内部滚动，拉满宽度 */
+/* ========================================================================== */
+/* 19. 特殊布局 & 侧边栏                                                         */
+/* ========================================================================== */
+/* Settings 弹窗下去掉滚动条，三列等宽 */
 .settings-modal .box {
-  /* 不再限制 max-height，允许自适应内容高度 */
   max-height: none !important;
   height: auto !important;
   overflow: visible !important;
-  /* 根据屏幕宽度自动伸缩，上限 1200px */
   width: min(80vw, 1200px);
 }
 
+/* Info 侧边栏 */
+.info-sidebar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 18px 22px 28px;
+  background: var(--card-light);
+  backdrop-filter: blur(calc(var(--blur)/2));
+  border-top: var(--glass-border);
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  font-size: 14px;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.15);
+}
+
+body.dark .info-sidebar {
+  background: var(--card-dark);
+}
+
+/* Zoom 控件 */
+.zoom-control {
+  position: absolute;
+  bottom: 18px;
+  right: 62px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(120, 120, 120, .15);
+  border: 1px solid rgba(200, 200, 200, .4);
+  padding: 4px 8px;
+  border-radius: 20px;
+  backdrop-filter: blur(4px);
+}
+
+body.dark .zoom-control {
+  background: rgba(255, 255, 255, .08);
+}
+
+.zoom-control input[type="range"] {
+  width: 100px;
+}
+
+.zoom-icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* ========================================================================== */
+/* 20. 地点选择器 & 相关弹窗                                                     */
+/* ========================================================================== */
 .place-picker {
   position: relative;
   display: inline-block;
@@ -3488,7 +2602,6 @@ body.dark legend {
   background: rgba(74, 144, 226, 0.1);
 }
 
-/* 暗色模式下，地点选择器背景和文字颜色 */
 body.dark .place-btn {
   color: var(--text-dark);
 }
@@ -3510,29 +2623,20 @@ body.dark .place-item:hover {
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* —— 编辑地点 弹窗专用 —— */
+/* 编辑地点弹窗 */
 .place-modal-box {
-  /* 自适应布局，宽度在 400–480px 之间 */
   width: 80vw;
   max-width: 480px;
   min-width: 400px;
-
-  /* 更充裕的内边距 */
   padding: 20px 24px;
-
-  /* 底部投影加强层次感 */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-
   position: relative;
-  /* 保留原来定位 */
   border-radius: var(--radius);
-  /* 与其他 .box 保持一致 */
   background: var(--card-light);
   backdrop-filter: blur(calc(var(--blur)/2));
   border: var(--glass-border);
 }
 
-/* 响应式：在窄屏上依然保证能显示 */
 @media (max-width: 480px) {
   .place-modal-box {
     width: 95vw;
