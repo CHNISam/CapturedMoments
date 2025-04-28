@@ -160,9 +160,12 @@
 
 
             <button class="btn-publish" @click="publishPost" :disabled="isPublishing">
-              <template v-if="!isPublishing">发布</template>
+              <!-- 编辑模式下显示“保存”，否则显示“发布” -->
+              <template v-if="!isPublishing">
+                {{ editingPost ? '保存' : '发布' }}
+              </template>
               <template v-else>
-                <span class="spinner"></span> 发布中…
+                <span class="spinner"></span> {{ editingPost ? '保存中…' : '发布中…' }}
               </template>
             </button>
 
@@ -932,9 +935,10 @@ export default {
       this.draftImgs = [...post.imgs];
       this.newPostPlace = post.place || '';
 
-      // 把 contenteditable 区同步内联文本
+      // 把 contenteditable 区同步内联文本（支持渲染 markdown 图片和换行）
       if (this.$refs.postInput) {
-        this.$refs.postInput.innerText = post.txt;
+        const html = this.renderText(post.txt).replace(/\n/g, '<br>');
+        this.$refs.postInput.innerHTML = html;
       }
 
       // 跳转到投稿区
@@ -999,6 +1003,7 @@ export default {
       setTimeout(() => {
         this.isPublishing = false;
         this.isListLoading = false;
+        this.editingPost = null;
         // this.scrollTo('post-list');
       }, 300);
     },
