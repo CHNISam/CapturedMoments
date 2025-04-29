@@ -101,9 +101,6 @@
       <!-- 发布与上传 -->
       <ul v-show="activeSection === 'publish'" class="settings-group">
         <li class="setting-item">
-          <span>发布设置</span>
-        </li>
-        <li class="setting-item">
           <span>图片上传方式</span>
           <select :value="imageInsertMode" @change="$emit('update:imageInsertMode', $event.target.value)">
             <option value="preview">预览区</option>
@@ -180,54 +177,90 @@ export default {
   display: flex;
   gap: 24px;
   padding: 40px 16px;
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
-  height: 80vh;
-  /* 保证固定高度，内部滚动 */
+  height: 80vh; /* 保证固定高度，内部滚动 */
   box-sizing: border-box;
 }
 
-/* 左侧导航 */
+/* 左侧导航 ===== */
 .settings-nav {
-  width: 180px;
+  width:  140px;
   background: rgba(0, 0, 0, 0.02);
-  /* 增加轻微背景色 */
-  border-right: none;
-  /* 移除边框，更柔和 */
+  border-right: none; /* 更柔和 */
   border-radius: 8px;
   padding: 8px;
-  position: sticky;
-  /* 滚动时保持可见 */
+  position: sticky; /* 滚动时保持可见 */
   top: 40px;
+  bottom: 40px;
   align-self: flex-start;
 }
 
+/* 右侧内容 ===== */
 .settings-content {
-  padding: 0 40px;
-  /* 左右内边距扩大，减少压迫感 */
+  flex: 1;
+  overflow-y: auto; /* 独立滚动区域 */
+  padding: 0 24px;
+  scrollbar-width: thin; /* Firefox */
 }
 
+/* 通用设置项 ===== */
 .setting-item {
   display: grid;
-  grid-template-columns: minmax(max-content, 150px) 1fr;
-  column-gap: 32px;
+  grid-template-columns: 100px 1fr; /* 固定标签宽度 */
+  align-items: center;
+  gap: 32px; /* 标签与控件间距 */
+  margin: 24px 0; /* 行间距 */
+  padding: 0 24px;
 }
-
 .setting-item span {
-  white-space: nowrap;
-  /* 标签文字不换行 */
+  white-space: nowrap; /* 标签文字不换行 */
   max-width: 150px;
-  /* 当太长时可截断或ellipsis */
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.setting-item:hover {
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+}
+.setting-item .btn-ghost,
+.setting-item .btn-publish,
+.rename-item input,
+.rename-input {
+  width: 160px;
+  white-space: nowrap; /* 文本不换行 */
+}
+/* 控件宽度限制 ===== */
+.setting-item input[type="range"],
+.setting-item select {
+  width: 100%;
+  max-width: 360px;
+}
 
-.nav-list {
+/* 分组标题 ===== */
+.group-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 32px 0 16px;
+}
+.group-title + .settings-group {
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+}
+
+/* 分组列表 ===== */
+.settings-group {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* 导航列表 ===== */
+.nav-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 .nav-list li {
   display: flex;
   align-items: center;
@@ -236,20 +269,14 @@ export default {
   user-select: none;
   transition: background .2s;
 }
-
 .nav-list li:hover {
   background: rgba(0, 0, 0, 0.04);
 }
-
-/* 柔和的激活态，不含侧边条 */
 .nav-list li.active {
   background: rgba(74, 144, 226, 0.08);
-  /* 透明度更低，颜色更柔和 */
-  /* 保留默认文字色，或根据需要使用深灰色 */
   color: inherit;
   font-weight: 600;
 }
-
 .nav-icon {
   width: 20px;
   height: 20px;
@@ -257,60 +284,7 @@ export default {
   margin-right: 8px;
 }
 
-/* 右侧内容 */
-.settings-content {
-  flex: 1;
-  overflow-y: auto;
-  /* 独立滚动区域 */
-  padding: 0 24px;
-  /* 左右留出足够空间 */
-  scrollbar-width: thin;
-  /* Firefox */
-}
-
-/* 分组标题 */
-.group-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 32px 0 16px;
-}
-
-.group-title+.settings-group {
-  border-top: 1px solid #eee;
-  padding-top: 16px;
-}
-
-/* 分组列表 */
-.settings-group {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* 单行项目：两列网格避免挤压 */
-.setting-item {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  /* 固定标签宽度 */
-  align-items: center;
-  gap: 32px;
-  /* 标签与控件间距 */
-  margin: 24px 0;
-  /* 行间距 */
-}
-
-.setting-item:hover {
-  background: rgba(0, 0, 0, 0.02);
-  border-radius: 4px;
-}
-
-/* 控件宽度限制 */
-.setting-item input[type="range"],
-.setting-item select {
-  width: 100%;
-  max-width: 300px;
-}
-
+/* 按钮组与输入项 ===== */
 .btn-group {
   display: flex;
   gap: 8px;
@@ -328,23 +302,14 @@ export default {
 .btn-ghost input[type="file"] {
   display: none;
 }
-
-/* 全局按钮基础 */
 .settings-container .btn-ghost,
 .settings-container .btn-publish {
   display: inline-block;
-  /* 保证外部宽度随内容浮动 */
   width: fit-content;
-  /* 根据内容收缩 */
   padding: 6px 12px;
-  /* 保持一致的水平内边距 */
   min-width: 64px;
-  /* 最小宽度，避免过短 */
   text-align: center;
-  /* 文本居中 */
 }
-
-/* 在网格/按钮组中靠左对齐 */
 .settings-container .btn-group button {
   justify-self: start;
 }
