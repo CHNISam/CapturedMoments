@@ -74,8 +74,7 @@
         </li>
         <li class="setting-item rename-item">
           <span>我的昵称</span>
-          <input type="text" :value="localDisplayName" placeholder="输入新的昵称"
-            @input="$emit('update:localDisplayName', $event.target.value)" />
+          <button class="btn-ghost" @click="showRenameModal = true">{{ localDisplayName || '设置昵称' }}</button>
         </li>
         <li class="setting-item">
           <span>勋章中心</span>
@@ -120,17 +119,38 @@
         </li>
       </ul>
     </section>
+    <!-- 昵称修改弹窗 -->
+    <div v-if="showRenameModal" class="modal show" @click.self="showRenameModal = false">
+      <div class="box" style="min-width:360px; max-width:480px;">
+        <!-- 右上角关闭 -->
+        <span class="close" @click="showRenameModal = false">×</span>
+        <!-- 标题 -->
+        <h3 style="margin-bottom:16px;">修改昵称</h3>
+        <!-- 输入区域 -->
+        <div style="margin-bottom:24px;">
+          <input v-model="renameDraft" placeholder="输入新的昵称"
+            style="width:100%; padding:8px; border:var(--glass-border); border-radius:4px;" />
+        </div>
+        <!-- 按钮 -->
+        <div style="text-align:right; gap:8px; display:flex; justify-content:flex-end;">
+          <button class="btn-ghost" @click="showRenameModal = false">取消</button>
+          <button class="btn-publish" @click="confirmRename">确定</button>
+        </div>
+      </div>
+    </div>
+
   </section>
 </template>
 
 <script>
 export default {
   name: 'SettingsPanel',
+  components: { },
   emits: [
     'update:theme', 'update:bgSrc', 'update:bgOpacity', 'update:bgBlur',
     'update:loadMode', 'update:imageInsertMode',
     'update:petEnabled', 'update:llmEnabled', 'update:localDisplayName',
-    'open-password-modal', 'open-badge-modal',
+    'open-password-modal', 'open-nickname-modal', 'open-badge-modal',
     'reset-password', 'add-allowed-uid', 'remove-allowed-uid', 'open-admin-pwd-modal'
   ],
   props: {
@@ -140,7 +160,7 @@ export default {
     localDisplayName: String,
     allowedUids: Array, currentUser: [String, Number], adminUid: [String, Number]
   },
-  data() { return { activeSection: 'visual', newAdminUid: '' }; },
+  data() { return { activeSection: 'visual', newAdminUid: '', showRenameModal: false, renameDraft: this.localDisplayName || '', }; },
   computed: {
     isAdmin() { return String(this.currentUser) === String(this.adminUid); },
     proxyBgOpacity: {
@@ -170,7 +190,10 @@ export default {
       // 选中 = inline，否则 preview
       this.$emit('update:imageInsertMode', e.target.checked ? 'inline' : 'preview');
     },
-    
+    confirmRename() {
+      this.$emit('update:localDisplayName', this.renameDraft.trim());
+      this.showRenameModal = false;
+    },
   },
 };
 </script>
@@ -241,11 +264,11 @@ export default {
 
 .setting-item .btn-ghost,
 .setting-item .btn-publish,
-.rename-item input,
 .rename-input {
   width: 160px;
-  white-space: nowrap;
-  /* 文本不换行 */
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 /* 控件宽度限制 ===== */
