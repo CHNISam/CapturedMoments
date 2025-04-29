@@ -120,25 +120,26 @@
       </ul>
     </section>
     <!-- 昵称修改弹窗 -->
-    <div v-if="showRenameModal" class="modal show" @click.self="showRenameModal = false">
-      <div class="box" style="min-width:360px; max-width:480px;">
-        <!-- 右上角关闭 -->
-        <span class="close" @click="showRenameModal = false">×</span>
-        <!-- 标题 -->
-        <h3 style="margin-bottom:16px;">修改昵称</h3>
-        <!-- 输入区域 -->
-        <div style="margin-bottom:24px;">
-          <input v-model="renameDraft" placeholder="输入新的昵称"
-            style="width:100%; padding:8px; border:var(--glass-border); border-radius:4px;" />
-        </div>
-        <!-- 按钮 -->
-        <div style="text-align:right; gap:8px; display:flex; justify-content:flex-end;">
-          <button class="btn-ghost" @click="showRenameModal = false">取消</button>
-          <button class="btn-publish" @click="confirmRename">确定</button>
+    <Teleport to="body">
+      <div v-if="showRenameModal" class="modal show" @click.self="showRenameModal = false">
+        <div class="box" style="min-width:360px; max-width:480px;">
+          <!-- 右上角关闭 -->
+          <span class="close" @click="showRenameModal = false">×</span>
+          <!-- 标题 -->
+          <h3 style="margin-bottom:16px;">修改昵称</h3>
+          <!-- 输入区域 -->
+          <div style="margin-bottom:24px;">
+            <input v-model="renameDraft" placeholder="输入新的昵称"
+              style="width:100%; padding:8px; border:var(--glass-border); border-radius:4px;" />
+          </div>
+          <!-- 按钮 -->
+          <div style="text-align:right; gap:8px; display:flex; justify-content:flex-end;">
+            <button class="btn-ghost" @click="showRenameModal = false">取消</button>
+            <button class="btn-publish" @click="confirmRename">确定</button>
+          </div>
         </div>
       </div>
-    </div>
-
+    </Teleport>
   </section>
 </template>
 
