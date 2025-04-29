@@ -136,25 +136,6 @@
           </div>
           <div class="np-toolbar">
             <span class="char-count">{{ newPostCharCount }}/30000</span>
-            <!-- —— Location picker —— -->
-            <div class="place-picker" @click.stop>
-              <button class="place-btn" @click="toggleNewPostPicker">
-                <svg class="location-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
-                  style="width:24px;height:24px;">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                  <circle cx="12" cy="9" r="2.5" />
-                </svg>
-                <span class="place-label">{{ newPostPlace || '选择地点' }}</span>
-              </button>
-
-              <div v-show="newPostPickerVisible" class="place-options">
-                <button v-for="place in placeOptions" :key="place" class="place-item"
-                  @click="selectNewPostPlace(place)">
-                  {{ place || '无' }}
-                </button>
-              </div>
-            </div>
-
 
             <!-- ③ 新的“发布”按钮，圆形、尺寸更小 -->
 
@@ -346,7 +327,8 @@
             :currentUser="currentUser" bestBadgeUid="246490729" adminUid="217122260"
             @open-password-modal="openPasswordModal" @open-badge-modal="openBadgeModal" @reset-password="resetPassword"
             @add-allowed-uid="addAllowedUid" @remove-allowed-uid="removeAllowedUid"
-            @open-admin-pwd-modal="openAdminPwdModal" />
+            @open-admin-pwd-modal="openAdminPwdModal"
+            @open-nickname-modal="showNicknameModal = true" />
         </div>
       </div>
 
@@ -447,24 +429,6 @@
           <h3 style="margin-bottom:12px;">编辑地点</h3>
           <!-- 跟发帖区一模一样的 np-toolbar -->
           <div class="np-toolbar" style="margin-bottom:12px;">
-            <!-- —— 同发帖区的 place-picker —— -->
-            <div class="place-picker" @click.stop>
-              <button class="place-btn" @click="toggleModalPicker">
-                <svg class="location-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
-                  style="width:24px;height:24px;">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                  <circle cx="12" cy="9" r="2.5" />
-                </svg>
-                <span class="place-label">{{ placeModalValue || '无' }}</span>
-              </button>
-
-              <div v-show="modalPickerVisible" class="place-options">
-                <button v-for="place in placeOptions" :key="place" class="place-item" @click="selectModalPlace(place)">
-                  {{ place || '无' }}
-                </button>
-              </div>
-            </div>
-
           </div>
 
           <div style="text-align:right;">
@@ -545,11 +509,6 @@ export default {
       isPublishing: false,    // 按钮 loading
       isListLoading: false,   // 列表骨架屏
       editingPost: null,
-
-      newPostPickerVisible: false,
-      modalPickerVisible: false,
-      placeOptions: ['', '蒙德', '璃月', '稻妻', '须弥', '枫丹', '纳塔'],
-
 
       // —— 分页加载配置 —— 
       loadedCount: 5,  // 初始加载 5 条
@@ -809,23 +768,6 @@ export default {
     },
 
     scrollTo(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); },
-    // 投稿区 Picker
-    toggleNewPostPicker() {
-      this.newPostPickerVisible = !this.newPostPickerVisible;
-    },
-    selectNewPostPlace(place) {
-      this.newPostPlace = place;
-      this.newPostPickerVisible = false;
-    },
-
-    // Modal 区 Picker
-    toggleModalPicker() {
-      this.modalPickerVisible = !this.modalPickerVisible;
-    },
-    selectModalPlace(place) {
-      this.placeModalValue = place;
-      this.modalPickerVisible = false;
-    },
 
     getAvatar(uid) {
       if (!this.avatarMap[uid]) {
@@ -2556,91 +2498,4 @@ body.dark .zoom-control {
   fill: none;
 }
 
-/* ========================================================================== */
-/* 20. 地点选择器 & 相关弹窗                                                     */
-/* ========================================================================== */
-.place-picker {
-  position: relative;
-  display: inline-block;
-}
-
-.place-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.place-options {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: var(--card-light);
-  border: var(--glass-border);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border-radius: var(--radius);
-  margin-top: 4px;
-  padding: 6px 0;
-  z-index: 300;
-  display: flex;
-  flex-direction: column;
-}
-
-.place-item {
-  padding: 6px 12px;
-  font-size: 14px;
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-}
-
-.place-item:hover {
-  background: rgba(74, 144, 226, 0.1);
-}
-
-body.dark .place-btn {
-  color: var(--text-dark);
-}
-
-body.dark .place-btn .location-icon {
-  stroke: currentColor;
-}
-
-body.dark .place-options {
-  background: var(--card-dark);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-body.dark .place-item {
-  color: var(--text-dark);
-}
-
-body.dark .place-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* 编辑地点弹窗 */
-.place-modal-box {
-  width: 80vw;
-  max-width: 480px;
-  min-width: 400px;
-  padding: 20px 24px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  position: relative;
-  border-radius: var(--radius);
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border: var(--glass-border);
-}
-
-@media (max-width: 480px) {
-  .place-modal-box {
-    width: 95vw;
-    min-width: auto;
-  }
-}
 </style>
