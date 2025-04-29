@@ -61,11 +61,8 @@
           <input type="range" min="0" max="20" step="1" v-model.number="proxyBgBlur" />
         </li>
         <li class="setting-item">
-          <span>动态加载模式</span>
-          <select :value="loadMode" @change="saveLoadMode">
-            <option value="auto">自动</option>
-            <option value="manual">手动</option>
-          </select>
+          <span>自动加载</span>
+          <input type="checkbox" :checked="loadMode === 'auto'" @change="saveLoadModeSwitch($event)" />
         </li>
       </ul>
 
@@ -101,12 +98,10 @@
       <!-- 发布与上传 -->
       <ul v-show="activeSection === 'publish'" class="settings-group">
         <li class="setting-item">
-          <span>图片上传方式</span>
-          <select :value="imageInsertMode" @change="$emit('update:imageInsertMode', $event.target.value)">
-            <option value="preview">预览区</option>
-            <option value="inline">正文内嵌</option>
-          </select>
+          <span>图片嵌入正文</span>
+          <input type="checkbox" :checked="imageInsertMode === 'inline'" @change="saveImageInsertModeSwitch($event)" />
         </li>
+
       </ul>
 
       <!-- 管理员 -->
@@ -166,8 +161,17 @@ export default {
       r.onload = ev => this.$emit('update:bgSrc', ev.target.result);
       r.readAsDataURL(f);
     },
-    saveLoadMode(e) { this.$emit('update:loadMode', e.target.value); }
-  }
+    saveLoadMode(e) { this.$emit('update:loadMode', e.target.value); },
+    saveLoadModeSwitch(e) {
+      // 开：'auto'，关：'manual'
+      this.$emit('update:loadMode', e.target.checked ? 'auto' : 'manual');
+    },
+    saveImageInsertModeSwitch(e) {
+      // 选中 = inline，否则 preview
+      this.$emit('update:imageInsertMode', e.target.checked ? 'inline' : 'preview');
+    },
+    
+  },
 };
 </script>
 
@@ -177,20 +181,23 @@ export default {
   display: flex;
   gap: 24px;
   padding: 40px 16px;
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
-  height: 80vh; /* 保证固定高度，内部滚动 */
+  height: 80vh;
+  /* 保证固定高度，内部滚动 */
   box-sizing: border-box;
 }
 
 /* 左侧导航 ===== */
 .settings-nav {
-  width:  140px;
+  width: 140px;
   background: rgba(0, 0, 0, 0.02);
-  border-right: none; /* 更柔和 */
+  border-right: none;
+  /* 更柔和 */
   border-radius: 8px;
   padding: 8px;
-  position: sticky; /* 滚动时保持可见 */
+  position: sticky;
+  /* 滚动时保持可见 */
   top: 40px;
   bottom: 40px;
   align-self: flex-start;
@@ -199,37 +206,48 @@ export default {
 /* 右侧内容 ===== */
 .settings-content {
   flex: 1;
-  overflow-y: auto; /* 独立滚动区域 */
+  overflow-y: auto;
+  /* 独立滚动区域 */
   padding: 0 24px;
-  scrollbar-width: thin; /* Firefox */
+  scrollbar-width: thin;
+  /* Firefox */
 }
 
 /* 通用设置项 ===== */
 .setting-item {
   display: grid;
-  grid-template-columns: 100px 1fr; /* 固定标签宽度 */
+  grid-template-columns: 100px 1fr;
+  /* 固定标签宽度 */
   align-items: center;
-  gap: 32px; /* 标签与控件间距 */
-  margin: 24px 0; /* 行间距 */
+  gap: 32px;
+  /* 标签与控件间距 */
+  margin: 24px 0;
+  /* 行间距 */
   padding: 0 24px;
 }
+
 .setting-item span {
-  white-space: nowrap; /* 标签文字不换行 */
+  white-space: nowrap;
+  /* 标签文字不换行 */
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .setting-item:hover {
   background: rgba(0, 0, 0, 0.02);
   border-radius: 4px;
 }
+
 .setting-item .btn-ghost,
 .setting-item .btn-publish,
 .rename-item input,
 .rename-input {
   width: 160px;
-  white-space: nowrap; /* 文本不换行 */
+  white-space: nowrap;
+  /* 文本不换行 */
 }
+
 /* 控件宽度限制 ===== */
 .setting-item input[type="range"],
 .setting-item select {
@@ -243,7 +261,8 @@ export default {
   font-weight: 600;
   margin: 32px 0 16px;
 }
-.group-title + .settings-group {
+
+.group-title+.settings-group {
   border-top: 1px solid #eee;
   padding-top: 16px;
 }
@@ -261,6 +280,7 @@ export default {
   padding: 0;
   list-style: none;
 }
+
 .nav-list li {
   display: flex;
   align-items: center;
@@ -269,14 +289,17 @@ export default {
   user-select: none;
   transition: background .2s;
 }
+
 .nav-list li:hover {
   background: rgba(0, 0, 0, 0.04);
 }
+
 .nav-list li.active {
   background: rgba(74, 144, 226, 0.08);
   color: inherit;
   font-weight: 600;
 }
+
 .nav-icon {
   width: 20px;
   height: 20px;
@@ -302,6 +325,7 @@ export default {
 .btn-ghost input[type="file"] {
   display: none;
 }
+
 .settings-container .btn-ghost,
 .settings-container .btn-publish {
   display: inline-block;
@@ -310,6 +334,7 @@ export default {
   min-width: 64px;
   text-align: center;
 }
+
 .settings-container .btn-group button {
   justify-self: start;
 }
