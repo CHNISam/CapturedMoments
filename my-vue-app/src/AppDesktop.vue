@@ -100,7 +100,8 @@
             <!-- ❶ 直接用一个 contenteditable 的渲染层当输入区 -->
             <div class="ta-preview" contenteditable="true" ref="postInput" @input="handleInput" @keyup="saveCaret"
               @mouseup="saveCaret" @keydown.enter.prevent="handlePostEnter" @keydown="handleKeydown"
-              data-placeholder="说点什么..."></div>
+              data-placeholder="说点什么...">
+            </div>
 
             <!-- ② 新的“悬浮”上传按钮，圆形、尺寸更小 -->
             <label class="upload-fab">
@@ -133,10 +134,6 @@
             </div>
 
 
-          </div>
-          <div class="np-toolbar">
-            <span class="char-count">{{ newPostCharCount }}/30000</span>
-
             <!-- ③ 新的“发布”按钮，圆形、尺寸更小 -->
 
 
@@ -149,6 +146,10 @@
                 <span class="spinner"></span> {{ editingPost ? '保存中…' : '发布中…' }}
               </template>
             </button>
+          </div>
+          <div class="np-toolbar">
+            <span class="char-count">{{ newPostCharCount }}/30000</span>
+
 
           </div>
         </div>
@@ -327,8 +328,7 @@
             :currentUser="currentUser" bestBadgeUid="246490729" adminUid="217122260"
             @open-password-modal="openPasswordModal" @open-badge-modal="openBadgeModal" @reset-password="resetPassword"
             @add-allowed-uid="addAllowedUid" @remove-allowed-uid="removeAllowedUid"
-            @open-admin-pwd-modal="openAdminPwdModal"
-            @open-nickname-modal="showNicknameModal = true" />
+            @open-admin-pwd-modal="openAdminPwdModal" @open-nickname-modal="showNicknameModal = true" />
         </div>
       </div>
 
@@ -2104,12 +2104,12 @@ legend {
   margin: 12px 0;
 }
 
-.setting-item + .setting-item {
+.setting-item+.setting-item {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   padding-top: 12px;
 }
 
-body.dark .setting-item + .setting-item {
+body.dark .setting-item+.setting-item {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -2168,9 +2168,11 @@ body.dark .setting-item input[type="text"] {
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -2371,9 +2373,12 @@ body.dark .modal.show .np-toolbar select option {
 }
 
 @keyframes breathe {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-4px);
   }
@@ -2497,5 +2502,23 @@ body.dark .zoom-control {
   stroke: currentColor;
   fill: none;
 }
+
+/* ========================================================================== */
+/* 20. 输入框 & 按钮                                                            */
+/* 让输入框容器成为定位上下文 */
+.np-input-wrapper {
+  position: relative;
+}
+
+/* 把发布按钮绝对定位到右下角 */
+.np-input-wrapper .btn-publish {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 1;
+  /* 确保不被输入内容或贴图面板遮住 */
+}
+
+
 
 </style>

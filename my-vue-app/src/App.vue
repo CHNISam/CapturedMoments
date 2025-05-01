@@ -12,3 +12,4 @@ export default {
   components: { AppDesktop, AppMobile }
 }
 </script>
+
