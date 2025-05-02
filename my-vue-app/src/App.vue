@@ -147,28 +147,6 @@
           </div>
           <div class="np-toolbar">
             <span class="char-count">{{ newPostCharCount }}/30000</span>
-            <!-- —— Location picker —— -->
-            <div class="place-picker" @click.stop>
-              <button class="place-btn" @click="toggleNewPostPicker">
-                <svg class="location-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
-                  style="width:24px;height:24px;">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                  <circle cx="12" cy="9" r="2.5" />
-                </svg>
-                <span class="place-label">{{ newPostPlace || '选择地点' }}</span>
-              </button>
-
-              <div v-show="newPostPickerVisible" class="place-options">
-                <button v-for="place in placeOptions" :key="place" class="place-item"
-                  @click="selectNewPostPlace(place)">
-                  {{ place || '无' }}
-                </button>
-              </div>
-            </div>
-
-
-
-
           </div>
         </div>
 
@@ -210,7 +188,7 @@
               </div>
               <div style="display:flex;align-items:center;gap:10px;">
                 <span style="font-size:12px">
-                  {{ new Date(post.ts).toLocaleTimeString() }}<span v-if="post.place"> · {{ post.place }}</span>
+                  {{ new Date(post.ts).toLocaleTimeString() }}
                 </span>
                 <div class="more-wrapper">
                   <span v-if="post.uid === currentUser || currentUser === '217122260'" class="more"
@@ -324,7 +302,7 @@
             <h4 style="grid-column:1/-1;margin:4px 0 6px">{{ key }}</h4>
             <div v-for="(photo, i) in group" :key="i" class="photo"
               @click="openModal(photo.post, photo.post.imgs.indexOf(photo.url))">
-              <img :src="photo.url" /><span>{{ photo.place }}</span>
+              <img :src="photo.url" />
             </div>
           </template>
         </div>
@@ -389,13 +367,6 @@
           <!-- Modal 图片操作菜单 -->
           <transition name="options-pop">
             <div v-if="showImageOptions" class="modal-options">
-              <button class="edit-place-btn" @click="openPlaceModal('image', modalPost)">
-                <!-- Location Marker 图标 -->
-                <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linejoin="round">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                  <circle cx="12" cy="9" r="2.5" />
-                </svg>
-              </button>
             </div>
           </transition>
           <div class="slider-content">
@@ -427,10 +398,6 @@
           <transition name="sidebar-slide">
             <div v-if="showInfoSidebar" class="info-sidebar">
               <p><b>尺寸：</b>{{ infoSize }}</p>
-              <p>
-                <b>地点：</b>
-                {{ modalPost.imgPlaces[modalIndex] || modalPost.place || '未知' }}
-              </p>
               <p><b>日期：</b>{{ new Date(modalPost.ts).toLocaleString() }}</p>
             </div>
           </transition>
@@ -440,43 +407,6 @@
           </div>
         </div>
       </div>
-      <!-- 编辑地点 Modal -->
-      <div v-if="showPlaceModal" class="modal show">
-        <div class="box place-modal-box">
-          <span class="close" @click="closePlaceModal">×</span>
-          <h3 style="margin-bottom:12px;">编辑地点</h3>
-          <!-- 跟发帖区一模一样的 np-toolbar -->
-          <div class="np-toolbar" style="margin-bottom:12px;">
-            <!-- —— 同发帖区的 place-picker —— -->
-            <div class="place-picker" @click.stop>
-              <button class="place-btn" @click="toggleModalPicker">
-                <svg class="location-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
-                  style="width:24px;height:24px;">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
-                  <circle cx="12" cy="9" r="2.5" />
-                </svg>
-                <span class="place-label">{{ placeModalValue || '无' }}</span>
-              </button>
-
-              <div v-show="modalPickerVisible" class="place-options">
-                <button v-for="place in placeOptions" :key="place" class="place-item" @click="selectModalPlace(place)">
-                  {{ place || '无' }}
-                </button>
-              </div>
-            </div>
-
-          </div>
-
-          <div style="text-align:right;">
-            <button class="btn-ghost" @click="closePlaceModal" style="margin-right:8px;">取消</button>
-            <button class="btn-publish" @click="confirmPlaceEdit">确定</button>
-          </div>
-        </div>
-      </div>
-
-
-
-      <!-- 密码 Modal -->
       <div v-if="showPasswordModal" class="modal show">
         <div class="box" style="text-align:center;max-width:340px;">
           <span class="close" @click="closePasswordModal">×</span>
@@ -540,16 +470,10 @@ export default {
 
       /* 投稿 */
       newPostText: '',
-      newPostPlace: '',
       draftImgs: [],
       isPublishing: false,    // 按钮 loading
       isListLoading: false,   // 列表骨架屏
       editingPost: null,
-
-      newPostPickerVisible: false,
-      modalPickerVisible: false,
-      placeOptions: ['', '蒙德', '璃月', '稻妻', '须弥', '枫丹', '纳塔'],
-
 
       // —— 分页加载配置 —— 
       loadedCount: 5,  // 初始加载 5 条
@@ -567,9 +491,6 @@ export default {
       modalMeta: '',
       modalImgs: [],     // 本次 Modal 要展示的图片列表
       modalIndex: 0,     // 当前显示的图片下标
-      showPlaceModal: false,      // 控制编辑地点弹窗显隐
-      placeModalTarget: null,     // 要编辑的对象（post 或 modalPost）
-      placeModalType: '',         // 'post' 或 'image'
       showInfoSidebar: false,          // Info 侧边栏显隐
       infoSize: '',                    // "4032 × 3024" 这样的字符串
 
@@ -608,7 +529,6 @@ export default {
       })(),
 
       editingImgIdx: 0,          // ⑦ 当前在改哪一张
-      placeModalValue: '',       // ⑧ <select v-model> 的值
 
       /* 密码 */
       oldPassword: '',
@@ -645,8 +565,6 @@ export default {
       // 动态列表「⋯」菜单
       postOptionsPost: null,     // 控制哪个 post 的选项菜单显隐
 
-      imageNewPlace: '',  // Modal 编辑时用的 v-model
-      postNewPlace: '',   // 动态列表编辑时用的 v-model
       visibleComments: {},   // key: post.id, value: Boolean  
     };
   },
@@ -677,8 +595,6 @@ export default {
         post.imgs.forEach((url, idx) => {
           out.push({
             url,
-            // 1️⃣ 如果这张图有 imgPlaces，就用它；否则 fallback 到 post.place
-            place: post.imgPlaces?.[idx] || post.place || '未知',
             date: new Date(post.ts).toISOString().slice(0, 10),
             post,
             idx
@@ -692,9 +608,9 @@ export default {
     groupedPhotos() {
       const g = {};
       this.allPhotos.forEach(p => {
-        const key = this.albumMode === 'time' ? p.date.slice(0, 7) : p.place;
+        const key = p.date.slice(0, 7);
         if (!g[key]) g[key] = [];
-        g[key].push({ ...p, meta: `${p.date} · ${p.place}` });
+        g[key].push({ ...p,  meta: p.date, });
       });
       return g;
     },
@@ -771,7 +687,7 @@ export default {
       const d = new Date(post.ts);
       const date = d.toLocaleDateString();      // 本地化日期
       const time = d.toLocaleTimeString();      // 本地化时分秒
-      return `${date} ${time}${post.place ? ' · ' + post.place : ''}`;
+      return `${date} ${time}`;
     },
 
     // —— 关闭贴图面板 —— //
@@ -809,24 +725,11 @@ export default {
     },
 
     scrollTo(id) { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: 'smooth' }); },
-    // 投稿区 Picker
-    toggleNewPostPicker() {
-      this.newPostPickerVisible = !this.newPostPickerVisible;
-    },
-    selectNewPostPlace(place) {
-      this.newPostPlace = place;
-      this.newPostPickerVisible = false;
-    },
 
     // Modal 区 Picker
     toggleModalPicker() {
       this.modalPickerVisible = !this.modalPickerVisible;
     },
-    selectModalPlace(place) {
-      this.placeModalValue = place;
-      this.modalPickerVisible = false;
-    },
-
     getAvatar(uid) {
       if (!this.avatarMap[uid]) {
         this.avatarMap[uid] = localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60';
@@ -933,7 +836,6 @@ export default {
       this.editingPost = post;
       this.newPostText = post.txt;
       this.draftImgs = [...post.imgs];
-      this.newPostPlace = post.place || '';
 
       // 把 contenteditable 区同步内联文本（支持渲染 markdown 图片和换行）
       if (this.$refs.postInput) {
@@ -960,11 +862,8 @@ export default {
       }
 
       if (this.editingPost) {
-        // 编辑已有动态：更新文本、图片、地点，不改 ts
         this.editingPost.txt = txt;
         this.editingPost.imgs = [...this.draftImgs];
-        this.editingPost.imgPlaces = this.draftImgs.map(() => null);
-        this.editingPost.place = this.newPostPlace;
 
         // 更新本地存储（注意：编辑时不清空 imgs）
         localStorage.setItem('posts', JSON.stringify(this.posts));
@@ -976,7 +875,6 @@ export default {
           id: crypto.randomUUID(),
           uid: this.currentUser,
           txt,
-          place: this.newPostPlace,
           imgPlaces: this.draftImgs.map(() => null),
           imgs: [...this.draftImgs],
           ts: Date.now(),
@@ -1138,53 +1036,10 @@ export default {
       }
     },
 
-    // Modal: 确认修改图片地点
-    openPlaceModal(type, target) {
-      this.placeModalType = type;
-      this.placeModalTarget = target;
-      this.showPlaceModal = true;
-      if (type === 'image') {
-        this.editingImgIdx = this.modalIndex;
-        this.placeModalValue = target.imgPlaces[this.modalIndex] ?? target.place ?? '';
-      } else {
-        this.placeModalValue = target.place ?? '';
-      }
-    },
-    // 取消
-    closePlaceModal() {
-      this.showPlaceModal = false;
-      this.placeModalTarget = null;
-    },
-    // 确认，保存到 localStorage
-    confirmPlaceEdit() {
-      const val = this.placeModalValue;
-      if (this.placeModalType === 'image') {               // ⑨ 单张
-        this.placeModalTarget.imgPlaces[this.editingImgIdx] = val || null;
-      } else {                                             // 动态
-        const old = this.placeModalTarget.place;
-        this.placeModalTarget.place = val || '';
-        // 把仍在“继承”旧地点的图片同步到新地点（继承 = imgPlace 为 null）
-        this.placeModalTarget.imgPlaces = this.placeModalTarget.imgPlaces.map(p =>
-          p === null ? null : p
-        );
-      }
-
-      // 持久化
-      // 只调用一次 setItem，把整个 this.posts 序列化
-      localStorage.setItem('posts', JSON.stringify(this.posts));
-      this.updateModalMeta();        // 如果正在看 Modal，立即刷新
-      this.closePlaceModal();
-    },
-
-
     isRead(id) { return this.readIds.has(id); },
 
     /* ========== 图片 Modal ========== */
     openModal(post, startIndex = 0) {               // ③ 只传 post 和索引
-      // —— 保底：确保这一条动态带 imgPlaces —— 
-      if (!Array.isArray(post.imgPlaces) || post.imgPlaces.length !== post.imgs.length) {
-        post.imgPlaces = post.imgs.map(() => null);
-      }
 
       this.modalPost = post;
       this.modalImgs = post.imgs;
@@ -1223,16 +1078,6 @@ export default {
     },
     closeModal() { this.showModal = false; },
     // Modal 里：编辑当前 post 的地点
-    editImagePlace() {
-      const newPlace = prompt('请输入新的地点', this.modalPost.place);
-      if (newPlace != null) {
-        this.modalPost.place = newPlace;
-        // 同步回 localStorage
-        localStorage.setItem('posts', JSON.stringify(this.posts));
-        this.modalMeta = `${new Date(this.modalPost.ts).toISOString().slice(0, 10)} · ${newPlace}`;
-      }
-      this.showImageOptions = false;
-    },
 
     toggleInfoSidebar() {
       this.showInfoSidebar = !this.showInfoSidebar;
@@ -1264,7 +1109,6 @@ export default {
         return; // 用户点击“取消”就直接退出
       }
       this.modalPost.imgs.splice(this.modalIndex, 1);
-      this.modalPost.imgPlaces.splice(this.modalIndex, 1);   // ⑩ 同步
       this.modalImgs.splice(this.modalIndex, 1);
       // 更新 storage
       localStorage.setItem('posts', JSON.stringify(this.posts));
@@ -1276,15 +1120,6 @@ export default {
 
     },
 
-    // 动态列表里：编辑 post.place
-    editPostPlace(post) {
-      const newPlace = prompt('请输入新的地点', post.place);
-      if (newPlace != null) {
-        post.place = newPlace;
-        localStorage.setItem('posts', JSON.stringify(this.posts));
-      }
-      this.postOptionsPost = null;
-    },
     // 点击“加载更多”
     updateLoadBehavior() {
       window.removeEventListener('scroll', this.onScrollLoad);
@@ -1490,13 +1325,6 @@ export default {
 
     // 同步主题
     document.body.classList.toggle('dark', this.theme === 'dark');
-
-    // 确保所有 post 都初始化好 imgPlaces
-    this.posts.forEach(p => {
-      if (!Array.isArray(p.imgPlaces) || p.imgPlaces.length !== p.imgs.length) {
-        p.imgPlaces = p.imgs.map(() => null);
-      }
-    });
 
 
   },
@@ -1986,34 +1814,6 @@ body.dark .post-options {
   /* 更舒适的PC内边距 */
 }
 
-.post-options .edit-place-btn {
-  /* same “glass” button look as .trash-btn */
-  background: rgba(120, 120, 120, 0.15);
-  border: 1px solid rgba(200, 200, 200, 0.4);
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  backdrop-filter: blur(4px);
-  box-shadow: 0 0 6px rgba(120, 120, 120, 0.6);
-  cursor: pointer;
-  transition: transform .1s, box-shadow .2s, background .2s;
-}
-
-.post-options .edit-place-btn:hover {
-  background: rgba(120, 120, 120, 0.25);
-  transform: scale(1.1);
-  box-shadow: 0 0 12px rgba(120, 120, 120, 0.8);
-}
-
-/* make the SVG inside fill currentColor & size nicely */
-.post-options .edit-place-btn svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-}
 
 
 
@@ -3393,29 +3193,6 @@ body.dark legend {
   opacity: 1;
 }
 
-.modal-options .edit-place-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(120, 120, 120, 0.15);
-  border: 1px solid rgba(200, 200, 200, 0.4);
-  width: auto;
-  padding: 6px 10px;
-  border-radius: 50%;
-  backdrop-filter: blur(4px);
-  cursor: pointer;
-  transition: background .2s, transform .1s;
-}
-
-.modal-options .edit-place-btn:hover {
-  background: rgba(120, 120, 120, 0.25);
-  transform: scale(1.1);
-}
-
-.modal-options .edit-place-btn svg {
-  width: 16px;
-  height: 16px;
-}
 
 
 /* 图标 */
@@ -3457,98 +3234,5 @@ body.dark legend {
   width: min(80vw, 1200px);
 }
 
-.place-picker {
-  position: relative;
-  display: inline-block;
-}
 
-.place-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.place-options {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: var(--card-light);
-  border: var(--glass-border);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border-radius: var(--radius);
-  margin-top: 4px;
-  padding: 6px 0;
-  z-index: 300;
-  display: flex;
-  flex-direction: column;
-}
-
-.place-item {
-  padding: 6px 12px;
-  font-size: 14px;
-  background: none;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-}
-
-.place-item:hover {
-  background: rgba(74, 144, 226, 0.1);
-}
-
-/* 暗色模式下，地点选择器背景和文字颜色 */
-body.dark .place-btn {
-  color: var(--text-dark);
-}
-
-body.dark .place-btn .location-icon {
-  stroke: currentColor;
-}
-
-body.dark .place-options {
-  background: var(--card-dark);
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-body.dark .place-item {
-  color: var(--text-dark);
-}
-
-body.dark .place-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* —— 编辑地点 弹窗专用 —— */
-.place-modal-box {
-  /* 自适应布局，宽度在 400–480px 之间 */
-  width: 80vw;
-  max-width: 480px;
-  min-width: 400px;
-
-  /* 更充裕的内边距 */
-  padding: 20px 24px;
-
-  /* 底部投影加强层次感 */
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-
-  position: relative;
-  /* 保留原来定位 */
-  border-radius: var(--radius);
-  /* 与其他 .box 保持一致 */
-  background: var(--card-light);
-  backdrop-filter: blur(calc(var(--blur)/2));
-  border: var(--glass-border);
-}
-
-/* 响应式：在窄屏上依然保证能显示 */
-@media (max-width: 480px) {
-  .place-modal-box {
-    width: 95vw;
-    min-width: auto;
-  }
-}
 </style>
