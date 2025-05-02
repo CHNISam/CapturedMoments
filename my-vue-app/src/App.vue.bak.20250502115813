@@ -438,18 +438,6 @@
 </template>
 
 <script>
-// —— 自动插入：节流函数 ——
-function throttle(fn, wait = 200) {
-  let last = 0;
-  return function (...args) {
-    const now = Date.now();
-    if (now - last > wait) {
-      last = now;
-      fn.apply(this, args);
-    }
-  };
-}
-
 /* ===== 登录白名单 & 常量 ===== */
 const BEST_BADGE_UID = '246490729';                 // 佩戴「最好的大佬」勋章的 UID
 import LoginModal from '@/components/LoginModal.vue';
@@ -462,14 +450,14 @@ export default {
   components: { LoginModal, SettingsPanel },
   /* ---------- data ---------- */
   data() {
-    const storedUser = this.safeParse('currentUser', null);
+    const storedUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 
     return {
       // 当前登录 UID；null 代表未登录
       currentUser: storedUser,
 
       /* 业务数据 */
-      posts: this.safeParse('posts', []),
+      posts: JSON.parse(localStorage.getItem('posts') || '[]'),
 
       /* 主题 / 外观 */
       theme: localStorage.getItem('theme') || 'light',
@@ -494,8 +482,6 @@ export default {
       /* 评论 */
       // localDisplayName: localStorage.getItem('displayName_' + (storedUser || '')) || '',
       newComment: {},
-      // —— 占位：稍后在 mounted 里生成 —— 
-      throttledScroll: null,
 
       /* Modals */
       showBadgeModal: false,
@@ -534,7 +520,7 @@ export default {
       ],
       selectedBadge: localStorage.getItem('wear_' + (storedUser || '')) || 'none',
       userBadges: (() => {
-        const map = this.safeParse('userBadges', {});
+        const map = JSON.parse(localStorage.getItem('userBadges') || '{}');
         // 如果有登录用户，且 map 里还没它的记录，就初始化一下
         if (storedUser && !(storedUser in map)) {
           map[storedUser] = localStorage.getItem('wear_' + storedUser) || 'none';
@@ -624,7 +610,7 @@ export default {
       this.allPhotos.forEach(p => {
         const key = p.date.slice(0, 7);
         if (!g[key]) g[key] = [];
-        g[key].push({ ...p, meta: p.date, });
+        g[key].push({ ...p,  meta: p.date, });
       });
       return g;
     },
@@ -680,17 +666,6 @@ export default {
 
   /* ---------- methods ---------- */
   methods: {
-    // —— 自动插入：安全 JSON.parse ——
-    safeParse(key, defaultVal) {
-      try {
-        const raw = localStorage.getItem(key);
-        return raw !== null ? JSON.parse(raw) : defaultVal;
-      } catch (e) {
-        console.error(`safeParse failed for ${key}:`, e);
-        return defaultVal;
-      }
-    },
-
     /* ========== 登录 ========== */
     /* 登录成功后的回调 */
     handleLogin(uid) {
@@ -698,7 +673,7 @@ export default {
       localStorage.setItem('currentUser', JSON.stringify(uid));
       this.readIds = new Set(JSON.parse(localStorage.getItem('readIds_' + uid) || '[]'));
       this.localDisplayName = localStorage.getItem('displayName_' + uid) || '';
-      this.posts = this.safeParse('posts', []);
+      this.posts = JSON.parse(localStorage.getItem('posts') || '[]');
     },
     logout() {
       localStorage.removeItem('currentUser');
@@ -1147,9 +1122,9 @@ export default {
 
     // 点击“加载更多”
     updateLoadBehavior() {
-      window.removeEventListener('scroll', this.throttledScroll);
+      window.removeEventListener('scroll', this.onScrollLoad);
       if (this.loadMode === 'auto') {
-        window.addEventListener('scroll', this.throttledScroll);
+        window.addEventListener('scroll', this.onScrollLoad);
       }
     },
     onScrollLoad() {
@@ -1348,11 +1323,6 @@ export default {
     // ✅ 统一绑定全局点击事件（只注册一次）
     document.addEventListener('click', this.handleGlobalClick);
 
-    // —— 绑定节流滚动：context 绑定在这里再做 —— 
-    this.throttledScroll = throttle(this.onScrollLoad.bind(this), 200);
-    this.updateLoadBehavior();
-
-
     // 同步主题
     document.body.classList.toggle('dark', this.theme === 'dark');
 
@@ -1360,7 +1330,7 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('click', this.handleGlobalClick);
-    window.removeEventListener('scroll', this.throttledScroll);
+    window.removeEventListener('scroll', this.onScrollLoad);
   },
 
 };
@@ -2869,14 +2839,11 @@ body.dark .nav-label {
   position: relative;
   /* 如果你之前给它加了 overflow:hidden，也请改成 visible */
 }
-
 /* 使按钮在 .np-input-wrapper 内悬浮到右下角 */
 .np-input-wrapper .btn-publish {
   position: absolute;
-  bottom: 8px;
-  /* 根据输入框内边距可微调 */
-  right: 8px;
-  /* 根据输入框内边距可微调 */
+  bottom: 8px;  /* 根据输入框内边距可微调 */
+  right: 8px;   /* 根据输入框内边距可微调 */
   z-index: 3;
 }
 
@@ -3266,4 +3233,6 @@ body.dark legend {
   /* 根据屏幕宽度自动伸缩，上限 1200px */
   width: min(80vw, 1200px);
 }
+
+
 </style>
