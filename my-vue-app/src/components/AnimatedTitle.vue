@@ -28,6 +28,13 @@ function startTyping(text) {
     }, props.speed)
 }
 
+function fadeOutThenType(text) {
+  visible.value = false
+  setTimeout(() => {
+    startTyping(text)
+  }, 300 + 200) // 300ms fade + 200ms停顿
+}
+
 // 监视 text 变化，并且首次也触发
 watch(
     () => props.text,
