@@ -3,14 +3,18 @@
     "version": "1.0.0",
     "description": "把回忆拼好给你 - Vue版本",
     "scripts": {
-      "serve": "vue-cli-service serve",
-      "build": "vue-cli-service build"
+        "serve": "vue-cli-service serve --https false --port 8086",
+        "build": "vue-cli-service build"
     },
     "dependencies": {
-      "vue": "^3.2.0"
+        "axios": "^1.9.0",
+        "cors": "^2.8.5",
+        "express": "^5.1.0",
+        "multer": "^1.4.5-lts.2",
+        "vue": "^3.2.0",
+        "vue-router": "^4.5.1"
     },
     "devDependencies": {
-      "@vue/cli-service": "^5.0.0"
+        "@vue/cli-service": "^5.0.0"
     }
-  }
-  
+}

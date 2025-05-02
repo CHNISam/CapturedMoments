@@ -11,10 +11,8 @@ module.exports = {
         port: 8082,
         host: '0.0.0.0',
         allowedHosts: 'all',
-        https: {
-          key: fs.readFileSync('H:/programs/localhost-key.pem'),
-          cert: fs.readFileSync('H:/programs/localhost.pem')
-        }
+        historyApiFallback: true, // ✅ 关键：支持前端路由刷新
+        https: false, // 开发环境下，不使用 https
       }
     : {}
 };
