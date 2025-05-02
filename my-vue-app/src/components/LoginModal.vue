@@ -2,42 +2,20 @@
   <transition name="fade">
     <div v-if="visible" class="modal show">
       <div class="box login-box">
-        <h3 class="login-title">登录 Captured Moments</h3>
-        <form
-          ref="loginForm"
-          method="post"
-          action="/login"
-          autocomplete="on"
-          @submit.prevent="handleSubmit"
-        >
+        <AnimatedTitle :text="currentTitle" />
+
+        <form ref="loginForm" method="post" action="/login" autocomplete="on" @submit.prevent="handleSubmit">
           <div class="form-group">
-            <input
-              v-model="uid"
-              name="username"
-              type="text"
-              placeholder="请输入原神 UID"
-              @input="error = ''"
-              autocomplete="username"
-            />
+            <input v-model="uid" name="username" type="text" placeholder="请输入原神 UID" @input="error = ''"
+              autocomplete="username" />
           </div>
           <div class="form-group">
-            <input
-              v-model="password"
-              name="password"
-              type="password"
-              :placeholder="isFirstLogin
-                ? '首次设置密码（建议至少4位）'
-                : '请输入密码'"
-              @input="error = ''"
-              :autocomplete="isFirstLogin ? 'new-password' : 'current-password'"
-            />
+            <input v-model="password" name="password" type="password" :placeholder="isFirstLogin
+              ? '首次设置密码（建议至少4位）'
+              : '请输入密码'" @input="error = ''" :autocomplete="isFirstLogin ? 'new-password' : 'current-password'" />
           </div>
           <p v-if="error" class="error-msg">{{ error }}</p>
-          <button
-            type="submit"
-            class="btn-publish"
-            :disabled="!canSubmit || loading"
-          >
+          <button type="submit" class="btn-publish" :disabled="!canSubmit || loading">
             {{ loading ? '请稍候...' : (isFirstLogin ? '设置并登录' : '登录') }}
           </button>
         </form>
@@ -49,6 +27,7 @@
 <script setup>
 import { getAllowedUids } from '@/config/auth'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import AnimatedTitle from './AnimatedTitle.vue'
 
 // Props & Emits
 const props = defineProps({ show: Boolean })
@@ -57,6 +36,7 @@ const emit = defineEmits(['login-success'])
 // Refs & state
 const loginForm = ref(null)
 const uid = ref('')
+const currentTitle = ref('登录 Captured Moments')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
@@ -155,7 +135,12 @@ async function handleSubmit() {
 
     // save current user to sessionStorage
     sessionStorage.setItem('currentUser', id)
-    emit('login-success', id)
+
+    currentTitle.value = '欢迎回来！'
+    setTimeout(() => {
+      emit('login-success', uid.value.trim())
+    }, currentTitle.value.length * 50 + 300)
+    return
 
     // clear plaintext
     password.value = ''
@@ -201,10 +186,12 @@ onBeforeUnmount(() => {
   box-sizing: border-box;
   z-index: 1000;
 }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -229,9 +216,11 @@ onBeforeUnmount(() => {
   font-size: 20px;
   font-weight: 600;
 }
+
 .form-group {
   margin-bottom: 16px;
 }
+
 input {
   width: 100%;
   height: 44px;
@@ -240,10 +229,12 @@ input {
   border-radius: 8px;
   font-size: 14px;
 }
+
 input:focus {
   outline: none;
   border-color: var(--primary);
 }
+
 .error-msg {
   color: #e00;
   font-size: 13px;
@@ -263,10 +254,12 @@ input:focus {
   cursor: pointer;
   transition: transform 0.1s;
 }
+
 .btn-publish:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 .btn-publish:not(:disabled):hover {
   transform: translateY(-1px);
 }
@@ -277,10 +270,12 @@ input:focus {
     max-width: 400px;
     padding: 32px;
   }
+
   input {
     height: 48px;
     font-size: 15px;
   }
+
   .btn-publish {
     height: 52px;
     font-size: 16px;
@@ -292,10 +287,12 @@ input:focus {
   .login-box {
     padding: 16px;
   }
+
   input {
     height: 42px;
     font-size: 13px;
   }
+
   .btn-publish {
     height: 44px;
     font-size: 14px;
