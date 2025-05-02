@@ -1,42 +1,81 @@
+<!-- src/components/ImageUploader.vue -->
 <template>
-  <div class="uploader">
-    <input type="file" @change="onFileChange" accept="image/*"/>
-    <button :disabled="!file" @click="upload">上传</button>
+  <div class="image-uploader">
+    <button @click="triggerFile">📷 选图</button>
+    <input type="file" ref="fileInput" class="hidden" accept="image/*" @change="onFileChange" />
 
     <div v-if="previewUrl" class="preview">
-      <p>上传成功，预览：</p>
-      <img :src="previewUrl" style="max-width:300px"/>
+      <p>预览：</p>
+      <img :src="previewUrl" alt="预览图" />
+    </div>
+
+    <button @click="uploadImage" :disabled="!selectedFile || isUploading">
+      {{ isUploading ? '上传中…' : '上传图片' }}
+    </button>
+
+    <div v-if="uploadedUrl" class="result">
+      <p>上传成功：</p>
+      <a :href="uploadedUrl" target="_blank">{{ uploadedUrl }}</a>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
-    return { file: null, previewUrl: '' };
+    return {
+      selectedFile: null,
+      previewUrl: null,
+      uploadedUrl: '',
+      isUploading: false,
+    };
   },
   methods: {
-    onFileChange(e) {
-      this.file = e.target.files[0];
+    triggerFile() {
+      this.$refs.fileInput.click();
     },
-    async upload() {
-      if (!this.file) return;
-      const form = new FormData();
-      form.append('image', this.file);
+    onFileChange(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      this.selectedFile = file;
+      this.previewUrl = URL.createObjectURL(file);
+    },
+    async uploadImage() {
+      if (!this.selectedFile) return;
+      this.isUploading = true;
       try {
-        // 🔥 注意：这里一定写明端口 3001
-        const res = await fetch('http://localhost:3001/upload', {
-          method: 'POST',
-          body: form
+        const form = new FormData();
+        form.append('image', this.selectedFile);
+        const res = await axios.post('http://localhost:3002/upload', form, {
+          headers: { 'Content-Type': 'multipart/form-data' },
         });
-        const json = await res.json();
-        // 从 variants 里任选一个展示
-        this.previewUrl = json.variants['640w-med'] || Object.values(json.variants)[0];
-      } catch (e) {
-        console.error(e);
-        alert('上传失败，请检查控制台');
+        this.uploadedUrl = res.data.url.startsWith('/')
+          ? `http://localhost:3002${res.data.url}`
+          : res.data.url;
+        this.$emit('uploaded', this.uploadedUrl); // 可供父组件监听
+      } catch (err) {
+        console.error('上传失败', err);
+        alert('上传失败');
+      } finally {
+        this.isUploading = false;
       }
-    }
-  }
+    },
+  },
 };
 </script>
+
+<style scoped>
+.hidden {
+  display: none;
+}
+.preview img {
+  max-width: 200px;
+  margin-top: 8px;
+  border-radius: 4px;
+}
+.result {
+  margin-top: 10px;
+}
+</style>
