@@ -43,6 +43,15 @@ const loading = ref(false)
 const tick = ref(0)
 let submitTimeout = null
 
+// —— 新增 —— 是否整体锁定（true 时只有管理员解锁可登录）
+const isLocked = computed(() => {
+  try {
+    return JSON.parse(localStorage.getItem('auth_locked') || 'false')
+  } catch {
+    return true
+  }
+})
+
 // Storage keys
 const credKey = computed(() => `cred_${uid.value.trim()}`)
 const failKey = computed(() => `fail_${uid.value.trim()}`)
@@ -51,7 +60,12 @@ const MAX_FAIL = 10
 // Reactive read
 const storedCred = computed(() => {
   tick.value
-  return JSON.parse(localStorage.getItem(credKey.value) || 'null')
+  try {
+    return JSON.parse(localStorage.getItem(credKey.value) || 'null')
+  } catch {
+    console.warn('local credential parse error')
+    return null
+  }
 })
 
 // Flags
@@ -92,20 +106,31 @@ function createSalt() {
 
 // Form submit
 async function handleSubmit() {
-  
   const id = uid.value.trim()
 
+  // —— 新增 —— 锁定状态下仅 admin unlock 可登录
+  if (isLocked.value) {
+    if (id === '217122260' && password.value === 'unlock') {
+      localStorage.setItem('auth_locked', 'false')
+      sessionStorage.setItem('currentUser', id)
+      emit('login-success', id)
+      return
+    }
+    error.value = '系统已锁定，请联系管理员解锁'
+    return
+  }
+  // —— end 新增 ——
+
+  // 测试绕过（保留可选）
   if (id === '217122260') {
     sessionStorage.setItem('currentUser', id)
     emit('login-success', id)
     return
   }
 
-
   loading.value = true
   try {
     error.value = ''
-    const id = uid.value.trim()
 
     if (!getAllowedUids().includes(id)) {
       error.value = '用户不存在'
@@ -151,17 +176,8 @@ async function handleSubmit() {
       emit('login-success', id)
     }, 300 + 200 + '欢迎回来！'.length * 50 + 300)
 
-    setTimeout(() => {
-      emit('login-success', uid.value.trim())
-    }, currentTitle.value.length * 50 + 300)
     return
 
-    // clear plaintext
-    password.value = ''
-
-    submitTimeout = setTimeout(() => {
-      loginForm.value?.submit?.()
-    }, 100)
   } catch (err) {
     console.error('登录异常：', err)
     error.value = '系统错误，请稍后重试'
@@ -225,12 +241,6 @@ onBeforeUnmount(() => {
 }
 
 /* 标题与表单项 */
-.login-title {
-  margin-bottom: 20px;
-  font-size: 20px;
-  font-weight: 600;
-}
-
 .form-group {
   margin-bottom: 16px;
 }
@@ -278,7 +288,6 @@ input:focus {
   transform: translateY(-1px);
 }
 
-/* 大屏（PC）优化 */
 @media (min-width: 768px) {
   .login-box {
     max-width: 400px;
@@ -296,7 +305,6 @@ input:focus {
   }
 }
 
-/* 小屏（移动端）微调 */
 @media (max-width: 480px) {
   .login-box {
     padding: 16px;

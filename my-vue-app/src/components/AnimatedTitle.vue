@@ -1,65 +1,93 @@
 <template>
-    <transition name="fade">
-        <h3 v-if="visible" class="animated-title">{{ displayedText }}</h3>
+    <transition name="fade-scale">
+      <h3 v-if="visible" class="animated-title">
+        {{ displayedText }}<span class="typing-cursor"></span>
+      </h3>
     </transition>
-</template>
-
-<script setup>
-import { ref, watch } from 'vue'
-
-const props = defineProps({
-    text: { type: String, required: true },
-    speed: { type: Number, default: 50 }
-})
-
-const displayedText = ref('')
-const visible = ref(false)
-let timer = null
-
-// 在这里定义一个复用的打字函数
-function startTyping(text) {
-    clearInterval(timer)
+  </template>
+  
+  <script setup>
+  import { ref, watch } from 'vue'
+  
+  const props = defineProps({
+    text:           { type: String, required: true },
+    speedFirst:     { type: Number, default: 120 },
+    speedMid:       { type: Number, default: 60 },
+    speedLast:      { type: Number, default: 40 },
+    fadeDuration:   { type: Number, default: 150 },
+    pauseDuration:  { type: Number, default: 150 }
+  })
+  
+  const displayedText = ref('')
+  const visible       = ref(false)
+  let timerId
+  
+  function startTyping(text) {
     displayedText.value = ''
-    visible.value = true
-    let idx = 0
-    timer = setInterval(() => {
-        displayedText.value += text[idx++] || ''
-        if (idx > text.length) clearInterval(timer)
-    }, props.speed)
-}
-
-function fadeOutThenType(text) {
-  visible.value = false
-  setTimeout(() => {
-    startTyping(text)
-  }, 300 + 200) // 300ms fade + 200ms停顿
-}
-
-// 监视 text 变化，并且首次也触发
-watch(
+    visible.value       = true
+    let i = 0
+  
+    function typeChar() {
+      if (i < text.length) {
+        displayedText.value += text[i++]
+        const delay =
+          i === 1               ? props.speedFirst :
+          i === text.length     ? props.speedLast  :
+                                  props.speedMid
+        timerId = setTimeout(typeChar, delay)
+      }
+    }
+  
+    typeChar()
+  }
+  
+  function fadeOutThenType(text) {
+    visible.value = false
+    clearTimeout(timerId)
+    setTimeout(() => {
+      startTyping(text)
+    }, props.fadeDuration + props.pauseDuration)
+  }
+  
+  watch(
     () => props.text,
-    (newText) => startTyping(newText),
+    newText => fadeOutThenType(newText),
     { immediate: true }
-)
-
-</script>
-
-<style scoped>
-.animated-title {
+  )
+  </script>
+  
+  <style scoped>
+  .animated-title {
+    display: inline-block;
+    margin-bottom: 20px;
     font-size: 20px;
     font-weight: 600;
     text-align: center;
-    margin-bottom: 20px;
     color: var(--text-primary);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
+  }
+  
+  .fade-scale-enter-active,
+  .fade-scale-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .fade-scale-enter-from,
+  .fade-scale-leave-to {
     opacity: 0;
-}
-</style>
+    transform: scale(0.95);
+  }
+  
+  .typing-cursor {
+    display: inline-block;
+    width: 1px;
+    height: 1em;
+    background-color: currentColor;
+    margin-left: 4px;
+    animation: blink 1s steps(1) infinite;
+  }
+  
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0; }
+  }
+  </style>
+  
