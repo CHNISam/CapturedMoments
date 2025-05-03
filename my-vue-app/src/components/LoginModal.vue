@@ -270,7 +270,7 @@ input:focus {
 .btn-publish {
   width: 100%;
   height: 48px;
-  background: var(--primary);
+  background: #40566b; 
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -286,6 +286,7 @@ input:focus {
 
 .btn-publish:not(:disabled):hover {
   transform: translateY(-1px);
+  background: #334456; /* 更深 hover */
 }
 
 @media (min-width: 768px) {
