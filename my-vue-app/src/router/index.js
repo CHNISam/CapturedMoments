@@ -17,8 +17,11 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes
-});
+  history: createWebHistory('/CapturedMoments/'),
+  routes: [
+    { path: '/', component: MainApp },
+    { path: '/test-upload', component: UploadTest }
+  ]
+})
 
 export default router;
