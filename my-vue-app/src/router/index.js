@@ -1,5 +1,5 @@
 // src/router/index.js
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import MainApp from '../views/MainApp.vue'; // ✅ 加这一行
 import UploadTest from '../views/UploadTest.vue';
 
@@ -17,11 +17,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory('/CapturedMoments/'),
-  routes: [
-    { path: '/', component: MainApp },
-    { path: '/test-upload', component: UploadTest }
-  ]
-})
-
+  history: createWebHashHistory(), // ✅ 使用 Hash 模式兼容 GitHub Pages
+  routes
+});
 export default router;

@@ -4,41 +4,18 @@
       <div class="box login-box">
         <AnimatedTitle :text="currentTitle" />
 
-        <form
-          ref="loginForm"
-          method="post"
-          action="/login"
-          autocomplete="on"
-          @submit.prevent="handleSubmit"
-        >
+        <form ref="loginForm" method="post" action="/login" autocomplete="on" @submit.prevent="handleSubmit">
           <div class="form-group">
-            <input
-              v-model="uid"
-              name="username"
-              type="text"
-              placeholder="请输入原神 UID"
-              @input="error = ''"
-              autocomplete="username"
-            />
+            <input v-model="uid" name="username" type="text" placeholder="请输入原神 UID" @input="error = ''"
+              autocomplete="username" />
           </div>
           <div class="form-group">
-            <input
-              v-model="password"
-              name="password"
-              type="password"
-              :placeholder="isFirstLogin
-                ? '首次设置密码（建议至少4位）'
-                : '请输入密码'"
-              @input="error = ''"
-              :autocomplete="isFirstLogin ? 'new-password' : 'current-password'"
-            />
+            <input v-model="password" name="password" type="password" :placeholder="isFirstLogin
+              ? '首次设置密码（建议至少4位）'
+              : '请输入密码'" @input="error = ''" :autocomplete="isFirstLogin ? 'new-password' : 'current-password'" />
           </div>
           <p v-if="error" class="error-msg">{{ error }}</p>
-          <button
-            type="submit"
-            class="btn-publish"
-            :disabled="!canSubmit || loading"
-          >
+          <button type="submit" class="btn-publish" :disabled="!canSubmit || loading">
             {{ loading ? '请稍候...' : (isFirstLogin ? '设置并登录' : '登录') }}
           </button>
         </form>
@@ -234,17 +211,17 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 16px;
   background-color: rgba(0, 0, 0, 0.4);
   box-sizing: border-box;
   z-index: 1000;
 }
 
-/* 淡入淡出动画 */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
@@ -253,29 +230,28 @@ onBeforeUnmount(() => {
 /* 登录框 */
 .login-box {
   width: 90%;
-  max-width: clamp(300px, 45%, 400px);
-  padding: clamp(1rem, 4vw, 2rem);
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 24px;
+  text-align: center;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  text-align: center;
 }
 
-/* 表单组 */
+/* 标题与表单项 */
 .form-group {
-  margin-bottom: 1rem;
+  margin-bottom: 16px;
 }
 
-/* 输入框 */
 input {
   width: 100%;
-  height: clamp(2.5rem, 6vh, 3rem);
-  padding: 0 0.75rem;
+  height: 44px;
+  padding: 0 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: clamp(0.875rem, 2.5vw, 1rem);
-  box-sizing: border-box;
+  font-size: 14px;
 }
 
 input:focus {
@@ -283,28 +259,24 @@ input:focus {
   border-color: var(--primary);
 }
 
-/* 错误提示 */
 .error-msg {
   color: #e00;
-  font-size: clamp(0.75rem, 2vw, 0.875rem);
-  margin-bottom: 0.75rem;
+  font-size: 13px;
+  margin-bottom: 12px;
   text-align: left;
 }
 
-/* 登录按钮 */
+/* 按钮 */
 .btn-publish {
   width: 100%;
-  height: clamp(2.75rem, 7vh, 3.5rem);
+  height: 48px;
   background: var(--primary);
   color: #fff;
   border: none;
   border-radius: 8px;
-  font-size: clamp(0.875rem, 2.5vw, 1.125rem);
+  font-size: 15px;
   cursor: pointer;
   transition: transform 0.1s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .btn-publish:disabled {
@@ -316,10 +288,36 @@ input:focus {
   transform: translateY(-1px);
 }
 
-/* 大屏优化 */
 @media (min-width: 768px) {
   .login-box {
-    max-width: clamp(350px, 35%, 480px);
+    max-width: 400px;
+    padding: 32px;
+  }
+
+  input {
+    height: 48px;
+    font-size: 15px;
+  }
+
+  .btn-publish {
+    height: 52px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-box {
+    padding: 16px;
+  }
+
+  input {
+    height: 42px;
+    font-size: 13px;
+  }
+
+  .btn-publish {
+    height: 44px;
+    font-size: 14px;
   }
 }
 </style>

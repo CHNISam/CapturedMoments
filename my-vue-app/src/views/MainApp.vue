@@ -7,7 +7,9 @@
     <!-- ================== 已登录主界面 ================== -->
     <div v-if="currentUser">
       <!-- 用户自定义背景 -->
-      <div id="bgLayer" :style="bgStyle"><div class="bg-mask"></div></div>
+      <div id="bgLayer" :style="bgStyle">
+        <div class="bg-mask"></div>
+      </div>
 
       <!-- 顶部导航 -->
       <nav>
@@ -684,7 +686,14 @@ export default {
     safeParse(key, defaultVal) {
       try {
         const raw = localStorage.getItem(key);
-        return raw !== null ? JSON.parse(raw) : defaultVal;
+        if (raw === null) return defaultVal;
+        try {
+          // 如果它是合法 JSON，就 parse
+          return JSON.parse(raw);
+        } catch {
+          // 不是 JSON，就当普通字符串返回
+          return raw;
+        }
       } catch (e) {
         console.error(`safeParse failed for ${key}:`, e);
         return defaultVal;
@@ -3282,4 +3291,11 @@ body.dark legend {
   background: var(--bg-mask-color);
 }
 
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  stroke: currentColor;
+  fill: none;
+}
 </style>
