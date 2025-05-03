@@ -7,7 +7,7 @@
     <!-- ================== 已登录主界面 ================== -->
     <div v-if="currentUser">
       <!-- 用户自定义背景 -->
-      <div id="bgLayer" :style="bgStyle"></div>
+      <div id="bgLayer" :style="bgStyle"><div class="bg-mask"></div></div>
 
       <!-- 顶部导航 -->
       <nav>
@@ -1387,6 +1387,7 @@ export default {
   --bg-opacity: .35;
   --bg-blur: 4px;
   --card-hover-light: rgba(255, 255, 255, 0.9);
+  --bg-mask-color: rgba(255, 255, 255, 0.4);
 }
 
 body.dark {
@@ -1396,6 +1397,7 @@ body.dark {
   --login-text: #d2d2d2;
   --login-border: rgba(255, 255, 255, 0.1);
   --card-hover-dark: rgba(60, 60, 61, 0.55);
+  --bg-mask-color: rgba(0, 0, 0, 0.4);
 }
 
 html,
@@ -3270,4 +3272,14 @@ body.dark legend {
   /* 根据屏幕宽度自动伸缩，上限 1200px */
   width: min(80vw, 1200px);
 }
+
+/* 底部遮罩层 */
+.bg-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--bg-mask-color);
+}
+
 </style>
