@@ -1,22 +1,26 @@
-# 📸 Captured Moments - A Personal AI-Powered Photo Album  
-A web-based photo album project for her.
+📸 Captured Moments
+A Personal AI-Powered Photo Album — handcrafted for her.
 
-## 🌐 Tech Stack Overview
+🌐 Tech Stack
+Layer	Tech	Description
+Frontend	Vue 3 + HTML/CSS/JavaScript	Static SPA without Vite or bundler
+Backend	Node.js + Express	Login, post creation, and image upload API
+Database	Lowdb (JSON file)	Lightweight local JSON-based data storage
+Storage	Local /uploads/	Saves all uploaded image files
+AI (Planned)	Python + FastAPI	For captions, emotion tagging, and memory recall
+Deployment	GitHub Pages (frontend) + VPS (backend)	Static frontend + self-hosted backend API
 
-| Role            | Technology      | Description |
-|-----------------|------------------|-------------|
-| Frontend        | [Vue 3](https://vuejs.org/) + HTML/CSS + JavaScript | Built without Vite or build tools; runs as a static SPA |
-| Backend         | [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/) | Handles API routes, user actions, and file uploads |
-| Database        | [MongoDB](https://www.mongodb.com/) (via MongoDB Atlas) | Flexible document-based data storage |
-| AI Processing   | [Python](https://www.python.org/) + [FastAPI](https://fastapi.tiangolo.com/) | Planned AI module for generating captions, summaries, etc. |
-| File Storage    | Local `/uploads/` directory | Stores uploaded images locally for now |
-| Deployment      | GitHub Pages (Frontend) + Render or VPS (Backend & AI) | Static frontend hosted on GitHub; backend to be hosted separately |
+✨ Features
+🖼️ Dynamic Posting – Share moments with rich-text and images
 
-## 📦 Features
+📝 Inline Embeds – Supports emojis and image embedding in text
 
-- User login & profile avatar
-- Post creation with images
-- AI-generated captions, summaries, or emotional context (planned)
-- Editable settings, dark mode, and UI personalization
-- MongoDB-powered flexible data schema
-- Python module support for future AI integrations
+🔐 Login System – Simple authentication with hashed credentials
+
+🎨 Theme Customization – Light/dark mode, flexible visual styles
+
+🐾 AI Desktop Assistant (planned) – Interactive companion for memories
+
+📁 Fully Local Data – JSON file + local uploads, no external DB
+
+💬 AI-Powered Insights (planned) – Memory suggestions, emotional resonance
