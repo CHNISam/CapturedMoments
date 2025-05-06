@@ -1,6 +1,6 @@
 <template>
   <transition name="fade">
-    <div v-if="visible" class="modal show" @keydown.enter.prevent="canSubmit && handleSubmit()" tabindex="0">
+    <div v-if="visible" class="fullpage-login" @keydown.enter.prevent="canSubmit && handleSubmit()" tabindex="0">
       <div class="box login-box">
         <AnimatedTitle :text="currentTitle" />
 
@@ -107,20 +107,6 @@ function createSalt() {
 // Form submit
 async function handleSubmit() {
   const id = uid.value.trim()
-
-  // —— 新增 —— 锁定状态下仅 admin unlock 可登录
-  if (isLocked.value) {
-    if (id === '217122260' && password.value === 'unlock') {
-      localStorage.setItem('auth_locked', 'false')
-      sessionStorage.setItem('currentUser', id)
-      emit('login-success', id)
-      return
-    }
-    error.value = '系统已锁定，请联系管理员解锁'
-    return
-  }
-  // —— end 新增 ——
-
   // 测试绕过（保留可选）
   if (id === '217122260') {
     sessionStorage.setItem('currentUser', id)
@@ -170,13 +156,7 @@ async function handleSubmit() {
 
     // save current user to sessionStorage
     sessionStorage.setItem('currentUser', id)
-
-    fadeOutThenType('欢迎回来！')
-    setTimeout(() => {
-      emit('login-success', id)
-    }, 300 + 200 + '欢迎回来！'.length * 50 + 300)
-
-    return
+    emit('login-success', id)
 
   } catch (err) {
     console.error('登录异常：', err)
@@ -204,18 +184,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* 模态遮罩 & 居中 */
-.modal {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  background-color: rgba(0, 0, 0, 0.4);
-  box-sizing: border-box;
-  z-index: 1000;
-}
 
 .fade-enter-active,
 .fade-leave-active {
@@ -237,6 +205,11 @@ onBeforeUnmount(() => {
   backdrop-filter: blur(10px);
   border-radius: 12px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  justify-content: space-between;
+  /* 拉开标题、表单和按钮 */
+  min-height: 350px;
+  /* 确保有足够高度支撑 */
 }
 
 /* 标题与表单项 */
@@ -246,11 +219,11 @@ onBeforeUnmount(() => {
 
 input {
   width: 100%;
-  height: 44px;
+  height: 56px;
   padding: 0 12px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 input:focus {
@@ -265,14 +238,6 @@ input:focus {
   text-align: left;
 }
 
-/* 控件响应式：可根据需要调整 clamp 或 media queries */
-input {
-  width: 100%;
-  height: clamp(42px, 6vw, 48px);
-  padding: 0 12px;
-  font-size: clamp(13px, 2vw, 15px);
-}
-
 /* 按钮 */
 .btn-publish {
   width: 100%;
@@ -284,7 +249,7 @@ input {
   font-size: 15px;
   cursor: pointer;
   transition: transform 0.1s;
-  padding: 14px 0;
+  padding: 0 16px;
 }
 
 .btn-publish:disabled {
@@ -302,6 +267,8 @@ input {
   .login-box {
     max-width: 400px;
     padding: 32px;
+    min-height: 350px;
+    justify-content: space-between;
   }
 
   input {
@@ -335,5 +302,17 @@ input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(63, 167, 255, 0.2);
   /* 添加浅色投影聚焦 */
+}
+
+.fullpage-login {
+  display: flex;
+  align-items: center;
+  /* 垂直居中 */
+  justify-content: center;
+  /* 水平居中 */
+  height: 100vh;
+  /* 整屏高度 */
+  background: #000;
+  /* 或你的背景色 */
 }
 </style>
