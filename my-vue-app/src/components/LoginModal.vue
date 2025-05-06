@@ -6,7 +6,7 @@
 
         <form ref="loginForm" method="post" action="/login" autocomplete="on" @submit.prevent="handleSubmit">
           <div class="form-group">
-            <input v-model="uid" name="username" type="text" placeholder="请输入原神 UID" @input="error = ''"
+            <input v-model="uid" name="username" type="text" placeholder="请输入UID" @input="error = ''"
               autocomplete="username" />
           </div>
           <div class="form-group">
@@ -26,8 +26,10 @@
 
 <script setup>
 import { getAllowedUids } from '@/config/auth'
+import { pbkdf2Hash } from '@/utils/crypto'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import AnimatedTitle from './AnimatedTitle.vue'
+
 
 // Props & Emits
 const props = defineProps({ show: Boolean })
@@ -73,20 +75,6 @@ const isFirstLogin = computed(() => uid.value.trim() !== '' && !storedCred.value
 const canSubmit = computed(() => uid.value.trim() !== '' && password.value.trim() !== '')
 const visible = computed(() => props.show)
 
-// PBKDF2 helper
-async function pbkdf2Hash(pwd, salt, iter = 100000) {
-  const enc = new TextEncoder()
-  const key = await crypto.subtle.importKey(
-    'raw', enc.encode(pwd), { name: 'PBKDF2' }, false, ['deriveBits']
-  )
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt: enc.encode(salt), iterations: iter, hash: 'SHA-256' },
-    key, 256
-  )
-  return Array.from(new Uint8Array(bits))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('')
-}
 
 // constant-time hex compare
 function equalTiming(aHex, bHex) {

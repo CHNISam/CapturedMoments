@@ -424,6 +424,25 @@
           </div>
         </div>
       </div>
+      <!-- 管理员为指定 UID 设置/重置密码 -->
+      <div v-if="adminPwdModalVisible" class="modal show">
+        <div class="box" style="text-align:center;max-width:340px;">
+          <span class="close" @click="closeAdminPwdModal">×</span>
+          <h3>设置用户密码（管理员）</h3>
+          <div style="margin-top:16px;">
+            <!-- 显示当前要改密的目标 UID -->
+            <input type="text" v-model="adminTargetUid" disabled placeholder="目标 UID"
+              style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;" />
+            <!-- 管理员输入的新密码 -->
+            <input type="password" v-model="adminNewPassword" placeholder="新密码（最少4位）"
+              style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;" />
+            <button class="btn-publish" style="margin-top:12px" @click="confirmAdminSetPassword">
+              确认设置
+            </button>
+          </div>
+        </div>
+      </div>
+
 
       <!-- 桌宠 -->
       <div id="pet" v-if="petEnabled" ref="pet"
@@ -457,7 +476,7 @@ const BEST_BADGE_UID = '246490729';                 // 佩戴「最好的大佬�
 import LoginModal from '@/components/LoginModal.vue';
 import SettingsPanel from '@/components/SettingsPanel.vue';
 import { getAllowedUids, setAllowedUids } from '@/config/auth';
-import { getOrCreateSalt, saltedHash } from '@/utils/crypto';
+import { getOrCreateSalt, pbkdf2Hash } from '@/utils/crypto';
 
 export default {
   name: 'App',
@@ -1309,7 +1328,7 @@ export default {
 
     resetPassword(uid) {
       if (!confirm(`将清除 ${uid} 的本地密码，下次登录需重设？`)) return;
-      localStorage.removeItem(`password_${uid}`);
+      localStorage.removeItem(`cred_${uid}`);
       localStorage.removeItem(`salt_${uid}`);
       alert(`已清除 ${uid} 的本地密码`);
     },
@@ -1319,10 +1338,12 @@ export default {
       if (this.adminNewPassword.length < 4) {
         return alert('新密码长度至少 4 位');
       }
-      // 假设你已有 getOrCreateSalt(uid) 和 saltedHash(pwd, salt) 工具
-      const salt = getOrCreateSalt(this.adminTargetUid);
-      const hash = await saltedHash(this.adminNewPassword, salt);
-      localStorage.setItem(`password_${this.adminTargetUid}`, hash);
+      const iter = 100000
+      const salt = getOrCreateSalt(this.adminTargetUid)
+      const hash = await pbkdf2Hash(this.adminNewPassword, salt, iter)
+      localStorage.setItem(`cred_${this.adminTargetUid}`, JSON.stringify({ hash, salt, iter }))
+
+
       alert('管理员密码已设置');
       this.closeAdminPwdModal();
     },
