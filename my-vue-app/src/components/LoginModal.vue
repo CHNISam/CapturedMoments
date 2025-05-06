@@ -1,30 +1,34 @@
 <template>
   <transition name="fade">
     <div v-if="visible" class="modal show">
-      <div class="box login-box">
-        <AnimatedTitle :text="currentTitle" />
+      <!-- 使用更大范围的响应式容器 -->
+      <ResponsiveWrapper :minWidth="280" :maxWidth="600" :fullHeight="true" :centerContent="true">
+        <div class="box login-box">
+          <AnimatedTitle :text="currentTitle" />
 
-        <form ref="loginForm" method="post" action="/login" autocomplete="on" @submit.prevent="handleSubmit">
-          <div class="form-group">
-            <input v-model="uid" name="username" type="text" placeholder="请输入原神 UID" @input="error = ''"
-              autocomplete="username" />
-          </div>
-          <div class="form-group">
-            <input v-model="password" name="password" type="password" :placeholder="isFirstLogin
-              ? '首次设置密码（建议至少4位）'
-              : '请输入密码'" @input="error = ''" :autocomplete="isFirstLogin ? 'new-password' : 'current-password'" />
-          </div>
-          <p v-if="error" class="error-msg">{{ error }}</p>
-          <button type="submit" class="btn-publish" :disabled="!canSubmit || loading">
-            {{ loading ? '请稍候...' : (isFirstLogin ? '设置并登录' : '登录') }}
-          </button>
-        </form>
-      </div>
+          <form ref="loginForm" method="post" action="/login" autocomplete="on" @submit.prevent="handleSubmit">
+            <div class="form-group">
+              <input v-model="uid" name="username" type="text" placeholder="请输入原神 UID" @input="error = ''"
+                autocomplete="username" />
+            </div>
+            <div class="form-group">
+              <input v-model="password" name="password" type="password" :placeholder="isFirstLogin
+                ? '首次设置密码（建议至少4位）'
+                : '请输入密码'" @input="error = ''" :autocomplete="isFirstLogin ? 'new-password' : 'current-password'" />
+            </div>
+            <p v-if="error" class="error-msg">{{ error }}</p>
+            <button type="submit" class="btn-publish" :disabled="!canSubmit || loading">
+              {{ loading ? '请稍候...' : (isFirstLogin ? '设置并登录' : '登录') }}
+            </button>
+          </form>
+        </div>
+      </ResponsiveWrapper>
     </div>
   </transition>
 </template>
 
 <script setup>
+import ResponsiveWrapper from '@/components/ResponsiveWrapper.vue'
 import { getAllowedUids } from '@/config/auth'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import AnimatedTitle from './AnimatedTitle.vue'
@@ -229,8 +233,7 @@ onBeforeUnmount(() => {
 
 /* 登录框 */
 .login-box {
-  width: 90%;
-  max-width: 360px;
+  width: 100%;
   margin: 0 auto;
   padding: 24px;
   text-align: center;
@@ -266,11 +269,19 @@ input:focus {
   text-align: left;
 }
 
+/* 控件响应式：可根据需要调整 clamp 或 media queries */
+input {
+  width: 100%;
+  height: clamp(42px, 6vw, 48px);
+  padding: 0 12px;
+  font-size: clamp(13px, 2vw, 15px);
+}
+
 /* 按钮 */
 .btn-publish {
   width: 100%;
   height: 48px;
-  background: #40566b; 
+  background: #40566b;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -286,7 +297,8 @@ input:focus {
 
 .btn-publish:not(:disabled):hover {
   transform: translateY(-1px);
-  background: #334456; /* 更深 hover */
+  background: #334456;
+  /* 更深 hover */
 }
 
 @media (min-width: 768px) {
