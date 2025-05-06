@@ -1258,46 +1258,34 @@ export default {
     openPasswordModal() { this.showPasswordModal = true; this.oldPassword = this.newPassword = this.confirmPassword = ''; },
     closePasswordModal() { this.showPasswordModal = false; },
     async changePassword() {
-      const key = `password_${this.currentUser}`;
-      const saltKey = `salt_${this.currentUser}`;
-      const oldPwd = this.oldPassword;
-      const newPwd = this.newPassword;
-      const confirm = this.confirmPassword;
-
-      const storedHash = localStorage.getItem(key);
-      const salt = localStorage.getItem(saltKey);
-      if (!storedHash || !salt) {
+      // 统一从 PBKDF2 存储的 cred_<uid> 里读写
+      const credKey = `cred_${this.currentUser}`;
+      const credRaw = localStorage.getItem(credKey);
+      if (!credRaw) {
         return alert('请先登录并设置密码');
       }
+      const { hash: storedHash, salt, iter } = JSON.parse(credRaw);
 
-      const sha256Hex = async (str) => {
-        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-        return Array.from(new Uint8Array(buf))
-          .map(b => b.toString(16).padStart(2, '0')).join('');
-      };
-
-      const saltedHash = async (pwd) => {
-        const h1 = await sha256Hex(pwd + salt);
-        return sha256Hex(h1 + salt);
-      };
-
-      const oldHash = await saltedHash(oldPwd);
+      // 验旧
+      const oldHash = await pbkdf2Hash(this.oldPassword, salt, iter);
       if (oldHash !== storedHash) {
         return alert('旧密码不正确！');
       }
-
-      if (newPwd !== confirm) {
+      // 校新
+      if (this.newPassword !== this.confirmPassword) {
         return alert('两次输入的新密码不一致！');
       }
-      if (newPwd.length < 4) {
+      if (this.newPassword.length < 4) {
         return alert('新密码长度至少 4 位！');
       }
+      // 写入
+      const newHash = await pbkdf2Hash(this.newPassword, salt, iter);
+      localStorage.setItem(credKey, JSON.stringify({ hash: newHash, salt, iter }));
 
-      const newHash = await saltedHash(newPwd);
-      localStorage.setItem(key, newHash);
       alert('密码修改成功！');
       this.closePasswordModal();
     },
+
 
     /* ========== Admin 密码设置 ========== */
     openAdminPwdModal(uid) {
