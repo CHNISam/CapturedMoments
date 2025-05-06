@@ -13,6 +13,14 @@ module.exports = {
         allowedHosts: 'all',
         historyApiFallback: true,
         https: false,
+
+        // ✅ 关键配置：禁用 HMR & WebSocket 注入
+        hot: false,
+        liveReload: false,
+        client: {
+          overlay: false,
+          webSocketURL: undefined, // 🚫 不要注入任何 ws://xxx 地址
+        },
       }
     : {}
 };

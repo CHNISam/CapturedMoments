@@ -1,34 +1,30 @@
 <template>
   <transition name="fade">
     <div v-if="visible" class="modal show">
-      <!-- 使用更大范围的响应式容器 -->
-      <ResponsiveWrapper :minWidth="280" :maxWidth="600" :fullHeight="true" :centerContent="true">
-        <div class="box login-box">
-          <AnimatedTitle :text="currentTitle" />
+      <div class="box login-box">
+        <AnimatedTitle :text="currentTitle" />
 
-          <form ref="loginForm" method="post" action="/login" autocomplete="on" @submit.prevent="handleSubmit">
-            <div class="form-group">
-              <input v-model="uid" name="username" type="text" placeholder="请输入原神 UID" @input="error = ''"
-                autocomplete="username" />
-            </div>
-            <div class="form-group">
-              <input v-model="password" name="password" type="password" :placeholder="isFirstLogin
-                ? '首次设置密码（建议至少4位）'
-                : '请输入密码'" @input="error = ''" :autocomplete="isFirstLogin ? 'new-password' : 'current-password'" />
-            </div>
-            <p v-if="error" class="error-msg">{{ error }}</p>
-            <button type="submit" class="btn-publish" :disabled="!canSubmit || loading">
-              {{ loading ? '请稍候...' : (isFirstLogin ? '设置并登录' : '登录') }}
-            </button>
-          </form>
-        </div>
-      </ResponsiveWrapper>
+        <form ref="loginForm" method="post" action="/login" autocomplete="on" @submit.prevent="handleSubmit">
+          <div class="form-group">
+            <input v-model="uid" name="username" type="text" placeholder="请输入原神 UID" @input="error = ''"
+              autocomplete="username" />
+          </div>
+          <div class="form-group">
+            <input v-model="password" name="password" type="password" :placeholder="isFirstLogin
+              ? '首次设置密码（建议至少4位）'
+              : '请输入密码'" @input="error = ''" :autocomplete="isFirstLogin ? 'new-password' : 'current-password'" />
+          </div>
+          <p v-if="error" class="error-msg">{{ error }}</p>
+          <button type="submit" class="btn-publish" :disabled="!canSubmit || loading">
+            {{ loading ? '请稍候...' : (isFirstLogin ? '设置并登录' : '登录') }}
+          </button>
+        </form>
+      </div>
     </div>
   </transition>
 </template>
 
 <script setup>
-import ResponsiveWrapper from '@/components/ResponsiveWrapper.vue'
 import { getAllowedUids } from '@/config/auth'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import AnimatedTitle from './AnimatedTitle.vue'
