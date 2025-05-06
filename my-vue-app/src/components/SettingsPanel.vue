@@ -65,17 +65,7 @@
             </li>
             <li class="setting-item">
               <span>背景设置</span>
-              <label class="btn-ghost upload-btn">
-                上传背景 <input type="file" accept="image/*" @change="changeBackground" />
-              </label>
-            </li>
-            <li class="setting-item">
-              <span>背景透明度</span>
-              <input type="range" min="0" max="1" step="0.05" v-model.number="proxyBgOpacity" />
-            </li>
-            <li class="setting-item">
-              <span>背景模糊</span>
-              <input type="range" min="0" max="20" step="1" v-model.number="proxyBgBlur" />
+              <button class="btn-ghost" @click="showBgModal = true">打开</button>
             </li>
             <li class="setting-item">
               <span>自动加载</span>
@@ -200,17 +190,7 @@
           </li>
           <li class="setting-item">
             <span>背景设置</span>
-            <label class="btn-ghost upload-btn">
-              上传背景 <input type="file" accept="image/*" @change="changeBackground" />
-            </label>
-          </li>
-          <li class="setting-item">
-            <span>背景透明度</span>
-            <input type="range" min="0" max="1" step="0.05" v-model.number="proxyBgOpacity" />
-          </li>
-          <li class="setting-item">
-            <span>背景模糊</span>
-            <input type="range" min="0" max="20" step="1" v-model.number="proxyBgBlur" />
+            <button class="btn-ghost" @click="showBgModal = true">打开</button>
           </li>
           <li class="setting-item">
             <span>自动加载</span>
@@ -296,15 +276,48 @@
         </div>
       </div>
     </Teleport>
+    <Teleport to="body">
+      <div v-if="showBgModal" class="modal show" @click.self="showBgModal = false">
+        <div class="box" style="min-width:360px; max-width:480px;">
+          <span class="close" @click="showBgModal = false">×</span>
+          <h3 style="margin-bottom:16px;">背景设置</h3>
+
+          <ul class="setting-list">
+            <li class="setting-item">
+              <span>上传背景</span>
+              <label class="btn-ghost upload-btn">
+                上传图片
+                <input type="file" accept="image/*" @change="changeBackground" />
+              </label>
+            </li>
+            <li class="setting-item">
+              <span>背景透明度</span>
+              <input type="range" min="0" max="1" step="0.05" v-model.number="proxyBgOpacity" />
+            </li>
+            <li class="setting-item">
+              <span>背景模糊</span>
+              <input type="range" min="0" max="20" step="1" v-model.number="proxyBgBlur" />
+            </li>
+          </ul>
+
+          <div style="text-align:right; margin-top:16px;">
+            <button class="btn-ghost" @click="showBgModal = false">取消</button>
+            <button class="btn-publish" @click="showBgModal = false">完成</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </section>
 </template>
 
 <script>
 import AdminPanel from '@/components/AdminPanel.vue'
 
+
 export default {
   name: 'SettingsPanel',
   components: { AdminPanel },
+
   emits: [
     'update:theme', 'update:bgSrc', 'update:bgOpacity', 'update:bgBlur',
     'update:loadMode', 'update:imageInsertMode',
@@ -331,7 +344,9 @@ export default {
       isMobile: false,               // 响应式判定
       newAdminUid: '',
       showRenameModal: false,
-      renameDraft: this.localDisplayName || ''
+      renameDraft: this.localDisplayName || '',
+      showBgModal: false,
+
     }
   },
   computed: {
@@ -558,15 +573,18 @@ export default {
     gap: 12px;
   }
 }
+
 /* 1. 让 detail header 和 back-btn 都用主题文字色 */
 .mobile-detail .detail-header {
   background: var(--accent-bg);
-  color: var(--text-color); /* ← 从 accent-fg 改为 text-color */
+  color: var(--text-color);
+  /* ← 从 accent-fg 改为 text-color */
 }
 
 /* 2. 确保 back-btn SVG 也跟文字用同一 currentColor */
 .mobile-detail .back-btn {
-  color: inherit; /* 继承上面设置的 --text-color */
+  color: inherit;
+  /* 继承上面设置的 --text-color */
 }
 
 /* （可选）如果你希望 .mobile-nav 的列表也显式用同一变量：
@@ -574,6 +592,7 @@ export default {
 .mobile-nav .nav-list li {
   color: var(--text-color);
 }
+
 .mobile-nav .nav-list li .nav-icon {
   stroke: currentColor;
 }
