@@ -1,6 +1,6 @@
 <template>
   <transition name="fade">
-    <div v-if="visible" class="modal show">
+    <div v-if="visible" class="modal show" @keydown.enter.prevent="canSubmit && handleSubmit()" tabindex="0">
       <div class="box login-box">
         <AnimatedTitle :text="currentTitle" />
 
@@ -260,7 +260,7 @@ input:focus {
 
 .error-msg {
   color: #e00;
-  font-size: 13px;
+  font-size: 16px;
   margin-bottom: 12px;
   text-align: left;
 }
@@ -284,6 +284,7 @@ input {
   font-size: 15px;
   cursor: pointer;
   transition: transform 0.1s;
+  padding: 14px 0;
 }
 
 .btn-publish:disabled {
@@ -328,5 +329,11 @@ input {
     height: 44px;
     font-size: 14px;
   }
+}
+
+input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(63, 167, 255, 0.2);
+  /* 添加浅色投影聚焦 */
 }
 </style>
