@@ -24,3 +24,4 @@ Deployment	GitHub Pages (frontend) + VPS (backend)	Static frontend + self-hosted
 📁 Fully Local Data – JSON file + local uploads, no external DB
 
 💬 AI-Powered Insights (planned) – Memory suggestions, emotional resonance
+更新测试
