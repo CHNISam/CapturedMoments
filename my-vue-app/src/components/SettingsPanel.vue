@@ -420,15 +420,15 @@ export default {
       reader.readAsDataURL(file)
     },
     clearBg() {
-      // 一键清空并实时预览
-      this.$emit('update:bgSrc', '');
-      this.$emit('update:bgOpacity', 1);
-      this.$emit('update:bgBlur', 0);
-      // 更新草稿，保证后续取消/完成逻辑正常
-      this.draftBgSrc = '';
-      this.draftOpacity = 1;
-      this.draftBlur = 0;
-    },
+  // 一键清空并实时预览
+  this.$emit('update:bgSrc',     '');
+  this.$emit('update:bgOpacity', 1);
+  this.$emit('update:bgBlur',    0);
+  // 更新草稿，保证后续取消/完成逻辑正常
+  this.draftBgSrc   = '';
+  this.draftOpacity = 1;
+  this.draftBlur    = 0;
+},
 
     cancelBg() {
       this.$emit('update:bgSrc', this.origBgSrc)

@@ -493,7 +493,7 @@ export default {
       posts: this.safeParse('posts', []),
 
       /* 主题 / 外观 */
-      theme: localStorage.getItem('theme') || 'light',
+      theme: localStorage.getItem('theme') || 'dark',
       bgSrc: localStorage.getItem('bgSrc') || '',
       bgOpacity: parseFloat(localStorage.getItem('bgOpacity') || 0.35),
       bgBlur: parseInt(localStorage.getItem('bgBlur') || 4),
@@ -1347,10 +1347,12 @@ export default {
 
     /* ========== 主题 ========== */
     toggleTheme() {
-      this.theme = this.theme === 'light' ? 'dark' : 'light';
-      document.body.classList.toggle('dark', this.theme === 'dark');
-      localStorage.setItem('theme', this.theme);
+      // 强制保持深色，不再切换浅色
+      this.theme = 'dark';
+      document.body.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     }
+
   },
 
   mounted() {
