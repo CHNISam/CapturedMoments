@@ -127,12 +127,6 @@
               <button class="btn-publish" @click="$emit('add-allowed-uid', newAdminUid)">新增</button>
             </li>
           </ul>
-
-          <!-- 管理员：安全监控 -->
-          <div v-show="activeSection === 'admin' && isAdmin" class="settings-group admin-monitor setting-group-card">
-            <h3 class="group-title">安全监控</h3>
-            <AdminPanel />
-          </div>
         </section>
       </div>
     </template>
@@ -312,12 +306,11 @@
 </template>
 
 <script>
-import AdminPanel from '@/components/AdminPanel.vue'
 import BaseModal from '@/components/BaseModal.vue'
 
 export default {
   name: 'SettingsPanel',
-  components: { BaseModal, AdminPanel },
+  components: { BaseModal },
 
   emits: [
     'update:theme', 'update:bgSrc', 'update:bgOpacity', 'update:bgBlur',
