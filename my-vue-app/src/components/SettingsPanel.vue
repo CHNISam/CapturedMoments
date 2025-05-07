@@ -294,6 +294,11 @@
           <span>背景模糊</span>
           <input type="range" min="0" max="20" step="1" v-model.number="draftBlur" />
         </li>
+        <!-- 新增：清除背景 -->
+        <li class="setting-item">
+          <span>清除背景</span>
+          <button type="button" class="btn-ghost" @click="clearBg()">清除背景</button>
+        </li>
       </ul>
 
       <!-- 底部按钮，拿到 close() 直接关模态 —— 工业常见 pattern -->
@@ -413,6 +418,16 @@ export default {
         this.draftBgSrc = ev.target.result
       }
       reader.readAsDataURL(file)
+    },
+    clearBg() {
+      // 一键清空并实时预览
+      this.$emit('update:bgSrc', '');
+      this.$emit('update:bgOpacity', 1);
+      this.$emit('update:bgBlur', 0);
+      // 更新草稿，保证后续取消/完成逻辑正常
+      this.draftBgSrc = '';
+      this.draftOpacity = 1;
+      this.draftBlur = 0;
     },
 
     cancelBg() {
