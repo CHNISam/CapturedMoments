@@ -1,0 +1,27 @@
+/* common.css 或全局样式 */
+.hover-darken {
+    /* 默认背景色与 hover 背景色（支持被外部覆盖） */
+    --btn-bg: #333;
+    --btn-hover-bg: #3a3a3a;
+  
+    background-color: var(--btn-bg);
+    color: #fff;
+  
+    /* 建议加上以下常规按钮样式，增强通用性 */
+    display: inline-block;
+    text-align: center;
+    line-height: 1.2;
+  
+    border: none;
+    border-radius: var(--radius, 6px);
+    padding: 6px 14px;
+    font-size: 14px;
+  
+    cursor: pointer;
+    transition: background-color 0.25s ease;
+  }
+  
+  .hover-darken:hover {
+    background-color: var(--btn-hover-bg);
+  }
+  

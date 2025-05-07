@@ -15,7 +15,8 @@
               : '请输入密码'" @input="error = ''" :autocomplete="isFirstLogin ? 'new-password' : 'current-password'" />
           </div>
           <p v-if="error" class="error-msg">{{ error }}</p>
-          <button type="submit" class="btn-publish" :disabled="!canSubmit || loading">
+          <button type="submit" class="btn-publish hover-darken" :disabled="!canSubmit || loading"
+            style="--btn-bg: #40566b; --btn-hover-bg: #334456">
             {{ loading ? '请稍候...' : (isFirstLogin ? '设置并登录' : '登录') }}
           </button>
         </form>
@@ -172,7 +173,6 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s;
@@ -230,14 +230,13 @@ input:focus {
 .btn-publish {
   width: 100%;
   height: 48px;
-  background: #40566b;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: transform 0.1s;
+  /* 去掉原来的 background、transition、hover 相关 */
+  /* background: #40566b; */
+  /* transition: transform 0.1s; */
   padding: 0 16px;
+  font-size: 15px;
+  /* 保留下沉动画 */
+  transition: transform 0.1s;
 }
 
 .btn-publish:disabled {
@@ -246,9 +245,8 @@ input:focus {
 }
 
 .btn-publish:not(:disabled):hover {
+  /* 只做轻微上浮 */
   transform: translateY(-1px);
-  background: #334456;
-  /* 更深 hover */
 }
 
 @media (min-width: 768px) {
