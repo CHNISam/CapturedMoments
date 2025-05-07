@@ -276,47 +276,43 @@
         </div>
       </div>
     </Teleport>
-    <Teleport to="body">
-      <div v-if="showBgModal" class="modal show" @click.self="showBgModal = false">
-        <div class="box" style="min-width:360px; max-width:480px;">
-          <span class="close" @click="showBgModal = false">×</span>
-          <h3 style="margin-bottom:16px;">背景设置</h3>
+    <BaseModal v-model="showBgModal" title="背景设置" maxWidth="480px">
+      <!-- 正文内容不变 -->
+      <ul class="setting-list">
+        <li class="setting-item">
+          <span>上传背景</span>
+          <label class="btn-ghost upload-btn">
+            上传图片
+            <input type="file" accept="image/*" @change="onBgUpload" />
+          </label>
+        </li>
+        <li class="setting-item">
+          <span>背景透明度</span>
+          <input type="range" min="0" max="1" step="0.05" v-model.number="draftOpacity" />
+        </li>
+        <li class="setting-item">
+          <span>背景模糊</span>
+          <input type="range" min="0" max="20" step="1" v-model.number="draftBlur" />
+        </li>
+      </ul>
 
-          <ul class="setting-list">
-            <li class="setting-item">
-              <span>上传背景</span>
-              <label class="btn-ghost upload-btn">
-                上传图片
-                <input type="file" accept="image/*" @change="changeBackground" />
-              </label>
-            </li>
-            <li class="setting-item">
-              <span>背景透明度</span>
-              <input type="range" min="0" max="1" step="0.05" v-model.number="proxyBgOpacity" />
-            </li>
-            <li class="setting-item">
-              <span>背景模糊</span>
-              <input type="range" min="0" max="20" step="1" v-model.number="proxyBgBlur" />
-            </li>
-          </ul>
+      <!-- 底部按钮，拿到 close() 直接关模态 —— 工业常见 pattern -->
+      <template #footer="{ close }">
+        <button type="button" class="btn-ghost" @click="cancelBg()">取消</button>
+        <button type="button" class="btn-publish" @click="confirmBg()">完成</button>
+      </template>
+    </BaseModal>
 
-          <div style="text-align:right; margin-top:16px;">
-            <button class="btn-ghost" @click="showBgModal = false">取消</button>
-            <button class="btn-publish" @click="showBgModal = false">完成</button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
   </section>
 </template>
 
 <script>
 import AdminPanel from '@/components/AdminPanel.vue'
-
+import BaseModal from '@/components/BaseModal.vue'
 
 export default {
   name: 'SettingsPanel',
-  components: { AdminPanel },
+  components: { BaseModal, AdminPanel },
 
   emits: [
     'update:theme', 'update:bgSrc', 'update:bgOpacity', 'update:bgBlur',
@@ -346,7 +342,12 @@ export default {
       showRenameModal: false,
       renameDraft: this.localDisplayName || '',
       showBgModal: false,
-
+      origBgSrc: this.bgSrc,
+      origOpacity: this.bgOpacity,
+      origBlur: this.bgBlur,
+      draftBgSrc: this.bgSrc,
+      draftOpacity: this.bgOpacity,
+      draftBlur: this.bgBlur,
     }
   },
   computed: {
@@ -381,7 +382,51 @@ export default {
   beforeUnmount() {
     window.removeEventListener('resize', this.updateMobile)
   },
+  watch: {
+    showBgModal(val) {
+      if (val) {
+        this.origBgSrc = this.bgSrc
+        this.origOpacity = this.bgOpacity
+        this.origBlur = this.bgBlur
+        this.draftBgSrc = this.bgSrc
+        this.draftOpacity = this.bgOpacity
+        this.draftBlur = this.bgBlur
+      }
+    },
+    draftBgSrc(val) {
+      if (this.showBgModal) this.$emit('update:bgSrc', val)
+    },
+    draftOpacity(val) {
+      if (this.showBgModal) this.$emit('update:bgOpacity', val)
+    },
+    draftBlur(val) {
+      if (this.showBgModal) this.$emit('update:bgBlur', val)
+    }
+  },
+
   methods: {
+    onBgUpload(e) {
+      const file = e.target.files[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = ev => {
+        this.draftBgSrc = ev.target.result
+      }
+      reader.readAsDataURL(file)
+    },
+
+    cancelBg() {
+      this.$emit('update:bgSrc', this.origBgSrc)
+      this.$emit('update:bgOpacity', this.origOpacity)
+      this.$emit('update:bgBlur', this.origBlur)
+      this.showBgModal = false
+    },
+
+    confirmBg() {
+      this.showBgModal = false
+    },
+
+
     updateMobile() {
       this.isMobile = window.innerWidth < 768
     },
