@@ -6,8 +6,8 @@
 
         <form ref="loginForm" method="post" action="/login" autocomplete="on" @submit.prevent="handleSubmit">
           <div class="form-group">
-            <input v-model="uid" name="username" type="text" placeholder="请输入UID" @input="error = ''"
-              autocomplete="username" />
+            <input v-model.trim="uid" name="username" type="text" placeholder="请输入UID" pattern="[A-Za-z0-9_]+"
+              maxlength="20" required autocomplete="username" @input="error = ''" />
           </div>
           <div class="form-group">
             <input v-model="password" name="password" type="password" :placeholder="isFirstLogin
@@ -33,8 +33,13 @@ import AnimatedTitle from './AnimatedTitle.vue'
 
 
 // Props & Emits
-const props = defineProps({ show: Boolean })
-const emit = defineEmits(['login-success'])
+const props = defineProps({
+  show: { type: Boolean, required: true },
+})
+const emit = defineEmits({
+  'login-success': (uid) => typeof uid === 'string' && uid.length > 0,
+})
+
 
 // Refs & state
 const loginForm = ref(null)
@@ -73,7 +78,13 @@ const storedCred = computed(() => {
 
 // Flags
 const isFirstLogin = computed(() => uid.value.trim() !== '' && !storedCred.value)
-const canSubmit = computed(() => uid.value.trim() !== '' && password.value.trim() !== '')
+const canSubmit = computed(() => {
+  const u = uid.value.trim()
+  const p = password.value
+  const minPwd = isFirstLogin.value ? 4 : 1
+  return u.length > 0 && p.length >= minPwd && !loading.value
+})
+
 const visible = computed(() => props.show)
 
 
@@ -95,8 +106,12 @@ function createSalt() {
 
 // Form submit
 async function handleSubmit() {
+  // 🛡️ 如果不能提交（未填完 / 正在加载中），直接返回
+  if (!canSubmit.value) return
+
   const id = uid.value.trim()
-  // 测试绕过（保留可选）
+
+  // 🎯 测试账号特殊处理（可选）
   if (id === '217122260') {
     sessionStorage.setItem('currentUser', id)
     emit('login-success', id)
@@ -107,12 +122,13 @@ async function handleSubmit() {
   try {
     error.value = ''
 
+    // ⛔ 判断 UID 是否允许
     if (!getAllowedUids().includes(id)) {
       error.value = '用户不存在'
       return
     }
 
-    // brute-force lock
+    // 🚫 判断是否触发暴力破解锁定
     let fails = Number(sessionStorage.getItem(failKey.value) || 0)
     if (fails >= MAX_FAIL) {
       error.value = '尝试过多，请稍后再试'
@@ -122,8 +138,8 @@ async function handleSubmit() {
     const pwd = password.value
     const cred = storedCred.value
 
-    // first login
     if (!cred) {
+      // 🧩 首次登录：设置新密码
       if (pwd.length < 4) {
         error.value = '密码长度至少4位'
         return
@@ -131,29 +147,35 @@ async function handleSubmit() {
       const salt = createSalt()
       const hash = await pbkdf2Hash(pwd, salt)
       localStorage.setItem(credKey.value, JSON.stringify({ hash, salt, iter: 100000 }))
-      tick.value++
+      tick.value++ // 强制刷新 storedCred
     } else {
+      // 🔐 正常登录：验证密码
       const { hash, salt, iter = 100000 } = cred
       const calc = await pbkdf2Hash(pwd, salt, iter)
+
       if (!equalTiming(calc, hash)) {
         sessionStorage.setItem(failKey.value, ++fails)
         error.value = '密码不正确，请重试'
         return
       }
+
+      // ✅ 密码正确，清除失败计数
       sessionStorage.removeItem(failKey.value)
     }
 
-    // save current user to sessionStorage
+    // 🎉 登录成功：写入当前用户信息
     sessionStorage.setItem('currentUser', id)
     emit('login-success', id)
 
   } catch (err) {
-    console.error('登录异常：', err)
-    error.value = '系统错误，请稍后重试'
+    console.error('[LoginModal] 登录异常:', err)
+    error.value = err?.message || '系统错误，请稍后重试'
   } finally {
+    // ✅ 无论成功失败，都要清除 loading 状态
     loading.value = false
   }
 }
+
 
 // Reset state when modal opens
 watch(visible, v => {
