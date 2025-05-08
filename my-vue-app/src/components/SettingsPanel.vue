@@ -56,7 +56,8 @@
           </button>
 
           <!-- 居中标题 -->
-          <h2 class="detail-title">账号资料</h2>
+          <h2 class="detail-title">{{ sectionTitleMap[activeSection] }}</h2>
+
 
           <!-- 占位符：保持标题真正水平居中 -->
           <span class="header-spacer"></span>
@@ -614,10 +615,11 @@ export default {
 .mobile-detail .detail-header {
   position: relative;
   display: flex;
-  justify-content: space-between;   /* 左右留出对称空间 */
+  justify-content: space-between;
+  /* 左右留出对称空间 */
   align-items: center;
   padding: 12px 16px;
-  background: var(--topbar-bg, rgba(0,0,0,0.6));
+  background: var(--topbar-bg, rgba(0, 0, 0, 0.6));
   color: #fff;
 }
 
@@ -642,11 +644,13 @@ export default {
 
 /* 标题 */
 .detail-title {
-  font-size: 1.125rem;   /* ≈18 px，介于17–20 px */
+  font-size: 1.125rem;
+  /* ≈18 px，介于17–20 px */
   font-weight: 600;
   line-height: 1;
   text-align: center;
-  flex: 1;               /* 占满中间区域，实现真正居中 */
+  flex: 1;
+  /* 占满中间区域，实现真正居中 */
   user-select: none;
 }
 
