@@ -61,7 +61,14 @@
           <ul v-show="activeSection === 'visual'" class="settings-group setting-group-card">
             <li class="setting-item">
               <span>主题模式</span>
-              <input type="checkbox" :checked="theme === 'dark'" @change="toggleTheme" />
+              <button class="btn-ghost" disabled title="已锁定为深色模式"@click="toggleTheme">
+                <svg v-if="theme === 'light'" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="5" />
+                </svg>
+                <svg v-else viewBox="0 0 24 24">
+                  <path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" />
+                </svg>
+              </button>
             </li>
             <li class="setting-item">
               <span>背景设置</span>
@@ -180,8 +187,16 @@
         <ul v-show="activeSection === 'visual'" class="settings-group">
           <li class="setting-item">
             <span>主题模式</span>
-            <input type="checkbox" :checked="theme === 'dark'" @change="toggleTheme" />
+            <button class="btn-ghost" disabled title="已锁定为深色模式"@click="toggleTheme">
+              <svg v-if="theme === 'light'" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5" />
+              </svg>
+              <svg v-else viewBox="0 0 24 24">
+                <path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" />
+              </svg>
+            </button>
           </li>
+
           <li class="setting-item">
             <span>背景设置</span>
             <button class="btn-ghost" @click="showBgModal = true">打开</button>
@@ -413,15 +428,15 @@ export default {
       reader.readAsDataURL(file)
     },
     clearBg() {
-  // 一键清空并实时预览
-  this.$emit('update:bgSrc',     '');
-  this.$emit('update:bgOpacity', 1);
-  this.$emit('update:bgBlur',    0);
-  // 更新草稿，保证后续取消/完成逻辑正常
-  this.draftBgSrc   = '';
-  this.draftOpacity = 1;
-  this.draftBlur    = 0;
-},
+      // 一键清空并实时预览
+      this.$emit('update:bgSrc', '');
+      this.$emit('update:bgOpacity', 1);
+      this.$emit('update:bgBlur', 0);
+      // 更新草稿，保证后续取消/完成逻辑正常
+      this.draftBgSrc = '';
+      this.draftOpacity = 1;
+      this.draftBlur = 0;
+    },
 
     cancelBg() {
       this.$emit('update:bgSrc', this.origBgSrc)
@@ -439,7 +454,7 @@ export default {
       this.isMobile = window.innerWidth < 768
     },
     toggleSection(k) { this.activeSection = k },
-    toggleTheme() { this.$emit('update:theme', this.theme === 'light' ? 'dark' : 'light') },
+    // toggleTheme() { this.$emit('update:theme', this.theme === 'light' ? 'dark' : 'light') },
     changeBackground(e) {
       const f = e.target.files[0]; if (!f) return;
       const r = new FileReader();

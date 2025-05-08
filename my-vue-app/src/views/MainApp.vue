@@ -82,15 +82,6 @@
           </div>
 
 
-
-          <button class="btn-ghost" @click="toggleTheme">
-            <svg v-if="theme === 'light'" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="5" />
-            </svg>
-            <svg v-else viewBox="0 0 24 24">
-              <path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z" />
-            </svg>
-          </button>
         </div>
       </nav>
 
