@@ -13,6 +13,10 @@
               <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5" />
             </svg>
             <span>视觉／界面</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+
           </li>
           <li @click="toggleSection('profile')">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
@@ -20,12 +24,20 @@
               <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2" />
             </svg>
             <span>个人资料</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+
           </li>
           <li @click="toggleSection('assistant')">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" />
             </svg>
             <span>交互助手</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+
           </li>
           <li @click="toggleSection('publish')">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
@@ -33,12 +45,20 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5-5m0 0l5 5m-5-5v12" />
             </svg>
             <span>发布与上传</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+
           </li>
           <li v-if="isAdmin" @click="toggleSection('admin')">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
               <path d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5" />
             </svg>
             <span>管理员</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+
           </li>
         </ul>
       </div>
@@ -495,8 +515,9 @@ export default {
 
 /* ===== 左侧导航（桌面） ===== */
 .settings-nav {
-  width: 140px;
+  width: 200px;
   background: rgba(0, 0, 0, 0.02);
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
   padding: 8px;
   position: sticky;
@@ -515,7 +536,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 8px 20px;
   border-radius: 4px;
   cursor: pointer;
   transition: background .2s;
@@ -532,6 +553,13 @@ export default {
   margin-right: 8px;
   stroke: currentColor;
   fill: none;
+}
+
+.chevron-icon {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
 }
 
 /* ===== 右侧内容（桌面） ===== */
