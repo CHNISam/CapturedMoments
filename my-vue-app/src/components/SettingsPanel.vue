@@ -45,23 +45,30 @@
 
       <!-- ▶ 详情页 -->
       <div v-else class="mobile-detail">
+        <!-- ▶ 详情页顶部栏（移动端） -->
         <header class="detail-header">
-          <button class="back-btn" @click="activeSection = null">
-            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 18l-6-6 6-6" />
+          <!-- 返回 -->
+          <button class="back-btn" @click="activeSection = null" aria-label="返回">
+            <svg class="icon-back" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.75"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
 
+          <!-- 居中标题 -->
+          <h2 class="detail-title">账号资料</h2>
 
-          <h2 class="detail-title">{{ sectionTitleMap[activeSection] }}</h2>
+          <!-- 占位符：保持标题真正水平居中 -->
+          <span class="header-spacer"></span>
         </header>
+
         <section class="settings-content">
           <!-- ↓↓ 原有各分组内容 ↓↓ -->
           <!-- 视觉／界面 -->
           <ul v-show="activeSection === 'visual'" class="settings-group setting-group-card">
             <li class="setting-item">
               <span>主题模式</span>
-              <button class="btn-ghost" disabled title="已锁定为深色模式"@click="toggleTheme">
+              <button class="btn-ghost" disabled title="已锁定为深色模式" @click="toggleTheme">
                 <svg v-if="theme === 'light'" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="5" />
                 </svg>
@@ -187,7 +194,7 @@
         <ul v-show="activeSection === 'visual'" class="settings-group">
           <li class="setting-item">
             <span>主题模式</span>
-            <button class="btn-ghost" disabled title="已锁定为深色模式"@click="toggleTheme">
+            <button class="btn-ghost" disabled title="已锁定为深色模式" @click="toggleTheme">
               <svg v-if="theme === 'light'" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="5" />
               </svg>
@@ -454,7 +461,9 @@ export default {
       this.isMobile = window.innerWidth < 768
     },
     toggleSection(k) { this.activeSection = k },
-    // toggleTheme() { this.$emit('update:theme', this.theme === 'light' ? 'dark' : 'light') },
+    toggleTheme() {
+      // this.$emit('update:theme', this.theme === 'light' ? 'dark' : 'light')
+    },
     changeBackground(e) {
       const f = e.target.files[0]; if (!f) return;
       const r = new FileReader();
@@ -601,30 +610,44 @@ export default {
   gap: 12px;
 }
 
+/* ===== 顶栏 ===== */
 .mobile-detail .detail-header {
-  position: sticky;
-  top: 0;
+  position: relative;
   display: flex;
+  justify-content: space-between;   /* 左右留出对称空间 */
   align-items: center;
-  gap: 8px;
   padding: 12px 16px;
-  background: var(--accent-bg);
-  color: var(--accent-fg);
+  background: var(--topbar-bg, rgba(0,0,0,0.6));
+  color: #fff;
 }
 
-.back-btn {
+/* 返回按钮 */
+.back-btn,
+.header-spacer {
   width: 36px;
   height: 36px;
-  border: none;
-  background: none;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
+  background: none;
+  padding: 0;
 }
 
+/* 图标大小与粗细 */
+.icon-back {
+  width: 24px;
+  height: 24px;
+}
+
+/* 标题 */
 .detail-title {
-  font-size: 1rem;
+  font-size: 1.125rem;   /* ≈18 px，介于17–20 px */
   font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  flex: 1;               /* 占满中间区域，实现真正居中 */
+  user-select: none;
 }
 
 .setting-group-card {
