@@ -312,7 +312,7 @@
           <!-- 这里直接渲染 SettingsPanel -->
           <SettingsPanel v-model:theme="theme" v-model:bgSrc="bgSrc" v-model:bgOpacity="bgOpacity"
             v-model:bgBlur="bgBlur" v-model:loadMode="loadMode" v-model:imageInsertMode="imageInsertMode"
-            v-model:petEnabled="petEnabled" v-model:llmEnabled="llmEnabled" v-model:localDisplayName="localDisplayName"
+            v-model:llmEnabled="llmEnabled" v-model:localDisplayName="localDisplayName"
             v-model:selectedBadge="selectedBadge" :allowedBadges="allowedBadges" :allowedUids="allowedUids"
             :currentUser="currentUser" bestBadgeUid="246490729" adminUid="217122260"
             @open-password-modal="openPasswordModal" @open-badge-modal="openBadgeModal" @reset-password="resetPassword"
@@ -434,14 +434,6 @@
         </div>
       </div>
 
-
-      <!-- 桌宠 -->
-      <div id="pet" v-if="petEnabled" ref="pet"
-        style="position:fixed;right:24px;bottom:24px;width:90px;user-select:none;cursor:move;z-index:90;"
-        @mousedown="dragPet">
-        <div v-html="petSVG"></div>
-      </div>
-
       <footer style="text-align:center;padding:24px 0;font-size:13px;color:#777">
         © 2025 把回忆拼好给你
       </footer>
@@ -526,7 +518,6 @@ export default {
       maxZoom: 3,           // 上限
 
       loadMode: localStorage.getItem('loadMode') || 'manual',
-      petEnabled: true,
       petType: 'cat',
       llmEnabled: true,
       petPrompt: '喵～ 记得喝水喔！',
@@ -1325,15 +1316,6 @@ export default {
 
       alert('管理员密码已设置');
       this.closeAdminPwdModal();
-    },
-
-
-    /* ========== 桌宠拖拽 ========== */
-    dragPet(e) {
-      const pet = this.$refs.pet;
-      const ox = e.offsetX, oy = e.offsetY;
-      document.onmousemove = ev => { pet.style.left = (ev.pageX - ox) + 'px'; pet.style.top = (ev.pageY - oy) + 'px'; };
-      document.onmouseup = () => document.onmousemove = null;
     },
 
     /* ========== 主题 ========== */
@@ -2401,14 +2383,6 @@ body.dark .modal.show .np-toolbar select option {
   fill: none;
 }
 
-
-
-
-/* 桌宠 */
-#pet svg {
-  width: 100%;
-  animation: breathe 3s ease-in-out infinite
-}
 
 @keyframes breathe {
 
