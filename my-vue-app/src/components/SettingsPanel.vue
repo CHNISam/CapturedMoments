@@ -127,11 +127,6 @@
           <!-- 交互助手 -->
           <ul v-show="activeSection === 'assistant'" class="settings-group setting-group-card">
             <li class="setting-item">
-              <span>桌宠</span>
-              <input type="checkbox" :checked="petEnabled"
-                @change="$emit('update:petEnabled', $event.target.checked)" />
-            </li>
-            <li class="setting-item">
               <span>AI</span>
               <input type="checkbox" :checked="llmEnabled"
                 @change="$emit('update:llmEnabled', $event.target.checked)" />
@@ -171,62 +166,59 @@
       <!-- ▶ 左侧导航 -->
       <aside class="settings-nav">
         <ul class="nav-list">
-          <ul class="nav-list">
-            <li :class="{ active: activeSection === 'visual' }" @click="toggleSection('visual')">
-              <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z" />
-                <path d="M6 15l9-9 3 3-9 9" />
-                <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5" />
-              </svg>
-              <span>视觉／界面</span>
-              <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </li>
+          <li :class="{ active: activeSection === 'visual' }" @click="toggleSection('visual')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z" />
+              <path d="M6 15l9-9 3 3-9 9" />
+              <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5" />
+            </svg>
+            <span>视觉／界面</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
 
-            <li :class="{ active: activeSection === 'profile' }" @click="toggleSection('profile')">
-              <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" />
-                <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2" />
-              </svg>
-              <span>个人资料</span>
-              <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </li>
+          <li :class="{ active: activeSection === 'profile' }" @click="toggleSection('profile')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" />
+              <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2" />
+            </svg>
+            <span>个人资料</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
 
-            <li :class="{ active: activeSection === 'assistant' }" @click="toggleSection('assistant')">
-              <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" />
-              </svg>
-              <span>交互助手</span>
-              <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </li>
+          <li :class="{ active: activeSection === 'assistant' }" @click="toggleSection('assistant')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" />
+            </svg>
+            <span>交互助手</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
 
-            <li :class="{ active: activeSection === 'publish' }" @click="toggleSection('publish')">
-              <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5-5m0 0l5 5m-5-5v12" />
-              </svg>
-              <span>发布与上传</span>
-              <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </li>
+          <li :class="{ active: activeSection === 'publish' }" @click="toggleSection('publish')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5-5m0 0l5 5m-5-5v12" />
+            </svg>
+            <span>发布与上传</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
 
-            <li v-if="isAdmin" :class="{ active: activeSection === 'admin' }" @click="toggleSection('admin')">
-              <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5" />
-              </svg>
-              <span>管理员</span>
-              <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-                <path d="M9 18l6-6-6-6" />
-              </svg>
-            </li>
-          </ul>
-
+          <li v-if="isAdmin" :class="{ active: activeSection === 'admin' }" @click="toggleSection('admin')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5" />
+            </svg>
+            <span>管理员</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
         </ul>
       </aside>
 
@@ -275,10 +267,6 @@
 
         <!-- 交互助手 -->
         <ul v-show="activeSection === 'assistant'" class="settings-group">
-          <li class="setting-item">
-            <span>桌宠</span>
-            <input type="checkbox" :checked="petEnabled" @change="$emit('update:petEnabled', $event.target.checked)" />
-          </li>
           <li class="setting-item">
             <span>AI</span>
             <input type="checkbox" :checked="llmEnabled" @change="$emit('update:llmEnabled', $event.target.checked)" />
@@ -380,7 +368,7 @@ export default {
   emits: [
     'update:theme', 'update:bgSrc', 'update:bgOpacity', 'update:bgBlur',
     'update:loadMode', 'update:imageInsertMode',
-    'update:petEnabled', 'update:llmEnabled', 'update:localDisplayName',
+    'update:llmEnabled', 'update:localDisplayName',
     'open-password-modal', 'open-badge-modal',
     'reset-password', 'add-allowed-uid', 'remove-allowed-uid', 'open-admin-pwd-modal'
   ],
@@ -390,7 +378,6 @@ export default {
     bgBlur: Number,
     loadMode: String,
     imageInsertMode: String,
-    petEnabled: Boolean,
     llmEnabled: Boolean,
     localDisplayName: String,
     allowedUids: Array,
