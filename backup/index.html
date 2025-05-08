@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>富文本输入（深色主题）示例</title>
+  <style>
+    /* 整体页面风格 */
+    body {
+      font-family: sans-serif;
+      background: #1e1e1e;
+      padding: 40px;
+      color: #eee;
+    }
+
+    /* 输入区容器：内容 + 工具栏 */
+    .np-input-wrapper {
+      display: flex;
+      flex-direction: column;
+      width: 600px;
+      margin: 0 auto;
+      border: 1px solid #444;
+      border-radius: 8px;
+      background: #2a2a2a;
+      overflow: hidden;
+    }
+
+    /* 可编辑内容区：flex 填满上半区，滚动 + 自动换行 */
+    .ta-preview {
+      flex: 1;
+      min-height: 120px;
+      max-height: 200px;
+      padding: 16px;
+      color: #ddd;
+      font-size: 14px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box;
+
+      /* —— 滚动条 主题化 —— */
+      /* Firefox */
+      scrollbar-width: thin;
+      scrollbar-color: #555 #2a2a2a;
+    }
+    /* Chrome/Safari */
+    .ta-preview::-webkit-scrollbar {
+      width: 6px;
+    }
+    .ta-preview::-webkit-scrollbar-track {
+      background: #2a2a2a;
+    }
+    .ta-preview::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 3px;
+    }
+    .ta-preview::-webkit-scrollbar-thumb:hover {
+      background: #666;
+    }
+
+    /* 底部工具栏 */
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      border-top: 1px solid #444;
+      background: inherit;
+    }
+    .toolbar .left-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* 所有按钮的基础样式 */
+    .btn {
+      height: 36px;
+      padding: 0 12px;
+      border: none;
+      border-radius: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+      background: transparent;
+      color: inherit;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* 上传按钮：白底深色图标 */
+    .btn-upload {
+      background: #fff;
+    }
+    .btn-upload:hover {
+      background: #f0f0f0;
+    }
+    .btn-upload svg {
+      width: 20px;
+      height: 20px;
+      fill: #333;
+    }
+
+    /* 插入表情 & 链接 按钮（圆形图标） */
+    .btn-emoji,
+    .btn-link {
+      width: 36px;
+      height: 36px;
+    }
+    .btn-emoji svg,
+    .btn-link svg {
+      width: 18px;
+      height: 18px;
+      fill: #ddd;
+    }
+
+    /* 发布按钮：主色调背景 */
+    .btn-publish {
+      background: #0063f7;
+      color: #fff;
+      font-size: 14px;
+      line-height: 1;
+    }
+    .btn-publish:hover {
+      background: #0051c8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="np-input-wrapper">
+    <!-- 可编辑内容区 -->
+    <div
+      class="ta-preview"
+      contenteditable="true"
+      tabindex="0"
+      aria-label="输入内容区">
+    </div>
+
+    <!-- 底部工具栏 -->
+    <div class="toolbar">
+      <div class="left-group">
+        <button class="btn btn-upload" aria-label="上传图片">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 3v14m0 0l-4-4m4 4l4-4M5 21h14"/>
+          </svg>
+        </button>
+        <button class="btn btn-emoji" aria-label="插入表情">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="9" cy="10" r="1.5" fill="#1e1e1e"/>
+            <circle cx="15" cy="10" r="1.5" fill="#1e1e1e"/>
+            <path d="M8 16c1.333-1 2.667-1 4 0" stroke="#1e1e1e" stroke-width="1.5" fill="none"/>
+          </svg>
+        </button>
+        <button class="btn btn-link" aria-label="插入链接">
+          <svg viewBox="0 0 24 24">
+            <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4v-2h-4
+                     c-2.82 0-5.1 2.28-5.1 5.1s2.28 5.1 5.1 5.1h4
+                     v-2h-4c-1.71 0-3.1-1.39-3.1-3.1zM9.9 13h4
+                     v-2h-4v2zm10 2h-4v2h4c2.82 0 5.1-2.28 5.1-5.1
+                     s-2.28-5.1-5.1-5.1h-4v2h4c1.71 0 3.1 1.39 3.1 3.1
+                     s-1.39 3.1-3.1 3.1z"/>
+          </svg>
+        </button>
+      </div>
+      <button class="btn btn-publish" aria-label="发布动态">发布</button>
+    </div>
+  </div>
+
+  <script>
+    const preview    = document.querySelector('.ta-preview');
+    const uploadBtn  = document.querySelector('.btn-upload');
+    const emojiBtn   = document.querySelector('.btn-emoji');
+    const linkBtn    = document.querySelector('.btn-link');
+    const publishBtn = document.querySelector('.btn-publish');
+
+    function insertAtCursor(node) {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) {
+        preview.appendChild(node);
+        return;
+      }
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(node);
+      range.setStartAfter(node);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+
+    uploadBtn.addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = document.createElement('img');
+          img.src = ev.target.result;
+          img.style.maxWidth = '100%';
+          insertAtCursor(img);
+        };
+        reader.readAsDataURL(file);
+      };
+      input.click();
+    });
+
+    emojiBtn.addEventListener('click', () => {
+      insertAtCursor(document.createTextNode('😊'));
+    });
+
+    linkBtn.addEventListener('click', () => {
+      const url = prompt('请输入链接 URL：');
+      if (!url) return;
+      const a = document.createElement('a');
+      a.href        = url;
+      a.textContent = url;
+      a.target      = '_blank';
+      insertAtCursor(a);
+    });
+
+    publishBtn.addEventListener('click', () => {
+      const content = preview.innerHTML.trim();
+      if (!content) {
+        alert('请输入内容或上传图片后再发布。');
+        return;
+      }
+      console.log('发布内容：', content);
+      alert('已发布！请在控制台查看内容。');
+      preview.innerHTML = '';
+    });
+
+    preview.addEventListener('paste', e => {
+      e.preventDefault();
+      const items = Array.from(e.clipboardData.items);
+
+      // 优先处理图片
+      const imageItem = items.find(
+        i => i.kind === 'file' && i.type.startsWith('image/')
+      );
+      if (imageItem) {
+        const blob = imageItem.getAsFile();
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const img = document.createElement('img');
+          img.src = ev.target.result;
+          img.style.maxWidth = '100%';
+          insertAtCursor(img);
+        };
+        reader.readAsDataURL(blob);
+        return;
+      }
+
+      // 再处理纯文本：换行转 <br>
+      const text = e.clipboardData.getData('text/plain');
+      const html = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\r?\n/g, '<br>');
+      document.execCommand('insertHTML', false, html);
+    });
+  </script>
+
+</body>
+</html>

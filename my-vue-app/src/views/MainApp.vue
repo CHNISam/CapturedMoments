@@ -28,27 +28,6 @@
               <span class="red" :class="{ hidden: !hasUnread }"></span>
             </span>
           </a>
-
-          <!-- 相册 -->
-          <a href="#album" @click.prevent="scrollTo('album')" class="nav-item nav-item-album">
-            <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21 15 16 10 5 21" />
-            </svg>
-            <span class="nav-label">相册</span>
-          </a>
-          <!-- 投稿 -->
-          <a href="#moments" @click.prevent="scrollTo('moments')" class="nav-item nav-item-submit">
-            <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round" />
-              <line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round" />
-            </svg>
-
-            <span class="nav-label">投稿</span>
-          </a>
           <!-- ① 在 data() 里新增 navDropdownVisible -->
           <div class="nav-avatar" @mouseenter="navDropdownVisible = true" @mouseleave="navDropdownVisible = false">
             <img :src="getAvatar(currentUser)" alt="Avatar" class="avatar-img" />
@@ -80,6 +59,27 @@
             </transition>
 
           </div>
+          <!-- 相册 -->
+          <a href="#album" @click.prevent="scrollTo('album')" class="nav-item nav-item-album">
+            <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+            <span class="nav-label">相册</span>
+          </a>
+          <!-- 投稿 -->
+          <a href="#moments" @click.prevent="scrollTo('moments')" class="nav-item nav-item-submit">
+            <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round" />
+              <line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round" />
+            </svg>
+
+            <span class="nav-label">投稿</span>
+          </a>
+
 
 
         </div>
@@ -3274,4 +3274,24 @@ body.dark legend {
   stroke: currentColor;
   fill: none;
 }
+.menu .nav-item.nav-item-submit {
+  background: #333;                   /* 深灰背景 */
+  color: #fff;                        /* 白色文字 */
+  border-radius: var(--radius);      /* 圆角 */
+  padding: 6px 14px;
+  font-weight: 600;
+  transition: 0.2s all ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);  /* 投影效果 */
+}
+.menu .nav-item.nav-item-submit:hover {
+  background: #2a2a2a;               /* hover 时稍微变亮 */
+  transform: scale(1.05);            /* 微微放大 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* 更深的投影 */
+}
+.nav-item-submit .nav-icon {
+  width: 26px;
+  height: 26px;
+  stroke-width: 2.5;
+}
+
 </style>
