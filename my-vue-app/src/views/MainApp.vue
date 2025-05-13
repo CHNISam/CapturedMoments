@@ -13,19 +13,18 @@
 
       <!-- 顶部导航 -->
       <nav>
-        <div class="logo">
+        <a href="/" class="logo">
           {{ currentUser === '246490729' ? '把回忆拼好给你' : 'Captured Moments' }}
-        </div>
-
+        </a>
+        <a href="/" class="nav-item nav-item-moments">
+          <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+            <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
+          </svg>
+          <span class="nav-label">
+            主页
+          </span>
+        </a>
         <div class="menu">
-          <a href="#moments" @click.prevent="scrollTo('moments')" class="nav-item nav-item-moments">
-            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
-            </svg>
-            <span class="nav-label">
-              主页
-            </span>
-          </a>
           <!-- ① 在 data() 里新增 navDropdownVisible -->
           <div class="nav-avatar" @mouseenter="navDropdownVisible = true" @mouseleave="navDropdownVisible = false">
             <img :src="getAvatar(currentUser)" alt="Avatar" class="avatar-img" />
@@ -1445,13 +1444,15 @@ body.dark nav {
 
 .logo {
   font-weight: 700;
-  font-size: 20px
+  font-size: 20px;
+  margin-right: 24px;
 }
 
 .menu {
   display: flex;
   gap: 18px;
-  align-items: center
+  align-items: center;
+  margin-left: auto;
 }
 
 .menu a {
@@ -3295,4 +3296,12 @@ body.dark legend {
   height: 26px;
   stroke-width: 2.5;
 }
+.nav-item-moments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;        /* 控制图标和文字的垂直间距 */
+  padding: 6px 8px;/* 跟其他 .nav-item 保持一致 */
+}
+
 </style>
