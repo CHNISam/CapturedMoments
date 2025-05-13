@@ -16,16 +16,15 @@
         <div class="logo">把回忆拼好给你</div>
         <div class="menu">
           <a href="#moments" @click.prevent="scrollTo('moments')" class="nav-item nav-item-moments">
-            <svg viewBox="0 0 24 24" class="nav-icon" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L2 12h3v8h6v-6h2v6h6v-8h3z" />
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
             </svg>
+
 
 
 
             <span class="nav-label">
               主页
-              <span class="red" :class="{ hidden: !hasUnread }"></span>
             </span>
           </a>
           <!-- ① 在 data() 里新增 navDropdownVisible -->
@@ -61,12 +60,12 @@
           </div>
           <!-- 相册 -->
           <a href="#album" @click.prevent="scrollTo('album')" class="nav-item nav-item-album">
-            <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
-              <polyline points="21 15 16 10 5 21" />
+              <path d="M21 15l-5-5L5 21" />
             </svg>
+
             <span class="nav-label">相册</span>
           </a>
           <!-- 投稿 -->
@@ -2832,11 +2831,6 @@ body.dark .menu .nav-item:hover {
   gap: 1.5px;
 }
 
-.nav-icon {
-  width: 22px;
-  height: 22px;
-}
-
 .nav-label {
   font-size: 12px;
   color: var(--text-light);
@@ -2846,10 +2840,6 @@ body.dark .nav-label {
   color: var(--text-dark);
 }
 
-.nav-item-submit .nav-icon {
-  width: 24px;
-  height: 24px;
-}
 
 /* 让 textarea 成为相对定位的参照物 */
 .np-input-wrapper {
@@ -3268,30 +3258,39 @@ body.dark legend {
 }
 
 .nav-icon {
+  margin: 0; 
   width: 20px;
   height: 20px;
-  margin-right: 8px;
   stroke: currentColor;
   fill: none;
 }
+
 .menu .nav-item.nav-item-submit {
-  background: #333;                   /* 深灰背景 */
-  color: #fff;                        /* 白色文字 */
-  border-radius: var(--radius);      /* 圆角 */
+  background: #333;
+  /* 深灰背景 */
+  color: #fff;
+  /* 白色文字 */
+  border-radius: var(--radius);
+  /* 圆角 */
   padding: 6px 14px;
   font-weight: 600;
   transition: 0.2s all ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);  /* 投影效果 */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  /* 投影效果 */
 }
+
 .menu .nav-item.nav-item-submit:hover {
-  background: #2a2a2a;               /* hover 时稍微变亮 */
-  transform: scale(1.05);            /* 微微放大 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* 更深的投影 */
+  background: #2a2a2a;
+  /* hover 时稍微变亮 */
+  transform: scale(1.05);
+  /* 微微放大 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  /* 更深的投影 */
 }
+
 .nav-item-submit .nav-icon {
   width: 26px;
   height: 26px;
   stroke-width: 2.5;
 }
-
 </style>
