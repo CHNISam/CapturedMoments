@@ -13,16 +13,15 @@
 
       <!-- 顶部导航 -->
       <nav>
-        <div class="logo">把回忆拼好给你</div>
+        <div class="logo">
+          {{ currentUser === '246490729' ? '把回忆拼好给你' : 'Captured Moments' }}
+        </div>
+
         <div class="menu">
           <a href="#moments" @click.prevent="scrollTo('moments')" class="nav-item nav-item-moments">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
               <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
             </svg>
-
-
-
-
             <span class="nav-label">
               主页
             </span>
@@ -2764,8 +2763,8 @@ body.dark .zoom-control {
 
 .nav-dropdown {
   /* 让下拉菜单至少宽到能容纳其内容 */
-  min-width: max-content;
-  /* 其余保持不变 */
+  min-width: 200px;
+  width: max-content;
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
@@ -2798,8 +2797,11 @@ body.dark .zoom-control {
 }
 
 body.dark .nav-dropdown {
-  background: var(--card-dark);
+  background: rgba(40, 40, 40, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.35);
 }
+
 
 body.dark .dropdown-item:hover {
   background: rgba(255, 255, 255, 0.15);
@@ -3258,7 +3260,7 @@ body.dark legend {
 }
 
 .nav-icon {
-  margin: 0; 
+  margin: 0;
   width: 20px;
   height: 20px;
   stroke: currentColor;
