@@ -2822,23 +2822,6 @@ body.dark .zoom-control {
   object-fit: cover;
 }
 
-.nav-dropdown {
-  /* 让下拉菜单至少宽到能容纳其内容 */
-  min-width: 200px;
-  width: max-content;
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  background: var(--card-light);
-  backdrop-filter: blur(12px);
-  border: var(--glass-border);
-  border-radius: var(--radius);
-  display: flex;
-  flex-direction: column;
-  padding: 6px 0;
-  z-index: 200;
-}
-
 .dropdown-item {
   /* 自动根据自己内容撑宽，不要限制成 100% */
   width: auto;
@@ -3489,18 +3472,20 @@ body.dark legend {
   margin-left: 0;
 }
 
-/* Avatar 下拉菜单 */
 .nav-dropdown {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 8px);  /* 增加距离 */
   right: 0;
-  min-width: 160px;
+  transform: translateX(0);  /* 修正左飘偏移 */
+  min-width: 200px;
   background: #2a2a2a;
   border: 1px solid #303030;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.8);
-  border-radius: 4px;
-  padding: 4px 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  padding: 8px 0;
+  z-index: 200;
 }
+
 .dropdown-item {
   display: block;
   width: 100%;
