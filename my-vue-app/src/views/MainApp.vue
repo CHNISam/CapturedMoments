@@ -11,76 +11,122 @@
         <div class="bg-mask"></div>
       </div>
 
-      <!-- 顶部导航 -->
-      <nav>
-        <span class="logo" @click="refreshPage">
-          {{ currentUser === '246490729' ? '把回忆拼好给你' : 'Captured Moments' }}
-        </span>
-        <span class="nav-item nav-item-moments" @click="refreshPage">
-          <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-            <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
-          </svg>
-          <span class="nav-label">
-            主页
-          </span>
-        </span>
-        <div class="menu">
-          <!-- ① 在 data() 里新增 navDropdownVisible -->
-          <div class="nav-avatar" @mouseenter="navDropdownVisible = true" @mouseleave="navDropdownVisible = false">
-            <img :src="getAvatar(currentUser)" alt="Avatar" class="avatar-img" />
-            <transition name="dropdown-fade">
-              <div v-show="navDropdownVisible" class="nav-dropdown">
-                <!-- 设置 -->
-                <button class="dropdown-item" @click="showSettingsModal = true">
-                  <!-- 齿轮图标 -->
-                  <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path
-                      d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09c.71 0 1.34-.41 1.51-1a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06c.48.48 1.14.67 1.82.33a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09c0 .71.41 1.34 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82c.17.59.8 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.71 0-1.34.41-1.51 1z" />
-                  </svg>
-                  <span>设置</span>
-                </button>
+<!-- 顶栏 Header -->
+<header class="app-header">
+  <!-- ═══ 左区：汉堡 + Logo + 首页 ═══ -->
+  <div class="header-left">
+    <button class="icon-btn hamburger" @click="toggleSidebar" aria-label="切换侧栏">
+      <!-- ≡ 汉堡 -->
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
 
-                <div class="dropdown-divider"></div>
+    <span class="logo" @click="refreshPage">
+      {{ currentUser === '246490729' ? '把回忆拼好给你' : 'Captured Moments' }}
+    </span>
 
-                <!-- 退出（关机图标） -->
-                <button class="dropdown-item" @click="logout">
-                  <!-- Power-off 图标 -->
-                  <svg class="dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M18.364 5.636a9 9 0 1 1-12.728 0"></path>
-                    <line x1="12" y1="2" x2="12" y2="12"></line>
-                  </svg>
-                  <span>退出</span>
-                </button>
-              </div>
-            </transition>
+    <button class="icon-btn home-btn" @click="refreshPage" aria-label="主页">
+      <!-- 🏠 主页（项目里原有的房子图标） -->
+      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10"/>
+      </svg>
+    </button>
+  </div>
 
-          </div>
-          <!-- 相册 -->
-          <a href="#album" @click.prevent="scrollTo('album')" class="nav-item nav-item-album">
-            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-              <circle cx="8.5" cy="8.5" r="1.5" />
-              <path d="M21 15l-5-5L5 21" />
-            </svg>
+  <!-- ═══ 中区：搜索框 ═══ -->
+  <form class="header-center search-form" @submit.prevent="onSearch">
+    <input v-model="searchQuery" class="search-input" placeholder="Search…" />
+    <button type="submit" class="icon-btn" aria-label="搜索">
+      <!-- 🔍 放大镜 -->
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+    </button>
+  </form>
 
-            <span class="nav-label">相册</span>
-          </a>
-          <!-- 投稿 -->
-          <a href="#moments" @click.prevent="scrollTo('moments')" class="nav-item nav-item-submit">
-            <svg xmlns="http://www.w3.org/2000/svg" class="nav-icon" fill="none" viewBox="0 0 24 24"
-              stroke="currentColor" stroke-width="2">
-              <line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round" />
-              <line x1="5" y1="12" x2="19" y2="12" stroke-linecap="round" />
-            </svg>
+  <!-- ═══ 右区：投稿 / 通知 / 头像 ═══ -->
+  <div class="header-right">
+    <button class="icon-btn" @click="onPost" aria-label="投稿">
+      <!-- ➕ 加号（用于投稿） -->
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M12 4v16M20 12H4"/>
+      </svg>
+    </button>
 
-            <span class="nav-label">投稿</span>
-          </a>
+    <button class="icon-btn" @click="gotoNotifications" aria-label="通知">
+      <!-- 🔔 铃铛 -->
+      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11
+                a6 6 0 0 0-5-5.917V5a2 2 0 1 0-4 0v.083
+                A6 6 0 0 0 4 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5"/>
+        <path d="M12 21a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2z"/>
+      </svg>
+    </button>
 
-
-
+    <!-- 头像 & 下拉，同你项目原逻辑 -->
+    <div class="avatar-wrapper"
+         @mouseenter="navDropdownVisible = true"
+         @mouseleave="navDropdownVisible = false">
+      <img :src="getAvatar(currentUser)" class="avatar-img" alt="avatar"/>
+      <transition name="dropdown-fade">
+        <div v-show="navDropdownVisible" class="nav-dropdown">
+          <button class="dropdown-item" @click="showSettingsModal = true">设置</button>
+          <button class="dropdown-item" @click="logout">退出</button>
         </div>
-      </nav>
+      </transition>
+    </div>
+  </div>
+</header>
+
+<!-- 侧栏 Sidebar -->
+<aside class="app-sidebar" :class="{collapsed: !sidebarOpen}">
+  <button :class="['sidebar-item', {active: activeTab==='home'}]" @click="goRoute('home')">
+    <!-- 🏠 -->
+    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+      <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10"/>
+    </svg>
+    <span>首页</span>
+  </button>
+
+  <button :class="['sidebar-item', {active: activeTab==='album'}]" @click="goRoute('album')">
+    <!-- 🖼 相册 icon -->
+    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+      <circle cx="9" cy="9" r="2"/>
+      <path d="M21 15l-5-5L5 21"/>
+    </svg>
+    <span>相册</span>
+  </button>
+
+  <button :class="['sidebar-item', {active: activeTab==='moments'}]" @click="goRoute('moments')">
+    <!-- 📝 动态 icon -->
+    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+      <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
+      <path d="M7 8h10M7 12h8M7 16h6"/>
+    </svg>
+    <span>动态</span>
+  </button>
+
+  <button :class="['sidebar-item', {active: activeTab==='post'}]" @click="onPost">
+    <!-- ➕ 投稿（同加号） -->
+    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+      <path d="M12 4v16M20 12H4"/>
+    </svg>
+    <span>投稿</span>
+  </button>
+</aside>
+
+<!-- 主内容区保持不动 -->
+<main :class="['app-main', { 'sidebar-collapsed': !sidebarOpen }]">
+  <!-- 现有 router-view / 内容 -->
+  <router-view/>
+</main>
+
 
       <!-- ======================== 投稿区 ======================== -->
       <section id="moments">
@@ -480,6 +526,9 @@ export default {
 
       /* 导航栏 */
       navDropdownVisible: false,
+      sidebarOpen: true,
+      searchQuery: '',
+      activeTab: 'home',          // 用于高亮侧栏
 
       /* 投稿 */
       newPostText: '',
@@ -722,9 +771,25 @@ export default {
       return `${date} ${time}`;
     },
 
-    refreshPage() {
-      // 以相同的路径重载页面，浏览器会默认回到顶部
-      window.location.href = window.location.pathname + window.location.search;
+     refreshPage() {
+      location.href = location.pathname + location.search;   // 刷新并回顶
+    },
+    toggleSidebar() {
+      this.sidebarOpen = !this.sidebarOpen;
+    },
+    onSearch() {
+      // TODO: 这里可换成实际搜索逻辑
+      console.log('搜索：', this.searchQuery);
+    },
+    onPost() {
+      this.$router.push('/post');      // 如有投稿页
+    },
+    gotoNotifications() {
+      this.$router.push('/notifications');
+    },
+    goRoute(route) {
+      this.activeTab = route;
+      this.$router.push(`/${route === 'home' ? '' : route}`);
     },
     // —— 关闭贴图面板 —— //
     handleClickToCloseSticker(e) {
@@ -3301,4 +3366,51 @@ body.dark legend {
   padding: 6px 8px;
   /* 跟其他 .nav-item 保持一致 */
 }
+/* 顶栏 */
+.app-header{
+  display:flex;align-items:center;justify-content:space-between;
+  height:56px;padding:0 24px;background:#fff;
+  border-bottom:1px solid var(--border-color,#e5e5e5);z-index:100;position:sticky;top:0;
+}
+.header-left,.header-right{display:flex;align-items:center;}
+.logo{font-size:18px;font-weight:600;margin:0 12px;cursor:pointer;}
+.icon-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+  background:none;border:none;cursor:pointer;border-radius:4px;
+}
+.icon-btn:hover{background:rgba(0,0,0,.06);}
+.icon-btn svg{width:24px;height:24px;pointer-events:none;}
+
+.search-form{display:flex;flex:1;max-width:400px;}
+.search-input{flex:1;padding:6px 10px;border:1px solid var(--border-color,#e5e5e5);
+  border-right:none;border-radius:2px 0 0 2px;outline:none;}
+.search-form .icon-btn{border:1px solid var(--border-color,#e5e5e5);
+  border-left:none;border-radius:0 2px 2px 0;}
+
+.avatar-wrapper{position:relative;margin-left:12px;}
+.avatar-img{width:32px;height:32px;border-radius:50%;}
+.nav-dropdown{position:absolute;top:calc(100% + 4px);right:0;min-width:160px;
+  background:#fff;border:1px solid var(--border-color,#e5e5e5);
+  box-shadow:0 4px 12px rgba(0,0,0,.12);border-radius:4px;padding:4px 0;}
+.dropdown-item{display:block;width:100%;padding:8px 16px;text-align:left;
+  background:none;border:none;font-size:14px;cursor:pointer;}
+.dropdown-item:hover{background:rgba(0,0,0,.06);}
+
+/* 侧栏 */
+.app-sidebar{
+  position:fixed;left:0;top:56px;bottom:0;width:72px;
+  background:#fff;border-right:1px solid var(--border-color,#e5e5e5);
+  display:flex;flex-direction:column;transition:transform .2s;
+}
+.app-sidebar.collapsed{transform:translateX(-100%);}
+.sidebar-item{flex-direction:column;display:flex;align-items:center;justify-content:center;
+  padding:16px 0;cursor:pointer;border:none;background:none;}
+.sidebar-item svg{width:24px;height:24px;}
+.sidebar-item span{margin-top:4px;font-size:12px;}
+.sidebar-item.active,
+.sidebar-item:hover{background:rgba(0,0,0,.06);}
+
+/* 主区域边距补偿 */
+.app-main{margin-left:72px;padding:16px;}
+.app-main.sidebar-collapsed{margin-left:0;}
+
 </style>
