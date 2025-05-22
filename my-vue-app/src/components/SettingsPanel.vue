@@ -658,7 +658,11 @@ export default {
 
 .mobile-nav {
   padding: 24px 16px;
+  /* 限高并滚动，防止内容溢出 */
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
 }
+
 
 .mobile-nav .nav-list {
   display: flex;
@@ -753,8 +757,14 @@ export default {
   background: #1e1e1e;
   border-right: 1px solid #303030;
   border-radius: 8px 0 0 8px;
-  overflow: hidden;
+  /* 限高并滚动一级目录 */
+  position: sticky;
+  top: 40px;
+  bottom: 40px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
+
 
 .nav-list {
   list-style: none;

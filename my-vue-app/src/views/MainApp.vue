@@ -3450,6 +3450,7 @@ body.dark legend {
   display: flex;
   flex-direction: column;
   transition: transform .2s;
+  z-index: 999;
 }
 .app-sidebar.collapsed {
   transform: translateX(-100%);
