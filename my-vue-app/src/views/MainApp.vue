@@ -101,7 +101,8 @@
                   </svg>
                   设置
                 </button>
-
+                <!-- 分隔线 -->
+                <div class="dropdown-divider"></div>
                 <!-- 退出 -->
                 <button class="dropdown-item" @click="logout">
                   <!-- 退出／关机 SVG -->
@@ -3556,21 +3557,33 @@ body.dark legend {
 .dropdown-item:hover {
   background: #383838;
 }
+
 /* 下拉菜单里的 按钮 + 图标 对齐 & 同色 */
 .nav-dropdown .dropdown-item {
   display: flex;
   align-items: center;
-  gap: 8px;              /* 图标和文字之间留点空隙 */
-  color: var(--text-dark);/* 深色主题下的文字色（#e0e0e0）*/
+  gap: 8px;
+  /* 图标和文字之间留点空隙 */
+  color: var(--text-dark);
+  /* 深色主题下的文字色（#e0e0e0）*/
 }
 
 /* 强制所有下拉图标都用 currentColor */
 .nav-dropdown .dropdown-item svg {
-  flex-shrink: 0;         /* 不要被压扁 */
+  flex-shrink: 0;
+  /* 不要被压扁 */
   width: 18px;
   height: 18px;
   stroke: currentColor !important;
-  fill: currentColor   !important;
+  fill: currentColor !important;
+}
+.dropdown-divider {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 8px 0;
+}
+
+.dark .dropdown-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 </style>
