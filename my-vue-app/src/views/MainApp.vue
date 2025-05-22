@@ -68,6 +68,23 @@
       </svg>
     </button>
 
+    <!-- AI 助手按钮 -->
+  <button class="icon-btn" @click="showAI = true" aria-label="AI 助手">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+         stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <!-- A 字主干 -->
+      <path d="M8 16l4-8 4 8" />
+      <!-- A 阴影 -->
+      <path d="M9 16.5l4-8 4 8" stroke-opacity="0.2" stroke-linecap="butt"/>
+      <!-- A 中横 -->
+      <line x1="10" y1="12" x2="14" y2="12"/>
+      <!-- I 主干 -->
+      <line x1="17" y1="8" x2="17" y2="16"/>
+      <!-- I 阴影 -->
+      <line x1="17.6" y1="8.6" x2="17.6" y2="16.6" stroke-opacity="0.2" stroke-linecap="butt"/>
+    </svg>
+  </button>
+
     <!-- 头像 & 下拉，同你项目原逻辑 -->
     <div class="avatar-wrapper"
          @mouseenter="navDropdownVisible = true"
@@ -3366,6 +3383,7 @@ body.dark legend {
 .header-right {
   display: flex;
   align-items: center;
+  gap: 12px; 
 }
 .logo {
   font-size: 18px;
