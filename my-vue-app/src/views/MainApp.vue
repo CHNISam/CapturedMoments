@@ -13,17 +13,17 @@
 
       <!-- 顶部导航 -->
       <nav>
-        <a href="/" class="logo">
+        <span class="logo" @click="refreshPage">
           {{ currentUser === '246490729' ? '把回忆拼好给你' : 'Captured Moments' }}
-        </a>
-        <a href="/" class="nav-item nav-item-moments">
+        </span>
+        <span class="nav-item nav-item-moments" @click="refreshPage">
           <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
             <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
           </svg>
           <span class="nav-label">
             主页
           </span>
-        </a>
+        </span>
         <div class="menu">
           <!-- ① 在 data() 里新增 navDropdownVisible -->
           <div class="nav-avatar" @mouseenter="navDropdownVisible = true" @mouseleave="navDropdownVisible = false">
@@ -722,6 +722,10 @@ export default {
       return `${date} ${time}`;
     },
 
+    refreshPage() {
+      // 以相同的路径重载页面，浏览器会默认回到顶部
+      window.location.href = window.location.pathname + window.location.search;
+    },
     // —— 关闭贴图面板 —— //
     handleClickToCloseSticker(e) {
       if (this.stickerPickerVisible &&
@@ -2526,15 +2530,6 @@ body.dark .skeleton-body {
   transform: translateY(-10px);
 }
 
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
 
 .lightbox {
   position: relative;
@@ -3296,12 +3291,14 @@ body.dark legend {
   height: 26px;
   stroke-width: 2.5;
 }
+
 .nav-item-moments {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;        /* 控制图标和文字的垂直间距 */
-  padding: 6px 8px;/* 跟其他 .nav-item 保持一致 */
+  gap: 2px;
+  /* 控制图标和文字的垂直间距 */
+  padding: 6px 8px;
+  /* 跟其他 .nav-item 保持一致 */
 }
-
 </style>
