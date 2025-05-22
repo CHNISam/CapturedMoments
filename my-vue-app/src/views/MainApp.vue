@@ -11,138 +11,157 @@
         <div class="bg-mask"></div>
       </div>
 
-<!-- 顶栏 Header -->
-<header class="app-header">
-  <!-- ═══ 左区：汉堡 + Logo + 首页 ═══ -->
-  <div class="header-left">
-    <button class="icon-btn hamburger" @click="toggleSidebar" aria-label="切换侧栏">
-      <!-- ≡ 汉堡 -->
-      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 6h16M4 12h16M4 18h16"/>
-      </svg>
-    </button>
+      <!-- 顶栏 Header -->
+      <header class="app-header">
+        <!-- ═══ 左区：汉堡 + Logo + 首页 ═══ -->
+        <div class="header-left">
+          <button class="icon-btn hamburger" @click="toggleSidebar" aria-label="切换侧栏">
+            <!-- ≡ 汉堡 -->
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
 
-    <span class="logo" @click="refreshPage">
-      {{ currentUser === '246490729' ? '把回忆拼好给你' : 'Captured Moments' }}
-    </span>
+          <span class="logo" @click="refreshPage">
+            {{ currentUser === '246490729' ? '把回忆拼好给你' : 'Captured Moments' }}
+          </span>
 
-    <button class="icon-btn home-btn" @click="refreshPage" aria-label="主页">
-      <!-- 🏠 主页（项目里原有的房子图标） -->
-      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- ═══ 中区：搜索框 ═══ -->
-  <form class="header-center search-form" @submit.prevent="onSearch">
-    <input v-model="searchQuery" class="search-input" placeholder="Search…" />
-    <button type="submit" class="icon-btn" aria-label="搜索">
-      <!-- 🔍 放大镜 -->
-      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"/>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-    </button>
-  </form>
-
-  <!-- ═══ 右区：投稿 / 通知 / 头像 ═══ -->
-  <div class="header-right">
-    <button class="icon-btn" @click="onPost" aria-label="投稿">
-      <!-- ➕ 加号（用于投稿） -->
-      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M12 4v16M20 12H4"/>
-      </svg>
-    </button>
-
-    <button class="icon-btn" @click="gotoNotifications" aria-label="通知">
-      <!-- 🔔 铃铛 -->
-      <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round">
-        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11
-                a6 6 0 0 0-5-5.917V5a2 2 0 1 0-4 0v.083
-                A6 6 0 0 0 4 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5"/>
-        <path d="M12 21a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2z"/>
-      </svg>
-    </button>
-
-    <!-- AI 助手按钮 -->
-  <button class="icon-btn" @click="showAI = true" aria-label="AI 助手">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-         stroke="#FFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <!-- A 字主干 -->
-      <path d="M8 16l4-8 4 8" />
-      <!-- A 阴影 -->
-      <path d="M9 16.5l4-8 4 8" stroke-opacity="0.2" stroke-linecap="butt"/>
-      <!-- A 中横 -->
-      <line x1="10" y1="12" x2="14" y2="12"/>
-      <!-- I 主干 -->
-      <line x1="17" y1="8" x2="17" y2="16"/>
-      <!-- I 阴影 -->
-      <line x1="17.6" y1="8.6" x2="17.6" y2="16.6" stroke-opacity="0.2" stroke-linecap="butt"/>
-    </svg>
-  </button>
-
-    <!-- 头像 & 下拉，同你项目原逻辑 -->
-    <div class="avatar-wrapper"
-         @mouseenter="navDropdownVisible = true"
-         @mouseleave="navDropdownVisible = false">
-      <img :src="getAvatar(currentUser)" class="avatar-img" alt="avatar"/>
-      <transition name="dropdown-fade">
-        <div v-show="navDropdownVisible" class="nav-dropdown">
-          <button class="dropdown-item" @click="showSettingsModal = true">设置</button>
-          <button class="dropdown-item" @click="logout">退出</button>
+          <button class="icon-btn home-btn" @click="refreshPage" aria-label="主页">
+            <!-- 🏠 主页（项目里原有的房子图标） -->
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
+            </svg>
+          </button>
         </div>
-      </transition>
-    </div>
-  </div>
-</header>
 
-<!-- 侧栏 Sidebar -->
-<aside class="app-sidebar" :class="{collapsed: !sidebarOpen}">
-  <button :class="['sidebar-item', {active: activeTab==='home'}]" @click="goRoute('home')">
-    <!-- 🏠 -->
-    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-      <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10"/>
-    </svg>
-    <span>首页</span>
-  </button>
+        <!-- ═══ 中区：搜索框 ═══ -->
+        <form class="header-center search-form" @submit.prevent="onSearch">
+          <input v-model="searchQuery" class="search-input" placeholder="Search…" />
+          <button type="submit" class="icon-btn" aria-label="搜索">
+            <!-- 🔍 放大镜 -->
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+          </button>
+        </form>
 
-  <button :class="['sidebar-item', {active: activeTab==='album'}]" @click="goRoute('album')">
-    <!-- 🖼 相册 icon -->
-    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-      <circle cx="9" cy="9" r="2"/>
-      <path d="M21 15l-5-5L5 21"/>
-    </svg>
-    <span>相册</span>
-  </button>
+        <!-- ═══ 右区：投稿 / 通知 / 头像 ═══ -->
+        <div class="header-right">
+          <button class="icon-btn" @click="onPost" aria-label="投稿">
+            <!-- ➕ 加号（用于投稿） -->
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M12 4v16M20 12H4" />
+            </svg>
+          </button>
 
-  <button :class="['sidebar-item', {active: activeTab==='moments'}]" @click="goRoute('moments')">
-    <!-- 📝 动态 icon -->
-    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-      <rect x="4" y="4" width="16" height="16" rx="2" ry="2"/>
-      <path d="M7 8h10M7 12h8M7 16h6"/>
-    </svg>
-    <span>动态</span>
-  </button>
+          <button class="icon-btn" @click="gotoNotifications" aria-label="通知">
+            <!-- 🔔 铃铛 -->
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11
+                a6 6 0 0 0-5-5.917V5a2 2 0 1 0-4 0v.083
+                A6 6 0 0 0 4 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5" />
+              <path d="M12 21a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2z" />
+            </svg>
+          </button>
 
-  <button :class="['sidebar-item', {active: activeTab==='post'}]" @click="onPost">
-    <!-- ➕ 投稿（同加号） -->
-    <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-      <path d="M12 4v16M20 12H4"/>
-    </svg>
-    <span>投稿</span>
-  </button>
-</aside>
+          <!-- AI 助手按钮 -->
+          <button class="icon-btn" @click="showAI = true" aria-label="AI 助手">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <!-- A 字主干 -->
+              <path d="M8 16l4-8 4 8" />
+              <!-- A 阴影 -->
+              <path d="M9 16.5l4-8 4 8" stroke-opacity="0.2" stroke-linecap="butt" />
+              <!-- A 中横 -->
+              <line x1="10" y1="12" x2="14" y2="12" />
+              <!-- I 主干 -->
+              <line x1="17" y1="8" x2="17" y2="16" />
+              <!-- I 阴影 -->
+              <line x1="17.6" y1="8.6" x2="17.6" y2="16.6" stroke-opacity="0.2" stroke-linecap="butt" />
+            </svg>
+          </button>
 
-<!-- 主内容区保持不动 -->
-<main :class="['app-main', { 'sidebar-collapsed': !sidebarOpen }]">
-  <!-- 现有 router-view / 内容 -->
-  <router-view/>
-</main>
+          <!-- 头像 & 下拉，同你项目原逻辑 -->
+          <div class="avatar-wrapper" @mouseenter="navDropdownVisible = true" @mouseleave="navDropdownVisible = false">
+            <img :src="getAvatar(currentUser)" class="avatar-img" alt="avatar" />
+            <transition name="dropdown-fade">
+              <div v-show="navDropdownVisible" class="nav-dropdown">
+                <!-- 设置 -->
+                <button class="dropdown-item" @click="showSettingsModal = true">
+                  <!-- 经典齿轮 SVG -->
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" height="24" viewBox="0 0 24 24" width="24"
+                    aria-hidden="true">
+                    <path clip-rule="evenodd"
+                      d="m14.302 6.457-.668-.278L12.87 3.5h-1.737l-.766 2.68-.668.277c-.482.2-.934.463-1.344.778l-.575.44-2.706-.677-.868 1.504 1.938 2.003-.093.716c-.033.255-.05.514-.05.779 0 .264.017.524.05.779l.093.716-1.938 2.003.868 1.504 2.706-.677.575.44c.41.315.862.577 1.344.778l.668.278.766 2.679h1.737l.765-2.68.668-.277c.483-.2.934-.463 1.345-.778l.574-.44 2.706.677.869-1.504-1.938-2.003.092-.716c.033-.255.05-.514.05-.779 0-.264-.017-.524-.05-.779l-.092-.716 1.938-2.003-.869-1.504-2.706.677-.574-.44c-.41-.315-.862-.577-1.345-.778Zm4.436.214Zm-3.86-1.6-.67-2.346c-.123-.429-.516-.725-.962-.725h-2.492c-.446 0-.838.296-.961.725l-.67 2.347c-.605.251-1.17.58-1.682.972l-2.37-.593c-.433-.108-.885.084-1.108.47L2.717 8.08c-.223.386-.163.874.147 1.195l1.698 1.755c-.04.318-.062.642-.062.971 0 .329.021.653.062.97l-1.698 1.756c-.31.32-.37.809-.147 1.195l1.246 2.158c.223.386.675.578 1.109.47l2.369-.593c.512.393 1.077.72 1.681.972l.67 2.347c.124.429.516.725.962.725h2.492c.446 0 .839-.296.961-.725l.67-2.347c.605-.251 1.17-.58 1.682-.972l2.37.593c.433.108.885-.084 1.109-.47l1.245-2.158c.223-.386.163-.874-.147-1.195l-1.698-1.755c.04-.318.062-.642.062-.971 0-.329-.021-.653-.062-.97l1.698-1.756c.31-.32.37-.809.147-1.195L20.038 5.92c-.224-.386-.676-.578-1.11-.47l-2.369.593c-.512-.393-1.077-.72-1.681-.972ZM15.5 12c0 1.933-1.567 3.5-3.5 3.5S8.5 13.933 8.5 12s1.567-3.5 3.5-3.5 3.5 1.567 3.5 3.5ZM14 12c0 1.105-.895 2-2 2s-2-.895-2-2 .895-2 2-2 2 .895 2 2Z"
+                      fill-rule="evenodd" />
+                  </svg>
+                  设置
+                </button>
+
+                <!-- 退出 -->
+                <button class="dropdown-item" @click="logout">
+                  <!-- 退出／关机 SVG -->
+                  <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24"
+                    viewBox="0 0 24 24" width="24" aria-hidden="true">
+                    <path
+                      d="M20 3v18H8v-1h11V4H8V3h12zm-8.9 12.1.7.7 4.4-4.4L11.8 7l-.7.7 3.1 3.1H3v1h11.3l-3.2 3.3z" />
+                  </svg>
+                  退出
+                </button>
+              </div>
+
+            </transition>
+          </div>
+        </div>
+      </header>
+
+      <!-- 侧栏 Sidebar -->
+      <aside class="app-sidebar" :class="{ collapsed: !sidebarOpen }">
+        <button :class="['sidebar-item', { active: activeTab === 'home' }]" @click="goRoute('home')">
+          <!-- 🏠 -->
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+            <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
+          </svg>
+          <span>首页</span>
+        </button>
+
+        <button :class="['sidebar-item', { active: activeTab === 'album' }]" @click="goRoute('album')">
+          <!-- 🖼 相册 icon -->
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="9" cy="9" r="2" />
+            <path d="M21 15l-5-5L5 21" />
+          </svg>
+          <span>相册</span>
+        </button>
+
+        <button :class="['sidebar-item', { active: activeTab === 'moments' }]" @click="goRoute('moments')">
+          <!-- 📝 动态 icon -->
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+            <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+            <path d="M7 8h10M7 12h8M7 16h6" />
+          </svg>
+          <span>动态</span>
+        </button>
+
+        <button :class="['sidebar-item', { active: activeTab === 'post' }]" @click="onPost">
+          <!-- ➕ 投稿（同加号） -->
+          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+            <path d="M12 4v16M20 12H4" />
+          </svg>
+          <span>投稿</span>
+        </button>
+      </aside>
+
+      <!-- 主内容区保持不动 -->
+      <main :class="['app-main', { 'sidebar-collapsed': !sidebarOpen }]">
+        <!-- 现有 router-view / 内容 -->
+        <router-view />
+      </main>
 
 
       <!-- ======================== 投稿区 ======================== -->
@@ -788,7 +807,7 @@ export default {
       return `${date} ${time}`;
     },
 
-     refreshPage() {
+    refreshPage() {
       location.href = location.pathname + location.search;   // 刷新并回顶
     },
     toggleSidebar() {
@@ -3366,6 +3385,7 @@ body.dark legend {
   padding: 6px 8px;
   /* 跟其他 .nav-item 保持一致 */
 }
+
 /* 顶栏 */
 .app-header {
   display: flex;
@@ -3379,12 +3399,14 @@ body.dark legend {
   position: sticky;
   top: 0;
 }
+
 .header-left,
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px; 
+  gap: 12px;
 }
+
 .logo {
   font-size: 18px;
   font-weight: 600;
@@ -3392,6 +3414,7 @@ body.dark legend {
   cursor: pointer;
   color: #e0e0e0;
 }
+
 .icon-btn {
   width: 40px;
   height: 40px;
@@ -3403,9 +3426,11 @@ body.dark legend {
   cursor: pointer;
   border-radius: 4px;
 }
+
 .icon-btn:hover {
   background: #383838;
 }
+
 .icon-btn svg {
   width: 24px;
   height: 24px;
@@ -3419,6 +3444,7 @@ body.dark legend {
   flex: 1;
   max-width: 400px;
 }
+
 .search-input {
   flex: 1;
   padding: 6px 10px;
@@ -3429,9 +3455,11 @@ body.dark legend {
   border-radius: 2px 0 0 2px;
   outline: none;
 }
+
 .search-input::placeholder {
   color: #aaa;
 }
+
 .search-form .icon-btn {
   border: 1px solid #303030;
   border-left: none;
@@ -3452,9 +3480,11 @@ body.dark legend {
   transition: transform .2s;
   z-index: 999;
 }
+
 .app-sidebar.collapsed {
   transform: translateX(-100%);
 }
+
 .sidebar-item {
   display: flex;
   flex-direction: column;
@@ -3465,16 +3495,19 @@ body.dark legend {
   background: none;
   border: none;
 }
+
 .sidebar-item svg {
   width: 24px;
   height: 24px;
   stroke: #e0e0e0;
 }
+
 .sidebar-item span {
   margin-top: 4px;
   font-size: 12px;
   color: #e0e0e0;
 }
+
 .sidebar-item.active,
 .sidebar-item:hover {
   background: #383838;
@@ -3487,15 +3520,18 @@ body.dark legend {
   background: #121212;
   color: #e0e0e0;
 }
+
 .app-main.sidebar-collapsed {
   margin-left: 0;
 }
 
 .nav-dropdown {
   position: absolute;
-  top: calc(100% + 8px);  /* 增加距离 */
+  top: calc(100% + 8px);
+  /* 增加距离 */
   right: 0;
-  transform: translateX(0);  /* 修正左飘偏移 */
+  transform: translateX(0);
+  /* 修正左飘偏移 */
   min-width: 200px;
   background: #2a2a2a;
   border: 1px solid #303030;
@@ -3516,8 +3552,25 @@ body.dark legend {
   cursor: pointer;
   color: #e0e0e0;
 }
+
 .dropdown-item:hover {
   background: #383838;
+}
+/* 下拉菜单里的 按钮 + 图标 对齐 & 同色 */
+.nav-dropdown .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;              /* 图标和文字之间留点空隙 */
+  color: var(--text-dark);/* 深色主题下的文字色（#e0e0e0）*/
+}
+
+/* 强制所有下拉图标都用 currentColor */
+.nav-dropdown .dropdown-item svg {
+  flex-shrink: 0;         /* 不要被压扁 */
+  width: 18px;
+  height: 18px;
+  stroke: currentColor !important;
+  fill: currentColor   !important;
 }
 
 </style>
