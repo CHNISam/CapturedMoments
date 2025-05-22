@@ -4,64 +4,90 @@
     <!-- ====================== 📱 Mobile ====================== -->
     <template v-if="isMobile">
       <!-- ▶ 主导航列表 -->
-      <div v-if="activeSection === null" class="mobile-nav">
-        <ul class="nav-list">
-          <li @click="toggleSection('visual')">
-            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z" />
-              <path d="M6 15l9-9 3 3-9 9" />
-              <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5" />
-            </svg>
-            <span>视觉／界面</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+<div v-if="activeSection === null" class="mobile-nav">
+  <ul class="nav-list mobile">
+    <!-- 视觉／界面 -->
+    <li
+      class="nav-item"
+      :class="{ active: activeSection === 'visual' }"
+      @click="toggleSection('visual')"
+    >
+      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z"/>
+        <path d="M6 15l9-9 3 3-9 9"/>
+        <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5"/>
+      </svg>
+      <span class="nav-label">视觉／界面</span>
+      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </li>
 
-          </li>
-          <li @click="toggleSection('profile')">
-            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" />
-              <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2" />
-            </svg>
-            <span>个人资料</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+    <!-- 个人资料 -->
+    <li
+      class="nav-item"
+      :class="{ active: activeSection === 'profile' }"
+      @click="toggleSection('profile')"
+    >
+      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
+        <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2"/>
+      </svg>
+      <span class="nav-label">个人资料</span>
+      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </li>
 
-          </li>
-          <li @click="toggleSection('assistant')">
-            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" />
-            </svg>
-            <span>交互助手</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+    <!-- 交互助手 -->
+    <li
+      class="nav-item"
+      :class="{ active: activeSection === 'assistant' }"
+      @click="toggleSection('assistant')"
+    >
+      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z"/>
+      </svg>
+      <span class="nav-label">交互助手</span>
+      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </li>
 
-          </li>
-          <li @click="toggleSection('publish')">
-            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5-5m0 0l5 5m-5-5v12" />
-            </svg>
-            <span>发布与上传</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+    <!-- 发布与上传 -->
+    <li
+      class="nav-item"
+      :class="{ active: activeSection === 'publish' }"
+      @click="toggleSection('publish')"
+    >
+      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5-5m0 0l5 5m-5-5v12"/>
+      </svg>
+      <span class="nav-label">发布与上传</span>
+      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </li>
 
-          </li>
-          <li v-if="isAdmin" @click="toggleSection('admin')">
-            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5" />
-            </svg>
-            <span>管理员</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+    <!-- 管理员 -->
+    <li
+      v-if="isAdmin"
+      class="nav-item"
+      :class="{ active: activeSection === 'admin' }"
+      @click="toggleSection('admin')"
+    >
+      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5"/>
+      </svg>
+      <span class="nav-label">管理员</span>
+      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+        <path d="M9 18l6-6-6-6"/>
+      </svg>
+    </li>
+  </ul>
+</div>
 
-          </li>
-        </ul>
-      </div>
 
       <!-- ▶ 详情页 -->
       <div v-else class="mobile-detail">
@@ -166,61 +192,53 @@
       <!-- ▶ 左侧导航 -->
       <aside class="settings-nav">
         <ul class="nav-list">
-          <li :class="{ active: activeSection === 'visual' }" @click="toggleSection('visual')">
+          <!-- 视觉／界面 -->
+          <li class="nav-item" :class="{ active: activeSection === 'visual' }" @click="toggleSection('visual')">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
               <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z" />
               <path d="M6 15l9-9 3 3-9 9" />
               <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5" />
             </svg>
-            <span>视觉／界面</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <span class="nav-label">视觉／界面</span>
           </li>
 
-          <li :class="{ active: activeSection === 'profile' }" @click="toggleSection('profile')">
+          <!-- 个人资料 -->
+          <li class="nav-item" :class="{ active: activeSection === 'profile' }" @click="toggleSection('profile')">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" />
               <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2" />
             </svg>
-            <span>个人资料</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <span class="nav-label">个人资料</span>
           </li>
 
-          <li :class="{ active: activeSection === 'assistant' }" @click="toggleSection('assistant')">
+          <!-- 交互助手 -->
+          <li class="nav-item" :class="{ active: activeSection === 'assistant' }" @click="toggleSection('assistant')">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" />
             </svg>
-            <span>交互助手</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <span class="nav-label">交互助手</span>
           </li>
 
-          <li :class="{ active: activeSection === 'publish' }" @click="toggleSection('publish')">
+          <!-- 发布与上传 -->
+          <li class="nav-item" :class="{ active: activeSection === 'publish' }" @click="toggleSection('publish')">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5-5m0 0l5 5m-5-5v12" />
             </svg>
-            <span>发布与上传</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <span class="nav-label">发布与上传</span>
           </li>
 
-          <li v-if="isAdmin" :class="{ active: activeSection === 'admin' }" @click="toggleSection('admin')">
+          <!-- 管理员（仅当 isAdmin） -->
+          <li v-if="isAdmin" class="nav-item" :class="{ active: activeSection === 'admin' }"
+            @click="toggleSection('admin')">
             <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
               <path d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5" />
             </svg>
-            <span>管理员</span>
-            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
+            <span class="nav-label">管理员</span>
           </li>
         </ul>
       </aside>
+
 
       <!-- ▶ 右侧内容 -->
       <section class="settings-content">
@@ -728,4 +746,102 @@ export default {
 .mobile-nav .nav-list li .nav-icon {
   stroke: currentColor;
 }
+
+/* —— YouTube-style Settings Nav —— */
+.settings-nav {
+  width: 240px;
+  background: #1e1e1e;
+  border-right: 1px solid #303030;
+  border-radius: 8px 0 0 8px;
+  overflow: hidden;
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  height: 48px;            
+  padding: 0 24px;         
+  color: #bbb;             
+  cursor: pointer;
+  border-bottom: 1px solid #303030;
+  transition: background 0.2s, color 0.2s;
+}
+
+.nav-item:last-child {
+  border-bottom: none;     
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 16px;
+  stroke: currentColor;
+}
+
+.nav-label {
+  font-size: 14px;
+  line-height: 1;
+  flex: 1;
+}
+
+/* Hover & Active */
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+.nav-item.active {
+  background: rgba(78, 161, 243, 0.2);
+  color: #fff;
+}
+/* —— YouTube-style Mobile Nav —— */
+.mobile-nav .nav-list.mobile {
+  background: #1e1e1e;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.mobile-nav .nav-item {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 20px;
+  color: #bbb;
+  cursor: pointer;
+  border-bottom: 1px solid #303030;
+  transition: background 0.2s, color 0.2s;
+}
+.mobile-nav .nav-item:last-child {
+  border-bottom: none;
+}
+.mobile-nav .nav-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  stroke: currentColor;
+}
+.mobile-nav .nav-label {
+  font-size: 16px;
+  line-height: 1;
+  flex: 1;
+}
+.mobile-nav .chevron-icon {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+}
+.mobile-nav .nav-item:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+.mobile-nav .nav-item.active {
+  background: rgba(78,161,243,0.2);
+  color: #fff;
+}
+
 </style>
