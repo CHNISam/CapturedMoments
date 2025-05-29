@@ -1,524 +1,528 @@
 <!-- src/views/MainApp.vue -->
 <template>
-  <div>
-    <!-- 登录 Modal -->
-    <LoginModal :show="!currentUser" @login-success="handleLogin" />
+  <HeaderBar>
+    <div>
+      <!-- 登录 Modal -->
+      <LoginModal :show="!currentUser" @login-success="login" />
 
-    <!-- ================== 已登录主界面 ================== -->
-    <div v-if="currentUser">
-      <!-- 用户自定义背景 -->
-      <div id="bgLayer" :style="bgStyle">
-        <div class="bg-mask"></div>
-      </div>
-
-      <!-- 顶栏 Header -->
-      <header class="app-header">
-        <!-- ═══ 左区：汉堡 + Logo + 首页 ═══ -->
-        <div class="header-left">
-          <button class="icon-btn hamburger" @click="toggleSidebar" aria-label="切换侧栏">
-            <!-- ≡ 汉堡 -->
-            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-
-          <span class="logo" @click="refreshPage">
-            {{ currentUser === '246490729' ? '把回忆拼好给你' : 'Captured Moments' }}
-          </span>
-
-          <button class="icon-btn home-btn" @click="refreshPage" aria-label="主页">
-            <!-- 🏠 主页（项目里原有的房子图标） -->
-            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-              <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
-            </svg>
-          </button>
+      <!-- ================== 已登录主界面 ================== -->
+      <div v-if="currentUser">
+        <!-- 用户自定义背景 -->
+        <div id="bgLayer" :style="bgStyle">
+          <div class="bg-mask"></div>
         </div>
 
-        <!-- ═══ 中区：搜索框 ═══ -->
-        <form class="header-center search-form" @submit.prevent="onSearch">
-          <input v-model="searchQuery" class="search-input" placeholder="Search…" />
-          <button type="submit" class="icon-btn" aria-label="搜索">
-            <!-- 🔍 放大镜 -->
-            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </button>
-        </form>
+        <!-- 顶栏 Header -->
+        <header class="app-header">
+          <!-- ═══ 左区：汉堡 + Logo + 首页 ═══ -->
+          <div class="header-left">
+            <button class="icon-btn hamburger" @click="toggleSidebar" aria-label="切换侧栏">
+              <!-- ≡ 汉堡 -->
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
 
-        <!-- ═══ 右区：投稿 / 通知 / 头像 ═══ -->
-        <div class="header-right">
-          <button class="icon-btn" @click="onPost" aria-label="投稿">
-            <!-- ➕ 加号（用于投稿） -->
+            <span class="logo" @click="refreshPage">
+              {{ currentUser === '246490729' ? '把回忆拼好给你' : 'Captured Moments' }}
+            </span>
+
+            <button class="icon-btn home-btn" @click="refreshPage" aria-label="主页">
+              <!-- 🏠 主页（项目里原有的房子图标） -->
+              <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- ═══ 中区：搜索框 ═══ -->
+          <form class="header-center search-form" @submit.prevent="onSearch">
+            <input v-model="searchQuery" class="search-input" placeholder="Search…" />
+            <button type="submit" class="icon-btn" aria-label="搜索">
+              <!-- 🔍 放大镜 -->
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+            </button>
+          </form>
+
+          <!-- ═══ 右区：投稿 / 通知 / 头像 ═══ -->
+          <div class="header-right">
+            <button class="icon-btn" @click="onPost" aria-label="投稿">
+              <!-- ➕ 加号（用于投稿） -->
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+                <path d="M12 4v16M20 12H4" />
+              </svg>
+            </button>
+
+            <button class="icon-btn" @click="gotoNotifications" aria-label="通知">
+              <!-- 🔔 铃铛 -->
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11
+                  a6 6 0 0 0-5-5.917V5a2 2 0 1 0-4 0v.083
+                  A6 6 0 0 0 4 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5" />
+                <path d="M12 21a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2z" />
+              </svg>
+            </button>
+
+            <!-- AI 助手按钮 -->
+            <button class="icon-btn" @click="showAI = true" aria-label="AI 助手">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <!-- A 字主干 -->
+                <path d="M8 16l4-8 4 8" />
+                <!-- A 阴影 -->
+                <path d="M9 16.5l4-8 4 8" stroke-opacity="0.2" stroke-linecap="butt" />
+                <!-- A 中横 -->
+                <line x1="10" y1="12" x2="14" y2="12" />
+                <!-- I 主干 -->
+                <line x1="17" y1="8" x2="17" y2="16" />
+                <!-- I 阴影 -->
+                <line x1="17.6" y1="8.6" x2="17.6" y2="16.6" stroke-opacity="0.2" stroke-linecap="butt" />
+              </svg>
+            </button>
+
+            <!-- 头像 & 下拉，同你项目原逻辑 -->
+            <div class="avatar-wrapper" @mouseenter="navDropdownVisible = true"
+              @mouseleave="navDropdownVisible = false">
+              <img :src="getAvatar(currentUser)" class="avatar-img" alt="avatar" />
+              <transition name="dropdown-fade">
+                <div v-show="navDropdownVisible" class="nav-dropdown">
+                  <!-- 设置 -->
+                  <button class="dropdown-item" @click="showSettingsModal = true">
+                    <!-- 经典齿轮 SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" height="24" viewBox="0 0 24 24"
+                      width="24" aria-hidden="true">
+                      <path clip-rule="evenodd"
+                        d="m14.302 6.457-.668-.278L12.87 3.5h-1.737l-.766 2.68-.668.277c-.482.2-.934.463-1.344.778l-.575.44-2.706-.677-.868 1.504 1.938 2.003-.093.716c-.033.255-.05.514-.05.779 0 .264.017.524.05.779l.093.716-1.938 2.003.868 1.504 2.706-.677.575.44c.41.315.862.577 1.344.778l.668.278.766 2.679h1.737l.765-2.68.668-.277c.483-.2.934-.463 1.345-.778l.574-.44 2.706.677.869-1.504-1.938-2.003.092-.716c.033-.255.05-.514.05-.779 0-.264-.017-.524-.05-.779l-.092-.716 1.938-2.003-.869-1.504-2.706.677-.574-.44c-.41-.315-.862-.577-1.345-.778Zm4.436.214Zm-3.86-1.6-.67-2.346c-.123-.429-.516-.725-.962-.725h-2.492c-.446 0-.838.296-.961.725l-.67 2.347c-.605.251-1.17.58-1.682.972l-2.37-.593c-.433-.108-.885.084-1.108.47L2.717 8.08c-.223.386-.163.874.147 1.195l1.698 1.755c-.04.318-.062.642-.062.971 0 .329.021.653.062.97l-1.698 1.756c-.31.32-.37.809-.147 1.195l1.246 2.158c.223.386.675.578 1.109.47l2.369-.593c.512.393 1.077.72 1.681.972l.67 2.347c.124.429.516.725.962.725h2.492c.446 0 .839-.296.961-.725l.67-2.347c.605-.251 1.17-.58 1.682-.972l2.37.593c.433.108.885-.084 1.109-.47l1.245-2.158c.223-.386.163-.874-.147-1.195l-1.698-1.755c.04-.318.062-.642.062-.971 0-.329-.021-.653-.062-.97l1.698-1.756c.31-.32.37-.809.147-1.195L20.038 5.92c-.224-.386-.676-.578-1.11-.47l-2.369.593c-.512-.393-1.077-.72-1.681-.972ZM15.5 12c0 1.933-1.567 3.5-3.5 3.5S8.5 13.933 8.5 12s1.567-3.5 3.5-3.5 3.5 1.567 3.5 3.5ZM14 12c0 1.105-.895 2-2 2s-2-.895-2-2 .895-2 2-2 2 .895 2 2Z"
+                        fill-rule="evenodd" />
+                    </svg>
+                    设置
+                  </button>
+                  <!-- 分隔线 -->
+                  <div class="dropdown-divider"></div>
+                  <!-- 退出 -->
+                  <button class="dropdown-item" @click="logout">
+                    <!-- 退出／关机 SVG -->
+                    <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24"
+                      viewBox="0 0 24 24" width="24" aria-hidden="true">
+                      <path
+                        d="M20 3v18H8v-1h11V4H8V3h12zm-8.9 12.1.7.7 4.4-4.4L11.8 7l-.7.7 3.1 3.1H3v1h11.3l-3.2 3.3z" />
+                    </svg>
+                    退出
+                  </button>
+                </div>
+
+              </transition>
+            </div>
+          </div>
+        </header>
+
+        <!-- 侧栏 Sidebar -->
+        <aside class="app-sidebar" :class="{ collapsed: !sidebarOpen }">
+          <button :class="['sidebar-item', { active: activeTab === 'home' }]" @click="goRoute('home')">
+            <!-- 🏠 -->
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
+            </svg>
+            <span>首页</span>
+          </button>
+
+          <button :class="['sidebar-item', { active: activeTab === 'album' }]" @click="goRoute('album')">
+            <!-- 🖼 相册 icon -->
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="M21 15l-5-5L5 21" />
+            </svg>
+            <span>相册</span>
+          </button>
+
+          <button :class="['sidebar-item', { active: activeTab === 'moments' }]" @click="goRoute('moments')">
+            <!-- 📝 动态 icon -->
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+              <path d="M7 8h10M7 12h8M7 16h6" />
+            </svg>
+            <span>动态</span>
+          </button>
+
+          <button :class="['sidebar-item', { active: activeTab === 'post' }]" @click="onPost">
+            <!-- ➕ 投稿（同加号） -->
             <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
               <path d="M12 4v16M20 12H4" />
             </svg>
+            <span>投稿</span>
           </button>
+        </aside>
 
-          <button class="icon-btn" @click="gotoNotifications" aria-label="通知">
-            <!-- 🔔 铃铛 -->
-            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11
-                a6 6 0 0 0-5-5.917V5a2 2 0 1 0-4 0v.083
-                A6 6 0 0 0 4 11v3.159c0 .538-.214 1.055-.595 1.436L2 17h5" />
-              <path d="M12 21a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2z" />
-            </svg>
-          </button>
+        <!-- 主内容区保持不动 -->
+        <main :class="['app-main', { 'sidebar-collapsed': !sidebarOpen }]">
+          <!-- 现有 router-view / 内容 -->
+          <router-view />
+        </main>
 
-          <!-- AI 助手按钮 -->
-          <button class="icon-btn" @click="showAI = true" aria-label="AI 助手">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFF" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <!-- A 字主干 -->
-              <path d="M8 16l4-8 4 8" />
-              <!-- A 阴影 -->
-              <path d="M9 16.5l4-8 4 8" stroke-opacity="0.2" stroke-linecap="butt" />
-              <!-- A 中横 -->
-              <line x1="10" y1="12" x2="14" y2="12" />
-              <!-- I 主干 -->
-              <line x1="17" y1="8" x2="17" y2="16" />
-              <!-- I 阴影 -->
-              <line x1="17.6" y1="8.6" x2="17.6" y2="16.6" stroke-opacity="0.2" stroke-linecap="butt" />
-            </svg>
-          </button>
 
-          <!-- 头像 & 下拉，同你项目原逻辑 -->
-          <div class="avatar-wrapper" @mouseenter="navDropdownVisible = true" @mouseleave="navDropdownVisible = false">
-            <img :src="getAvatar(currentUser)" class="avatar-img" alt="avatar" />
-            <transition name="dropdown-fade">
-              <div v-show="navDropdownVisible" class="nav-dropdown">
-                <!-- 设置 -->
-                <button class="dropdown-item" @click="showSettingsModal = true">
-                  <!-- 经典齿轮 SVG -->
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" height="24" viewBox="0 0 24 24" width="24"
-                    aria-hidden="true">
-                    <path clip-rule="evenodd"
-                      d="m14.302 6.457-.668-.278L12.87 3.5h-1.737l-.766 2.68-.668.277c-.482.2-.934.463-1.344.778l-.575.44-2.706-.677-.868 1.504 1.938 2.003-.093.716c-.033.255-.05.514-.05.779 0 .264.017.524.05.779l.093.716-1.938 2.003.868 1.504 2.706-.677.575.44c.41.315.862.577 1.344.778l.668.278.766 2.679h1.737l.765-2.68.668-.277c.483-.2.934-.463 1.345-.778l.574-.44 2.706.677.869-1.504-1.938-2.003.092-.716c.033-.255.05-.514.05-.779 0-.264-.017-.524-.05-.779l-.092-.716 1.938-2.003-.869-1.504-2.706.677-.574-.44c-.41-.315-.862-.577-1.345-.778Zm4.436.214Zm-3.86-1.6-.67-2.346c-.123-.429-.516-.725-.962-.725h-2.492c-.446 0-.838.296-.961.725l-.67 2.347c-.605.251-1.17.58-1.682.972l-2.37-.593c-.433-.108-.885.084-1.108.47L2.717 8.08c-.223.386-.163.874.147 1.195l1.698 1.755c-.04.318-.062.642-.062.971 0 .329.021.653.062.97l-1.698 1.756c-.31.32-.37.809-.147 1.195l1.246 2.158c.223.386.675.578 1.109.47l2.369-.593c.512.393 1.077.72 1.681.972l.67 2.347c.124.429.516.725.962.725h2.492c.446 0 .839-.296.961-.725l.67-2.347c.605-.251 1.17-.58 1.682-.972l2.37.593c.433.108.885-.084 1.109-.47l1.245-2.158c.223-.386.163-.874-.147-1.195l-1.698-1.755c.04-.318.062-.642.062-.971 0-.329-.021-.653-.062-.97l1.698-1.756c.31-.32.37-.809.147-1.195L20.038 5.92c-.224-.386-.676-.578-1.11-.47l-2.369.593c-.512-.393-1.077-.72-1.681-.972ZM15.5 12c0 1.933-1.567 3.5-3.5 3.5S8.5 13.933 8.5 12s1.567-3.5 3.5-3.5 3.5 1.567 3.5 3.5ZM14 12c0 1.105-.895 2-2 2s-2-.895-2-2 .895-2 2-2 2 .895 2 2Z"
-                      fill-rule="evenodd" />
-                  </svg>
-                  设置
-                </button>
-                <!-- 分隔线 -->
-                <div class="dropdown-divider"></div>
-                <!-- 退出 -->
-                <button class="dropdown-item" @click="logout">
-                  <!-- 退出／关机 SVG -->
-                  <svg xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24"
-                    viewBox="0 0 24 24" width="24" aria-hidden="true">
-                    <path
-                      d="M20 3v18H8v-1h11V4H8V3h12zm-8.9 12.1.7.7 4.4-4.4L11.8 7l-.7.7 3.1 3.1H3v1h11.3l-3.2 3.3z" />
-                  </svg>
-                  退出
-                </button>
+        <!-- ======================== 投稿区 ======================== -->
+        <section id="moments">
+          <h2 class="big">投稿</h2>
+          <div class="np-top">
+            <div class="np-input-wrapper">
+              <!-- ❶ 直接用一个 contenteditable 的渲染层当输入区 -->
+              <div class="ta-preview" contenteditable="true" ref="postInput" @input="handleInput" @keyup="saveCaret"
+                @mouseup="saveCaret" @keydown.enter.prevent="handlePostEnter" @keydown="handleKeydown"
+                data-placeholder="说点什么..."></div>
+
+              <!-- ② 新的“悬浮”上传按钮，圆形、尺寸更小 -->
+              <label class="upload-fab">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                </svg>
+                <input type="file" accept="image/*" multiple @change="handlePostImages" />
+              </label>
+              <!-- === ① 触发按钮 === -->
+              <button type="button" class="emoji-fab" @click="toggleStickerPicker">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <!-- 外圆 -->
+                  <circle cx="12" cy="12" r="10" />
+                  <!-- 眼睛 -->
+                  <circle cx="9" cy="10" r="1" />
+                  <circle cx="15" cy="10" r="1" />
+                  <!-- 微笑曲线 -->
+                  <path d="M8 16c1.333-1 2.667-1 4 0" />
+                </svg>
+              </button>
+              <!-- === ② 贴图网格 === -->
+              <div v-if="stickerPickerVisible" class="sticker-picker">
+                <img v-for="s in displayedStickers" :key="s.id" :src="s.url" :alt="s.id"
+                  @click.stop="selectSticker(s)" />
+
+                <!-- 分页按钮 -->
+                <button class="page-btn left" @click="prevStickerPage" :disabled="stickerPage === 0">‹</button>
+                <button class="page-btn right" @click="nextStickerPage"
+                  :disabled="(stickerPage + 1) * stickersPerPage >= stickers.length">›</button>
               </div>
-
-            </transition>
-          </div>
-        </div>
-      </header>
-
-      <!-- 侧栏 Sidebar -->
-      <aside class="app-sidebar" :class="{ collapsed: !sidebarOpen }">
-        <button :class="['sidebar-item', { active: activeTab === 'home' }]" @click="goRoute('home')">
-          <!-- 🏠 -->
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-            <path d="M3 12l9-9 9 9M4 10v10h6v-6h4v6h6V10" />
-          </svg>
-          <span>首页</span>
-        </button>
-
-        <button :class="['sidebar-item', { active: activeTab === 'album' }]" @click="goRoute('album')">
-          <!-- 🖼 相册 icon -->
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <circle cx="9" cy="9" r="2" />
-            <path d="M21 15l-5-5L5 21" />
-          </svg>
-          <span>相册</span>
-        </button>
-
-        <button :class="['sidebar-item', { active: activeTab === 'moments' }]" @click="goRoute('moments')">
-          <!-- 📝 动态 icon -->
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-            <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
-            <path d="M7 8h10M7 12h8M7 16h6" />
-          </svg>
-          <span>动态</span>
-        </button>
-
-        <button :class="['sidebar-item', { active: activeTab === 'post' }]" @click="onPost">
-          <!-- ➕ 投稿（同加号） -->
-          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-            <path d="M12 4v16M20 12H4" />
-          </svg>
-          <span>投稿</span>
-        </button>
-      </aside>
-
-      <!-- 主内容区保持不动 -->
-      <main :class="['app-main', { 'sidebar-collapsed': !sidebarOpen }]">
-        <!-- 现有 router-view / 内容 -->
-        <router-view />
-      </main>
+              <!-- ③ 新的“发布”按钮，圆形、尺寸更小 -->
 
 
-      <!-- ======================== 投稿区 ======================== -->
-      <section id="moments">
-        <h2 class="big">投稿</h2>
-        <div class="np-top">
-          <div class="np-input-wrapper">
-            <!-- ❶ 直接用一个 contenteditable 的渲染层当输入区 -->
-            <div class="ta-preview" contenteditable="true" ref="postInput" @input="handleInput" @keyup="saveCaret"
-              @mouseup="saveCaret" @keydown.enter.prevent="handlePostEnter" @keydown="handleKeydown"
-              data-placeholder="说点什么..."></div>
+              <button class="btn-publish" @click="publishPost" :disabled="isPublishing">
+                <!-- 编辑模式下显示“保存”，否则显示“发布” -->
+                <template v-if="!isPublishing">
+                  {{ editingPost ? '保存' : '发布' }}
+                </template>
+                <template v-else>
+                  <span class="spinner"></span> {{ editingPost ? '保存中…' : '发布中…' }}
+                </template>
+              </button>
 
-            <!-- ② 新的“悬浮”上传按钮，圆形、尺寸更小 -->
-            <label class="upload-fab">
-              <svg viewBox="0 0 24 24">
-                <path d="M12 5v14m7-7H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              </svg>
-              <input type="file" accept="image/*" multiple @change="handlePostImages" />
-            </label>
-            <!-- === ① 触发按钮 === -->
-            <button type="button" class="emoji-fab" @click="toggleStickerPicker">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <!-- 外圆 -->
-                <circle cx="12" cy="12" r="10" />
-                <!-- 眼睛 -->
-                <circle cx="9" cy="10" r="1" />
-                <circle cx="15" cy="10" r="1" />
-                <!-- 微笑曲线 -->
-                <path d="M8 16c1.333-1 2.667-1 4 0" />
-              </svg>
-            </button>
-            <!-- === ② 贴图网格 === -->
-            <div v-if="stickerPickerVisible" class="sticker-picker">
-              <img v-for="s in displayedStickers" :key="s.id" :src="s.url" :alt="s.id" @click.stop="selectSticker(s)" />
-
-              <!-- 分页按钮 -->
-              <button class="page-btn left" @click="prevStickerPage" :disabled="stickerPage === 0">‹</button>
-              <button class="page-btn right" @click="nextStickerPage"
-                :disabled="(stickerPage + 1) * stickersPerPage >= stickers.length">›</button>
             </div>
-            <!-- ③ 新的“发布”按钮，圆形、尺寸更小 -->
-
-
-            <button class="btn-publish" @click="publishPost" :disabled="isPublishing">
-              <!-- 编辑模式下显示“保存”，否则显示“发布” -->
-              <template v-if="!isPublishing">
-                {{ editingPost ? '保存' : '发布' }}
-              </template>
-              <template v-else>
-                <span class="spinner"></span> {{ editingPost ? '保存中…' : '发布中…' }}
-              </template>
-            </button>
-
-          </div>
-          <div class="np-toolbar">
-            <span class="char-count">{{ newPostCharCount }}/30000</span>
-          </div>
-        </div>
-
-        <!-- 图片草稿预览 -->
-        <div v-if="draftImgs.length && imageInsertMode === 'preview'" class="np-preview">
-          <div v-for="(img, i) in draftImgs" :key="i" class="thumb">
-            <img :src="img" /><span class="remove" @click="removeDraft(i)">×</span>
-          </div>
-        </div>
-
-        <!-- 动态列表 -->
-        <h2 class="big">动态</h2>
-        <!-- 1. 骨架屏，当 isListLoading=true 时显示 -->
-        <template v-if="isListLoading">
-          <div class="skeleton-list">
-            <div class="skeleton-card" v-for="n in 3" :key="n">
-              <div class="skeleton-head"></div>
-              <div class="skeleton-body"></div>
+            <div class="np-toolbar">
+              <span class="char-count">{{ newPostCharCount }}/30000</span>
             </div>
           </div>
-        </template>
 
-        <!-- 2. 列表主结构，用 transition-group 加入进场动画 -->
-        <transition-group name="post-fade" tag="div" id="moments-list">
-          <div v-for="post in visiblePosts" :key="post.id" class="post card">
-            <!-- ——— 保留你原来的 post 结构 —— ——— -->
-            <div class="head" style="display:flex;justify-content:space-between;align-items:center;">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                <div
-                  :style="{ width: '34px', height: '34px', borderRadius: '50%', background: 'url(' + getAvatar(post.uid) + ') center/cover' }">
-                </div>
-                <b>{{ getDisplayName(post.uid) }}</b>
-                <span v-html="badgeHTML(post.uid)"></span>
-                <!-- 勋章后面追加日期 -->
-                <small class="post-date">
-                  {{ new Date(post.ts).toLocaleDateString() }}
-                </small>
-                <span class="red" v-if="!isRead(post.id) && post.uid !== currentUser"></span>
+          <!-- 图片草稿预览 -->
+          <div v-if="draftImgs.length && imageInsertMode === 'preview'" class="np-preview">
+            <div v-for="(img, i) in draftImgs" :key="i" class="thumb">
+              <img :src="img" /><span class="remove" @click="removeDraft(i)">×</span>
+            </div>
+          </div>
+
+          <!-- 动态列表 -->
+          <h2 class="big">动态</h2>
+          <!-- 1. 骨架屏，当 isListLoading=true 时显示 -->
+          <template v-if="isListLoading">
+            <div class="skeleton-list">
+              <div class="skeleton-card" v-for="n in 3" :key="n">
+                <div class="skeleton-head"></div>
+                <div class="skeleton-body"></div>
               </div>
-              <div style="display:flex;align-items:center;gap:10px;">
-                <span style="font-size:12px">
-                  {{ new Date(post.ts).toLocaleTimeString() }}
-                </span>
-                <div class="more-wrapper">
-                  <span v-if="post.uid === currentUser || currentUser === '217122260'" class="more"
-                    @click="postOptionsPost = postOptionsPost === post ? null : post">⋯</span>
-                  <transition name="options-pop">
-                    <div v-if="postOptionsPost === post" class="post-options">
-                      <button class="edit-post-btn" @click="startEdit(post)">
-                        <!-- Pencil (edit) 图标 -->
-                        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
-                          stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M12 20h9"></path>
-                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
-                        </svg>
-                      </button>
-
-
-                      <button class="trash-btn" @click="deletePost(post)">
-                        <!-- 这里是你的删除图标 -->
-                        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
-                          stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M3 6h18" />
-                          <path d="M9 6v12" />
-                          <path d="M15 6v12" />
-                          <path d="M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6" />
-                        </svg>
-                      </button>
-                    </div>
-                  </transition>
-                </div>
-              </div>
-            </div>
-
-            <div class="body">
-              <p v-html="renderText(post.txt)"></p>
-            </div>
-
-            <div class="photos">
-              <div v-for="(img, i) in post.imgs.slice(0, 3)" :key="i" class="thumb" @click="openModal(post, i)">
-                <img :src="img" alt="" />
-                <!-- 只有在第三张，且还有多余图片时才显示 +N -->
-                <div v-if="i === 2 && post.imgs.length > 3" class="thumb-overlay">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="stack-icon" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2">
-                    <!-- 上层矩形 -->
-                    <rect x="3" y="4" width="18" height="6" rx="1" ry="1" />
-                    <!-- 下层矩形，略微偏移 -->
-                    <rect x="6" y="12" width="18" height="6" rx="1" ry="1" />
-                  </svg>
-                  <span class="overlay-count">+{{ post.imgs.length - 3 }}</span>
-                </div>
-              </div>
-            </div>
-
-
-
-
-            <div class="actions">
-              <!-- 观看次数图标 -->
-              <svg viewBox="0 0 24 24">
-                <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z" />
-              </svg>
-              <span>{{ post.views }}</span>
-
-              <!-- 新增：评论切换按钮 -->
-              <svg class="comment-toggle" @click="toggleComments(post)" style="cursor:pointer; margin-left:8px;"
-                viewBox="0 0 24 24">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" fill="none"
-                  stroke="currentColor" stroke-width="2" />
-              </svg>
-              <span>{{ post.cmts.length }}</span>
-            </div>
-
-            <div v-if="visibleComments[post.id]" class="comments">
-              <div v-for="(c, idx) in post.cmts" :key="idx" class="comment">
-                <div class="comment-left">
-                  <span class="comment-display">{{ getDisplayName(c.who) }}: {{ c.txt }}</span>
-                </div>
-                <div class="comment-right">
-                  <span v-if="c.who === currentUser" class="comment-edit" @click="editComment(post, idx)">✎</span>
-                  <span v-if="c.who === currentUser" class="comment-delete" @click="deleteComment(post, idx)">×</span>
-                  <span v-else class="comment-author">{{ getDisplayName(c.who) }}</span>
-                </div>
-              </div>
-              <div class="c-input">
-                <input type="text" v-model="newComment[post.id]" placeholder="评论..."
-                  @keydown.enter.prevent="handleCommentEnter($event, post)" />
-                <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
-              </div>
-            </div>
-            <!-- ———————————————— 结束 ———————————————— -->
-          </div>
-        </transition-group>
-        <div v-if="visiblePosts.length < posts.length" style="text-align:center;margin:16px 0;">
-          <div v-if="loadMode === 'manual' && visiblePosts.length < posts.length"
-            style="text-align:center;margin:16px 0;">
-            <button class="btn-ghost" @click="loadMore">加载更多</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ======================== 相册 ======================== -->
-      <section id="album">
-        <h2 class="big">相册</h2>
-        <div class="album-tabs">
-          <button :class="{ on: albumMode === 'time' }" @click="albumMode = 'time'">按时间</button>
-          <button :class="{ on: albumMode === 'region' }" @click="albumMode = 'region'">按地区</button>
-        </div>
-
-        <div id="album-grid" class="grid">
-          <template v-for="(group, key) in groupedPhotos" :key="key">
-            <h4 style="grid-column:1/-1;margin:4px 0 6px">{{ key }}</h4>
-            <div v-for="(photo, i) in group" :key="i" class="photo"
-              @click="openModal(photo.post, photo.post.imgs.indexOf(photo.url))">
-              <img :src="photo.url" />
             </div>
           </template>
-        </div>
 
-        <div v-if="allPhotos.length === 0" style="text-align:center;margin-top:30px;color:#888">暂无照片，快去上传吧~</div>
-      </section>
+          <!-- 2. 列表主结构，用 transition-group 加入进场动画 -->
+          <transition-group name="post-fade" tag="div" id="moments-list">
+            <div v-for="post in visiblePosts" :key="post.id" class="post card">
+              <!-- ——— 保留你原来的 post 结构 —— ——— -->
+              <div class="head" style="display:flex;justify-content:space-between;align-items:center;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                  <div
+                    :style="{ width: '34px', height: '34px', borderRadius: '50%', background: 'url(' + getAvatar(post.uid) + ') center/cover' }">
+                  </div>
+                  <b>{{ getDisplayName(post.uid) }}</b>
+                  <span v-html="badgeHTML(post.uid)"></span>
+                  <!-- 勋章后面追加日期 -->
+                  <small class="post-date">
+                    {{ new Date(post.ts).toLocaleDateString() }}
+                  </small>
+                  <span class="red" v-if="!isRead(post.id) && post.uid !== currentUser"></span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:12px">
+                    {{ new Date(post.ts).toLocaleTimeString() }}
+                  </span>
+                  <div class="more-wrapper">
+                    <span v-if="post.uid === currentUser || currentUser === '217122260'" class="more"
+                      @click="postOptionsPost = postOptionsPost === post ? null : post">⋯</span>
+                    <transition name="options-pop">
+                      <div v-if="postOptionsPost === post" class="post-options">
+                        <button class="edit-post-btn" @click="startEdit(post)">
+                          <!-- Pencil (edit) 图标 -->
+                          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 20h9"></path>
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path>
+                          </svg>
+                        </button>
 
-      <!-- Settings 弹窗 -->
-      <div v-if="showSettingsModal" class="modal show settings-modal">
-        <div class="box">
-          <!-- 右上角关闭 -->
-          <span class="close" @click="showSettingsModal = false">×</span>
 
-          <!-- 这里直接渲染 SettingsPanel -->
-          <SettingsPanel v-model:theme="theme" v-model:bgSrc="bgSrc" v-model:bgOpacity="bgOpacity"
-            v-model:bgBlur="bgBlur" v-model:loadMode="loadMode" v-model:imageInsertMode="imageInsertMode"
-            v-model:llmEnabled="llmEnabled" v-model:localDisplayName="localDisplayName"
-            v-model:selectedBadge="selectedBadge" :allowedBadges="allowedBadges" :allowedUids="allowedUids"
-            :currentUser="currentUser" bestBadgeUid="246490729" adminUid="217122260"
-            @open-password-modal="openPasswordModal" @open-badge-modal="openBadgeModal" @reset-password="resetPassword"
-            @add-allowed-uid="addAllowedUid" @remove-allowed-uid="removeAllowedUid"
-            @open-admin-pwd-modal="openAdminPwdModal" />
-        </div>
-      </div>
+                        <button class="trash-btn" @click="deletePost(post)">
+                          <!-- 这里是你的删除图标 -->
+                          <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 6h18" />
+                            <path d="M9 6v12" />
+                            <path d="M15 6v12" />
+                            <path d="M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6" />
+                          </svg>
+                        </button>
+                      </div>
+                    </transition>
+                  </div>
+                </div>
+              </div>
+
+              <div class="body">
+                <p v-html="renderText(post.txt)"></p>
+              </div>
+
+              <div class="photos">
+                <div v-for="(img, i) in post.imgs.slice(0, 3)" :key="i" class="thumb" @click="openModal(post, i)">
+                  <img :src="img" alt="" />
+                  <!-- 只有在第三张，且还有多余图片时才显示 +N -->
+                  <div v-if="i === 2 && post.imgs.length > 3" class="thumb-overlay">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stack-icon" viewBox="0 0 24 24" fill="none"
+                      stroke="currentColor" stroke-width="2">
+                      <!-- 上层矩形 -->
+                      <rect x="3" y="4" width="18" height="6" rx="1" ry="1" />
+                      <!-- 下层矩形，略微偏移 -->
+                      <rect x="6" y="12" width="18" height="6" rx="1" ry="1" />
+                    </svg>
+                    <span class="overlay-count">+{{ post.imgs.length - 3 }}</span>
+                  </div>
+                </div>
+              </div>
 
 
-      <!-- 勋章 Modal -->
-      <div v-if="showBadgeModal" class="modal show">
-        <div class="box">
-          <span class="close" @click="closeBadgeModal">×</span>
-          <h3>选择勋章</h3>
-          <div style="margin:10px 0;">
-            <label v-for="badge in allowedBadges" :key="badge.id"
-              style="display:flex;align-items:center;gap:6px;margin:4px 0">
-              <input type="radio" name="wear" :value="badge.id" v-model="selectedBadge" />
-              <span
-                :class="['badge', badge.id === 'best' ? 'best' : badge.id === 'catgirl' ? 'catgirl' : badge.id === 'none' ? 'badge-none' : '']">
-                {{ badge.name }}
-              </span>
-            </label>
-          </div>
-          <button class="btn-publish" style="margin-top:12px" @click="confirmBadge">确认</button>
-        </div>
-      </div>
 
-      <!-- 图片 Slider Modal -->
-      <div v-if="showModal" class="modal show slider-modal" @click.self="closeInfoSidebar">
-        <div class="box">
-          <span class="close" @click="closeModal">×</span>
-          <!-- Modal 图片菜单按钮 -->
-          <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
-          <!-- Modal 信息按钮 -->
-          <span class="info-btn" @click="toggleInfoSidebar" :aria-label="showInfoSidebar ? '收起信息' : '查看信息'">
-            <!-- 圆圈里的 i，和 iOS 类似 -->
-            <svg viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
-              <line x1="12" y1="8" x2="12" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              <line x1="12" y1="11" x2="12" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-          </span>
 
-          <!-- Modal 图片操作菜单 -->
-          <transition name="options-pop">
-            <div v-if="showImageOptions" class="modal-options">
+              <div class="actions">
+                <!-- 观看次数图标 -->
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7z m0 12a5 5 0 110-10 5 5 0 010 10z" />
+                </svg>
+                <span>{{ post.views }}</span>
+
+                <!-- 新增：评论切换按钮 -->
+                <svg class="comment-toggle" @click="toggleComments(post)" style="cursor:pointer; margin-left:8px;"
+                  viewBox="0 0 24 24">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" fill="none"
+                    stroke="currentColor" stroke-width="2" />
+                </svg>
+                <span>{{ post.cmts.length }}</span>
+              </div>
+
+              <div v-if="visibleComments[post.id]" class="comments">
+                <div v-for="(c, idx) in post.cmts" :key="idx" class="comment">
+                  <div class="comment-left">
+                    <span class="comment-display">{{ getDisplayName(c.who) }}: {{ c.txt }}</span>
+                  </div>
+                  <div class="comment-right">
+                    <span v-if="c.who === currentUser" class="comment-edit" @click="editComment(post, idx)">✎</span>
+                    <span v-if="c.who === currentUser" class="comment-delete" @click="deleteComment(post, idx)">×</span>
+                    <span v-else class="comment-author">{{ getDisplayName(c.who) }}</span>
+                  </div>
+                </div>
+                <div class="c-input">
+                  <input type="text" v-model="newComment[post.id]" placeholder="评论..."
+                    @keydown.enter.prevent="handleCommentEnter($event, post)" />
+                  <button class="btn-publish" style="font-size:13px" @click="sendComment(post)">发送</button>
+                </div>
+              </div>
+              <!-- ———————————————— 结束 ———————————————— -->
             </div>
-          </transition>
-          <div class="slider-content">
-            <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex === 0">‹</button>
-            <!-- 桌面鼠标滚轮 -->
-            <img class="slider-img" :src="modalImgs[modalIndex]"
-              :style="{ transform: 'scale(' + modalZoom + ')', transition: 'transform .15s' }" @load="handleImgLoad"
-              @wheel.prevent="onWheelZoom" />
-
-            <button class="slider-btn right" @click="nextModalImg"
-              :disabled="modalIndex === modalImgs.length - 1">›</button>
-          </div>
-          <!-- 新增：固定在右下角的删除按钮 -->
-          <button class="modal-delete-btn" @click="deleteImage()">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6" stroke="currentColor"
-                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button>
-          <!-- 缩放条 + 放大镜 -->
-          <div class="zoom-control">
-            <svg class="zoom-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none" />
-              <line x1="16" y1="16" x2="22" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-            <input type="range" :min="minZoom" :max="maxZoom" step="0.1" v-model.number="modalZoom" />
-          </div>
-          <!-- 侧边栏：照片信息 -->
-          <transition name="sidebar-slide">
-            <div v-if="showInfoSidebar" class="info-sidebar">
-              <p><b>尺寸：</b>{{ infoSize }}</p>
-              <p><b>日期：</b>{{ new Date(modalPost.ts).toLocaleString() }}</p>
+          </transition-group>
+          <div v-if="visiblePosts.length < posts.length" style="text-align:center;margin:16px 0;">
+            <div v-if="loadMode === 'manual' && visiblePosts.length < posts.length"
+              style="text-align:center;margin:16px 0;">
+              <button class="btn-ghost" @click="loadMore">加载更多</button>
             </div>
-          </transition>
+          </div>
+        </section>
 
-          <div class="modal-meta">
-            {{ modalIndex + 1 }} / {{ modalImgs.length }}
+        <!-- ======================== 相册 ======================== -->
+        <section id="album">
+          <h2 class="big">相册</h2>
+          <div class="album-tabs">
+            <button :class="{ on: albumMode === 'time' }" @click="albumMode = 'time'">按时间</button>
+            <button :class="{ on: albumMode === 'region' }" @click="albumMode = 'region'">按地区</button>
+          </div>
+
+          <div id="album-grid" class="grid">
+            <template v-for="(group, key) in groupedPhotos" :key="key">
+              <h4 style="grid-column:1/-1;margin:4px 0 6px">{{ key }}</h4>
+              <div v-for="(photo, i) in group" :key="i" class="photo"
+                @click="openModal(photo.post, photo.post.imgs.indexOf(photo.url))">
+                <img :src="photo.url" />
+              </div>
+            </template>
+          </div>
+
+          <div v-if="allPhotos.length === 0" style="text-align:center;margin-top:30px;color:#888">暂无照片，快去上传吧~</div>
+        </section>
+
+        <!-- Settings 弹窗 -->
+        <div v-if="showSettingsModal" class="modal show settings-modal">
+          <div class="box">
+            <!-- 右上角关闭 -->
+            <span class="close" @click="showSettingsModal = false">×</span>
+
+            <!-- 这里直接渲染 SettingsPanel -->
+            <SettingsPanel v-model:theme="theme" v-model:bgSrc="bgSrc" v-model:bgOpacity="bgOpacity"
+              v-model:bgBlur="bgBlur" v-model:loadMode="loadMode" v-model:imageInsertMode="imageInsertMode"
+              v-model:llmEnabled="llmEnabled" v-model:localDisplayName="localDisplayName"
+              v-model:selectedBadge="selectedBadge" :allowedBadges="allowedBadges" :allowedUids="allowedUids"
+              :currentUser="currentUser" bestBadgeUid="246490729" adminUid="217122260"
+              @open-password-modal="openPasswordModal" @open-badge-modal="openBadgeModal"
+              @reset-password="resetPassword" @add-allowed-uid="addAllowedUid" @remove-allowed-uid="removeAllowedUid"
+              @open-admin-pwd-modal="openAdminPwdModal" />
           </div>
         </div>
-      </div>
-      <div v-if="showPasswordModal" class="modal show">
-        <div class="box" style="text-align:center;max-width:340px;">
-          <span class="close" @click="closePasswordModal">×</span>
-          <h3>更改密码</h3>
-          <div style="margin-top:16px;">
-            <input type="password" v-model="oldPassword" placeholder="旧密码"
-              style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;" />
-            <input type="password" v-model="newPassword" placeholder="新密码"
-              style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;" />
-            <input type="password" v-model="confirmPassword" placeholder="确认新密码"
-              style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;" />
-            <button class="btn-publish" style="margin-top:12px" @click="changePassword">确认更改</button>
+
+
+        <!-- 勋章 Modal -->
+        <div v-if="showBadgeModal" class="modal show">
+          <div class="box">
+            <span class="close" @click="closeBadgeModal">×</span>
+            <h3>选择勋章</h3>
+            <div style="margin:10px 0;">
+              <label v-for="badge in allowedBadges" :key="badge.id"
+                style="display:flex;align-items:center;gap:6px;margin:4px 0">
+                <input type="radio" name="wear" :value="badge.id" v-model="selectedBadge" />
+                <span
+                  :class="['badge', badge.id === 'best' ? 'best' : badge.id === 'catgirl' ? 'catgirl' : badge.id === 'none' ? 'badge-none' : '']">
+                  {{ badge.name }}
+                </span>
+              </label>
+            </div>
+            <button class="btn-publish" style="margin-top:12px" @click="confirmBadge">确认</button>
           </div>
         </div>
-      </div>
-      <!-- 管理员为指定 UID 设置/重置密码 -->
-      <div v-if="adminPwdModalVisible" class="modal show">
-        <div class="box" style="text-align:center;max-width:340px;">
-          <span class="close" @click="closeAdminPwdModal">×</span>
-          <h3>设置用户密码（管理员）</h3>
-          <div style="margin-top:16px;">
-            <!-- 显示当前要改密的目标 UID -->
-            <input type="text" v-model="adminTargetUid" disabled placeholder="目标 UID"
-              style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;" />
-            <!-- 管理员输入的新密码 -->
-            <input type="password" v-model="adminNewPassword" placeholder="新密码（最少4位）"
-              style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;" />
-            <button class="btn-publish" style="margin-top:12px" @click="confirmAdminSetPassword">
-              确认设置
+
+        <!-- 图片 Slider Modal -->
+        <div v-if="showModal" class="modal show slider-modal" @click.self="closeInfoSidebar">
+          <div class="box">
+            <span class="close" @click="closeModal">×</span>
+            <!-- Modal 图片菜单按钮 -->
+            <span class="more modal-more" @click="showImageOptions = !showImageOptions">⋯</span>
+            <!-- Modal 信息按钮 -->
+            <span class="info-btn" @click="toggleInfoSidebar" :aria-label="showInfoSidebar ? '收起信息' : '查看信息'">
+              <!-- 圆圈里的 i，和 iOS 类似 -->
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2" />
+                <line x1="12" y1="8" x2="12" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <line x1="12" y1="11" x2="12" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </span>
+
+            <!-- Modal 图片操作菜单 -->
+            <transition name="options-pop">
+              <div v-if="showImageOptions" class="modal-options">
+              </div>
+            </transition>
+            <div class="slider-content">
+              <button class="slider-btn left" @click="prevModalImg" :disabled="modalIndex === 0">‹</button>
+              <!-- 桌面鼠标滚轮 -->
+              <img class="slider-img" :src="modalImgs[modalIndex]"
+                :style="{ transform: 'scale(' + modalZoom + ')', transition: 'transform .15s' }" @load="handleImgLoad"
+                @wheel.prevent="onWheelZoom" />
+
+              <button class="slider-btn right" @click="nextModalImg"
+                :disabled="modalIndex === modalImgs.length - 1">›</button>
+            </div>
+            <!-- 新增：固定在右下角的删除按钮 -->
+            <button class="modal-delete-btn" @click="deleteImage()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h18M9 6v12m6-12v12M4 6v14a2 2 0 002 2h12a2 2 0 002-2V6" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
             </button>
+            <!-- 缩放条 + 放大镜 -->
+            <div class="zoom-control">
+              <svg class="zoom-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none" />
+                <line x1="16" y1="16" x2="22" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+              <input type="range" :min="minZoom" :max="maxZoom" step="0.1" v-model.number="modalZoom" />
+            </div>
+            <!-- 侧边栏：照片信息 -->
+            <transition name="sidebar-slide">
+              <div v-if="showInfoSidebar" class="info-sidebar">
+                <p><b>尺寸：</b>{{ infoSize }}</p>
+                <p><b>日期：</b>{{ new Date(modalPost.ts).toLocaleString() }}</p>
+              </div>
+            </transition>
+
+            <div class="modal-meta">
+              {{ modalIndex + 1 }} / {{ modalImgs.length }}
+            </div>
           </div>
         </div>
-      </div>
+        <div v-if="showPasswordModal" class="modal show">
+          <div class="box" style="text-align:center;max-width:340px;">
+            <span class="close" @click="closePasswordModal">×</span>
+            <h3>更改密码</h3>
+            <div style="margin-top:16px;">
+              <input type="password" v-model="oldPassword" placeholder="旧密码"
+                style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;" />
+              <input type="password" v-model="newPassword" placeholder="新密码"
+                style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;" />
+              <input type="password" v-model="confirmPassword" placeholder="确认新密码"
+                style="width:100%;padding:8px;border-radius:8px;border:1px solid #ccc;margin-bottom:8px;" />
+              <button class="btn-publish" style="margin-top:12px" @click="changePassword">确认更改</button>
+            </div>
+          </div>
+        </div>
+        <!-- 管理员为指定 UID 设置/重置密码 -->
+        <div v-if="adminPwdModalVisible" class="modal show">
+          <div class="box" style="text-align:center;max-width:340px;">
+            <span class="close" @click="closeAdminPwdModal">×</span>
+            <h3>设置用户密码（管理员）</h3>
+            <div style="margin-top:16px;">
+              <!-- 显示当前要改密的目标 UID -->
+              <input type="text" v-model="adminTargetUid" disabled placeholder="目标 UID"
+                style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;" />
+              <!-- 管理员输入的新密码 -->
+              <input type="password" v-model="adminNewPassword" placeholder="新密码（最少4位）"
+                style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; margin-bottom:8px;" />
+              <button class="btn-publish" style="margin-top:12px" @click="confirmAdminSetPassword">
+                确认设置
+              </button>
+            </div>
+          </div>
+        </div>
 
-      <footer style="text-align:center;padding:24px 0;font-size:13px;color:#777">
-        © 2025 把回忆拼好给你
-      </footer>
+        <footer style="text-align:center;padding:24px 0;font-size:13px;color:#777">
+          © 2025 把回忆拼好给你
+        </footer>
+      </div>
     </div>
-  </div>
+  </HeaderBar>
 </template>
 
 <script>
@@ -539,18 +543,39 @@ const BEST_BADGE_UID = '246490729';                 // 佩戴「最好的大佬�
 import LoginModal from '@/components/LoginModal.vue';
 import SettingsPanel from '@/components/SettingsPanel.vue';
 import { getAllowedUids, setAllowedUids } from '@/config/auth';
+import { useUserStore } from '@/stores/user';
 import { getOrCreateSalt, pbkdf2Hash } from '@/utils/crypto';
+import { storeToRefs } from 'pinia';
+
 
 export default {
   name: 'App',
   components: { LoginModal, SettingsPanel },
+  setup() {
+    // ① 获取全局唯一的 store 实例
+    const userStore = useUserStore()
+
+    // ② 解构出需要响应的 state（推荐用 storeToRefs）
+    const { currentUser } = storeToRefs(userStore)
+    const getAvatar = userStore.getAvatar
+
+    // ③ 获取 actions（不需要解包）
+    const { login, logout, setAvatar } = userStore
+
+    // ④ 返回给模板使用
+    return {
+      currentUser,
+      getAvatar,
+      login,
+      logout,
+      setAvatar
+    }
+  },
   /* ---------- data ---------- */
   data() {
     const storedUser = this.safeParse('currentUser', null);
 
     return {
-      // 当前登录 UID；null 代表未登录
-      currentUser: storedUser,
 
       /* 业务数据 */
       posts: this.safeParse('posts', []),
@@ -607,11 +632,6 @@ export default {
       localDisplayName: localStorage.getItem('displayName_' + (storedUser || '')) || '',
       imageInsertMode: localStorage.getItem('imageInsertMode') || 'preview',
 
-      /*头像 */
-      avatarMap: {
-        [storedUser]: localStorage.getItem('avatar-' + storedUser)
-          || 'https://placehold.co/60'
-      },
       /* 勋章 */
       BADGES: [
         { id: 'none', name: '不佩戴' },
@@ -785,21 +805,6 @@ export default {
     },
 
     /* ========== 登录 ========== */
-    /* 登录成功后的回调 */
-    handleLogin(uid) {
-      this.currentUser = uid;
-      localStorage.setItem('currentUser', JSON.stringify(uid));
-      this.readIds = new Set(JSON.parse(localStorage.getItem('readIds_' + uid) || '[]'));
-      this.localDisplayName = localStorage.getItem('displayName_' + uid) || '';
-      this.posts = this.safeParse('posts', []);
-    },
-    logout() {
-      localStorage.removeItem('currentUser');
-      this.currentUser = null;
-      this.posts = [];
-      this.localDisplayName = '';
-      this.readIds = new Set();
-    },
     /* ========== 工具函数 ========== */
     formatMeta(post) {
       const d = new Date(post.ts);
@@ -867,12 +872,6 @@ export default {
     // Modal 区 Picker
     toggleModalPicker() {
       this.modalPickerVisible = !this.modalPickerVisible;
-    },
-    getAvatar(uid) {
-      if (!this.avatarMap[uid]) {
-        this.avatarMap[uid] = localStorage.getItem('avatar-' + uid) || 'https://placehold.co/60';
-      }
-      return this.avatarMap[uid];
     },
 
 
@@ -1318,10 +1317,7 @@ export default {
       const r = new FileReader()
       r.onload = ev => {
         const url = ev.target.result
-        // —— 更新响应式 avatarMap，让所有用到它的地方都自动刷新 —— 
-        this.avatarMap[this.currentUser] = url
-        // —— 同步到 localStorage，保证刷新或下次登录还能继续用 —— 
-        localStorage.setItem('avatar-' + this.currentUser, url)
+        this.setAvatar(this.currentUser, url)
       }
       r.readAsDataURL(f)
     },
@@ -3577,6 +3573,7 @@ body.dark legend {
   stroke: currentColor !important;
   fill: currentColor !important;
 }
+
 .dropdown-divider {
   border-top: 1px solid rgba(0, 0, 0, 0.1);
   margin: 8px 0;
@@ -3585,5 +3582,4 @@ body.dark legend {
 .dark .dropdown-divider {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
-
 </style>

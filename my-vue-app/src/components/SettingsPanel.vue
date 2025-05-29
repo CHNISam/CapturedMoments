@@ -4,89 +4,69 @@
     <!-- ====================== 📱 Mobile ====================== -->
     <template v-if="isMobile">
       <!-- ▶ 主导航列表 -->
-<div v-if="activeSection === null" class="mobile-nav">
-  <ul class="nav-list mobile">
-    <!-- 视觉／界面 -->
-    <li
-      class="nav-item"
-      :class="{ active: activeSection === 'visual' }"
-      @click="toggleSection('visual')"
-    >
-      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z"/>
-        <path d="M6 15l9-9 3 3-9 9"/>
-        <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5"/>
-      </svg>
-      <span class="nav-label">视觉／界面</span>
-      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M9 18l6-6-6-6"/>
-      </svg>
-    </li>
+      <div v-if="activeSection === null" class="mobile-nav">
+        <ul class="nav-list mobile">
+          <!-- 视觉／界面 -->
+          <li class="nav-item" :class="{ active: activeSection === 'visual' }" @click="toggleSection('visual')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z" />
+              <path d="M6 15l9-9 3 3-9 9" />
+              <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5" />
+            </svg>
+            <span class="nav-label">视觉／界面</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
 
-    <!-- 个人资料 -->
-    <li
-      class="nav-item"
-      :class="{ active: activeSection === 'profile' }"
-      @click="toggleSection('profile')"
-    >
-      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z"/>
-        <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2"/>
-      </svg>
-      <span class="nav-label">个人资料</span>
-      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M9 18l6-6-6-6"/>
-      </svg>
-    </li>
+          <!-- 个人资料 -->
+          <li class="nav-item" :class="{ active: activeSection === 'profile' }" @click="toggleSection('profile')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" />
+              <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2" />
+            </svg>
+            <span class="nav-label">个人资料</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
 
-    <!-- 交互助手 -->
-    <li
-      class="nav-item"
-      :class="{ active: activeSection === 'assistant' }"
-      @click="toggleSection('assistant')"
-    >
-      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z"/>
-      </svg>
-      <span class="nav-label">交互助手</span>
-      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M9 18l6-6-6-6"/>
-      </svg>
-    </li>
+          <!-- 交互助手 -->
+          <li class="nav-item" :class="{ active: activeSection === 'assistant' }" @click="toggleSection('assistant')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" />
+            </svg>
+            <span class="nav-label">交互助手</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
 
-    <!-- 发布与上传 -->
-    <li
-      class="nav-item"
-      :class="{ active: activeSection === 'publish' }"
-      @click="toggleSection('publish')"
-    >
-      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
-        <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5-5m0 0l5 5m-5-5v12"/>
-      </svg>
-      <span class="nav-label">发布与上传</span>
-      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M9 18l6-6-6-6"/>
-      </svg>
-    </li>
+          <!-- 发布与上传 -->
+          <li class="nav-item" :class="{ active: activeSection === 'publish' }" @click="toggleSection('publish')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 10l5-5m0 0l5 5m-5-5v12" />
+            </svg>
+            <span class="nav-label">发布与上传</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
 
-    <!-- 管理员 -->
-    <li
-      v-if="isAdmin"
-      class="nav-item"
-      :class="{ active: activeSection === 'admin' }"
-      @click="toggleSection('admin')"
-    >
-      <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5"/>
-      </svg>
-      <span class="nav-label">管理员</span>
-      <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
-        <path d="M9 18l6-6-6-6"/>
-      </svg>
-    </li>
-  </ul>
-</div>
+          <!-- 管理员 -->
+          <li v-if="isAdmin" class="nav-item" :class="{ active: activeSection === 'admin' }"
+            @click="toggleSection('admin')">
+            <svg class="nav-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5" />
+            </svg>
+            <span class="nav-label">管理员</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </li>
+        </ul>
+      </div>
 
 
       <!-- ▶ 详情页 -->
@@ -144,6 +124,14 @@
               <span>我的昵称</span>
               <button class="btn-ghost" @click="showRenameModal = true">{{ localDisplayName || '设置昵称' }}</button>
             </li>
+            <li class="setting-item">
+              <span>头像：</span>
+              <input type="file" accept="image/*" @change="onAvatarChange" />
+              <!-- 预览：直接从 store.avatarMap 里读 -->
+              <img v-if="userStore.avatarMap[currentUser]" :src="userStore.avatarMap[currentUser]" alt="头像预览"
+                style="width:60px; height:60px; border-radius:50%; margin-left:8px;" />
+            </li>
+
             <li class="setting-item">
               <span>勋章中心</span>
               <button class="btn-ghost" @click="$emit('open-badge-modal')">更换勋章</button>
@@ -278,6 +266,13 @@
             <button class="btn-ghost" @click="showRenameModal = true">{{ localDisplayName || '设置昵称' }}</button>
           </li>
           <li class="setting-item">
+            <span>头像：</span>
+            <input type="file" accept="image/*" @change="onAvatarChange" />
+            <!-- 预览：直接从 store.avatarMap 里读 -->
+            <img v-if="userStore.avatarMap[currentUser]" :src="userStore.avatarMap[currentUser]" alt="头像预览"
+              style="width:60px; height:60px; border-radius:50%; margin-left:8px;" />
+          </li>
+          <li class="setting-item">
             <span>勋章中心</span>
             <button class="btn-ghost" @click="$emit('open-badge-modal')">更换勋章</button>
           </li>
@@ -378,6 +373,7 @@
 
 <script>
 import BaseModal from '@/components/BaseModal.vue'
+import { useUserStore } from '@/stores/user'
 
 export default {
   name: 'SettingsPanel',
@@ -416,6 +412,7 @@ export default {
       draftBgSrc: this.bgSrc,
       draftOpacity: this.bgOpacity,
       draftBlur: this.bgBlur,
+      userStore: null,
     }
   },
   computed: {
@@ -441,9 +438,14 @@ export default {
     }
   },
   created() {
+    // ① 响应式判断
     this.updateMobile()
     if (this.isMobile) this.activeSection = null
+
+    // ② 挂载 Pinia userStore
+    this.userStore = useUserStore()
   },
+
   mounted() {
     window.addEventListener('resize', this.updateMobile, { passive: true })
   },
@@ -503,7 +505,16 @@ export default {
     confirmBg() {
       this.showBgModal = false
     },
-
+    onAvatarChange(e) {
+      const file = e.target.files[0]
+      if (!file) return
+      const reader = new FileReader()
+      reader.onload = () => {
+        // ③ 调用 Pinia Action，自动更新 avatarMap + localStorage
+        this.userStore.setAvatar(this.currentUser, reader.result)
+      }
+      reader.readAsDataURL(file)
+    },
 
     updateMobile() {
       this.isMobile = window.innerWidth < 768
@@ -775,16 +786,16 @@ export default {
 .nav-item {
   display: flex;
   align-items: center;
-  height: 48px;            
-  padding: 0 24px;         
-  color: #bbb;             
+  height: 48px;
+  padding: 0 24px;
+  color: #bbb;
   cursor: pointer;
   border-bottom: 1px solid #303030;
   transition: background 0.2s, color 0.2s;
 }
 
 .nav-item:last-child {
-  border-bottom: none;     
+  border-bottom: none;
 }
 
 .nav-icon {
@@ -805,16 +816,19 @@ export default {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
+
 .nav-item.active {
   background: rgba(78, 161, 243, 0.2);
   color: #fff;
 }
+
 /* —— YouTube-style Mobile Nav —— */
 .mobile-nav .nav-list.mobile {
   background: #1e1e1e;
   border-radius: 8px;
   overflow: hidden;
 }
+
 .mobile-nav .nav-item {
   display: flex;
   align-items: center;
@@ -825,33 +839,38 @@ export default {
   border-bottom: 1px solid #303030;
   transition: background 0.2s, color 0.2s;
 }
+
 .mobile-nav .nav-item:last-child {
   border-bottom: none;
 }
+
 .mobile-nav .nav-icon {
   width: 20px;
   height: 20px;
   margin-right: 12px;
   stroke: currentColor;
 }
+
 .mobile-nav .nav-label {
   font-size: 16px;
   line-height: 1;
   flex: 1;
 }
+
 .mobile-nav .chevron-icon {
   margin-left: auto;
   width: 16px;
   height: 16px;
   stroke: currentColor;
 }
+
 .mobile-nav .nav-item:hover {
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-}
-.mobile-nav .nav-item.active {
-  background: rgba(78,161,243,0.2);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 
+.mobile-nav .nav-item.active {
+  background: rgba(78, 161, 243, 0.2);
+  color: #fff;
+}
 </style>
