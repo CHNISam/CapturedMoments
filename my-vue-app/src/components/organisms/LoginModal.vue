@@ -7,15 +7,17 @@
       tabindex="0"
     >
       <div class="login-box">
-        <!-- 外部传入 dark-title 覆盖为纯白 -->
+        <!-- 动画标题 + 暗色 override -->
         <AnimatedTitle :text="currentTitle" class="dark-title" />
 
         <form @submit.prevent="handleSubmit" autocomplete="on">
+          <!-- UID -->
           <FormGroup
             v-model:value="uid"
             placeholder="请输入UID"
             :errorMessage="error && !storedCred ? error : ''"
           />
+          <!-- 密码 -->
           <FormGroup
             v-model:value="password"
             type="password"
@@ -26,12 +28,18 @@
             :errorMessage="error && storedCred ? error : ''"
           />
 
+          <!-- 通用错误 -->
           <ErrorMessage
             v-if="error && !(isFirstLogin || !storedCred)"
             :message="error"
           />
 
-          <Button :disabled="!canSubmit || loading" :loading="loading">
+          <!-- 提交按钮 -->
+          <Button
+            type="submit"
+            :disabled="!canSubmit || loading"
+            :loading="loading"
+          >
             {{ isFirstLogin ? '设置并登录' : '登录' }}
           </Button>
         </form>
@@ -45,7 +53,6 @@ import { getAllowedUids } from '@/config/auth'
 import { pbkdf2Hash } from '@/utils/crypto'
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 
-// 原子/分子组件
 import Button from '@/components/atoms/Button.vue'
 import ErrorMessage from '@/components/atoms/ErrorMessage.vue'
 import AnimatedTitle from '@/components/molecules/AnimatedTitle.vue'
@@ -82,6 +89,7 @@ function equalTiming(a, b) {
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i)
   return diff === 0
 }
+
 function createSalt() {
   const arr = crypto.getRandomValues(new Uint8Array(8))
   return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')
@@ -99,7 +107,7 @@ async function handleSubmit() {
     error.value = ''
     if (!getAllowedUids().includes(id)) { error.value = '用户不存在'; return }
     let fails = Number(sessionStorage.getItem(`fail_${id}`) || 0)
-    if (fails >= 10)        { error.value = '尝试过多，请稍后再试'; return }
+    if (fails >= 10) { error.value = '尝试过多，请稍后再试'; return }
     if (!storedCred.value) {
       if (password.value.length < 4) { error.value = '密码长度至少4位'; return }
       const salt = createSalt()
@@ -126,9 +134,14 @@ async function handleSubmit() {
 
 watch(visible, v => {
   if (v) {
-    uid.value = ''; password.value = ''; error.value = ''; loading.value = false; tick.value++
+    uid.value = ''
+    password.value = ''
+    error.value = ''
+    loading.value = false
+    tick.value++
   }
 })
+
 onBeforeUnmount(() => clearTimeout(submitTimeout))
 </script>
 
@@ -138,6 +151,7 @@ onBeforeUnmount(() => clearTimeout(submitTimeout))
   height: 100vh; background: #121212;
 }
 .login-box {
+  text-align: center;
   width: 100%; max-width: 400px;
   margin: 0 auto; padding: 24px;
   background: rgba(18,18,18,0.9); backdrop-filter: blur(10px);
@@ -146,9 +160,8 @@ onBeforeUnmount(() => clearTimeout(submitTimeout))
 .fade-enter-active, .fade-leave-active { transition: opacity .3s }
 .fade-enter-from, .fade-leave-to   { opacity: 0 }
 
-/* 覆盖 AnimatedTitle 透传过来的 class */
+/* 强制 AnimatedTitle 根元素（h3）的文字为白色 */
 .dark-title {
-  /* 应用于 <h3> 根元素 */
   color: #fff !important;
 }
 </style>

@@ -1,11 +1,11 @@
-// src/components/atoms/ErrorMessage.vue
 <template>
   <p class="error-message">{{ message }}</p>
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
-const props = defineProps({ message: { type: String, required: true } })
+const props = defineProps({
+  message: { type: String, required: true }
+})
 </script>
 
 <style scoped>
