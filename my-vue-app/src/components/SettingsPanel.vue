@@ -372,7 +372,7 @@
 </template>
 
 <script>
-import BaseModal from '@/components/BaseModal.vue'
+import BaseModal from '@/components/common/BaseModal.vue'
 import { useUserStore } from '@/stores/user'
 
 export default {
@@ -390,6 +390,7 @@ export default {
     theme: String,
     bgOpacity: Number,
     bgBlur: Number,
+    bgSrc: String,
     loadMode: String,
     imageInsertMode: String,
     llmEnabled: Boolean,
