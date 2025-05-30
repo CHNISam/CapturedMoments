@@ -108,10 +108,6 @@
               <span>背景设置</span>
               <button class="btn-ghost" @click="showBgModal = true">打开</button>
             </li>
-            <li class="setting-item">
-              <span>自动加载</span>
-              <input type="checkbox" :checked="loadMode === 'auto'" @change="saveLoadModeSwitch($event)" />
-            </li>
           </ul>
 
           <!-- 个人资料 -->
@@ -249,10 +245,6 @@
             <span>背景设置</span>
             <button class="btn-ghost" @click="showBgModal = true">打开</button>
           </li>
-          <li class="setting-item">
-            <span>自动加载</span>
-            <input type="checkbox" :checked="loadMode === 'auto'" @change="saveLoadModeSwitch($event)" />
-          </li>
         </ul>
 
         <!-- 个人资料 -->
@@ -381,7 +373,7 @@ export default {
 
   emits: [
     'update:theme', 'update:bgSrc', 'update:bgOpacity', 'update:bgBlur',
-    'update:loadMode', 'update:imageInsertMode',
+    'update:imageInsertMode',
     'update:llmEnabled', 'update:localDisplayName',
     'open-password-modal', 'open-badge-modal',
     'reset-password', 'add-allowed-uid', 'remove-allowed-uid', 'open-admin-pwd-modal'
@@ -530,7 +522,6 @@ export default {
       r.onload = ev => this.$emit('update:bgSrc', ev.target.result);
       r.readAsDataURL(f)
     },
-    saveLoadModeSwitch(e) { this.$emit('update:loadMode', e.target.checked ? 'auto' : 'manual') },
     saveImageInsertModeSwitch(e) { this.$emit('update:imageInsertMode', e.target.checked ? 'inline' : 'preview') },
     confirmRename() {
       this.$emit('update:localDisplayName', this.renameDraft.trim());
