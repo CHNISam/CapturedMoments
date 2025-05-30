@@ -1,0 +1,44 @@
+/* —— 侧栏图标 / 文字强制白色 —— */
+.app-sidebar .sidebar-item svg,
+.app-sidebar .sidebar-item span {
+  color: #fff !important;
+  stroke: #fff !important;
+  fill: #fff !important;
+}
+.shell {
+  min-height: 100vh;          /* 让整页占满 */
+  display: flex;
+  flex-direction: column;
+}
+
+.body {
+  flex: 1;                    /* 把剩余高度交给内容区 */
+  display: flex;
+  overflow: hidden;
+}
+
+/* ————————— 侧栏 ————————— */
+.app-sidebar {
+  width: 72px;
+  background: #202020;
+  border-right: 1px solid #303030;
+  transition: transform .25s;
+}
+
+.app-sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+/* ————————— 主内容 ————————— */
+.app-main {
+  flex: 1;
+  padding: 16px;
+  background: #121212;
+  color: #e0e0e0;
+  overflow-y: auto;
+}
+
+/* 侧栏收起时去掉让出的 72px */
+.app-main.sidebar-collapsed {
+  margin-left: 0;
+}

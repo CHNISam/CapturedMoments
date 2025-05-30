@@ -1,19 +1,16 @@
 <template>
-  <section id="moments" class="moments-page">
-    <h2 class="section-title">📸 动态</h2>
-    <DynamicFeed />
-  </section>
+  <MomentsList
+    :posts="demo"
+    :hasMore="false"
+    @open-modal="()=>{}"
+    @toggle-comments="()=>{}"
+    @load-more="()=>{}"
+  />
 </template>
 
 <script setup>
-import DynamicFeed from '@/components/DynamicFeed.vue';
+import MomentsList from '@/components/molecules/MomentsList.vue';
+const demo=[
+  {id:1,avatar:'https://placehold.co/40',author:'Alice',time:'刚刚',content:'<p>Hello</p>',imgs:[],views:0,cmts:[]}
+]
 </script>
-
-<style scoped>
-.moments-page { padding: 1.5rem 2rem; }
-.section-title {
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-</style>
