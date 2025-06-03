@@ -7,21 +7,31 @@ import LoginPage from '@/views/LoginPage.vue'; // 登录页（仅渲染 Modal）
 import MomentsPage from '@/views/MomentsPage.vue';
 import { createRouter, createWebHashHistory } from 'vue-router';
 
+// 路由配置
 const routes = [
   {
     path: '/login',
     name: 'Login',
     component: LoginPage
   },
+  // 404
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFound.vue') },
   {
     path: '/',
     component: ShellLayout,
     meta: { requiresAuth: true },
     children: [
-      { path: '',        redirect: '/moments' },
+      { path: '', redirect: '/moments' },
       { path: 'moments', name: 'Moments', component: MomentsPage },
-      { path: 'albums',  name: 'Albums',  component: AlbumPage   },
-      { path: 'editor',  name: 'Editor',  component: EditorPage  }
+      { path: 'albums', name: 'Albums', component: AlbumPage },
+      { path: 'editor', name: 'Editor', component: EditorPage },
+      { path: 'settings', name: 'Settings', component: () => import('@/views/SettingsPage.vue') },
+      {
+        path: '/settings/:section?',
+        name: 'Settings',
+        component: () => import('@/views/SettingsPage.vue')
+      }
+
     ]
   }
 ]
