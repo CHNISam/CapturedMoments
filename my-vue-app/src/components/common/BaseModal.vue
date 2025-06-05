@@ -67,5 +67,14 @@
     gap: 12px;                   /* 按钮间隔 */
     padding-top: 8px;
   }
+  /* ① 把叉叉字体和标题都强制设为纯白（只要是在 .modal.show 下的 .close 和 .modal-title） */
+.modal.show .close {
+  color: #ffffff !important;
+}
+
+.modal.show .modal-title {
+  color: #ffffff !important;
+}
+
   </style>
   
