@@ -955,4 +955,9 @@ body.dark {
 .settings-content {
   padding: 0 24px;
 }
+/* 针对背景设置弹窗里的文案，用浅灰或者更亮的颜色 */
+.setting-list .setting-item span {
+  color: #e0e0e0; /* 或者 #fff，根据你想要的亮度来调 */
+}
+
 </style>
