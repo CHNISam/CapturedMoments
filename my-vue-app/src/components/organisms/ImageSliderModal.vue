@@ -206,18 +206,32 @@ export default {
 }
 
 .delete-btn {
-    position: absolute;
-    bottom: 16px;
-    right: 16px;
-    background: rgba(255, 0, 0, 0.6);
-    border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.08); /* 微弱白感，深色适配 */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* 极细白边，突出轮廓 */
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s, border 0.2s;
+  z-index: 5;
+}
+
+.delete-btn:hover {
+  background: rgba(255, 255, 255, 0.15); /* hover 稍亮一点点 */
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.delete-btn .icon {
+  stroke: #ffffff;
+  width: 20px;
+  height: 20px;
 }
 
 .zoom-control {
