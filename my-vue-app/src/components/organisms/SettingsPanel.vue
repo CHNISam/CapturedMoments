@@ -11,17 +11,7 @@
             :class="{ active: activeSection === 'visual' }"
             @click="toggleSection('visual')"
           >
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z" />
-              <path d="M6 15l9-9 3 3-9 9" />
-              <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5" />
-            </svg>
+            <IconVisual class="nav-icon" />
             <span class="nav-label">视觉 / 界面</span>
             <svg
               class="chevron-icon"
@@ -39,16 +29,7 @@
             :class="{ active: activeSection === 'profile' }"
             @click="toggleSection('profile')"
           >
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" />
-              <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2" />
-            </svg>
+            <IconProfile class="nav-icon" />
             <span class="nav-label">个人资料</span>
             <svg
               class="chevron-icon"
@@ -66,15 +47,7 @@
             :class="{ active: activeSection === 'assistant' }"
             @click="toggleSection('assistant')"
           >
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" />
-            </svg>
+            <IconAssistant class="nav-icon" />
             <span class="nav-label">交互助手</span>
             <svg
               class="chevron-icon"
@@ -92,24 +65,7 @@
             :class="{ active: activeSection === 'publish' }"
             @click="toggleSection('publish')"
           >
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
-              />
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M7 10l5-5m0 0l5 5m-5-5v12"
-              />
-            </svg>
+            <IconPublish class="nav-icon" />
             <span class="nav-label">发布 与 上传</span>
             <svg
               class="chevron-icon"
@@ -128,17 +84,7 @@
             :class="{ active: activeSection === 'admin' }"
             @click="toggleSection('admin')"
           >
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path
-                d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5"
-              />
-            </svg>
+            <IconAdmin class="nav-icon" />
             <span class="nav-label">管理员</span>
             <svg
               class="chevron-icon"
@@ -277,64 +223,36 @@
       <!-- ▶ 左侧 Desktop 一级导航 -->
       <aside class="settings-nav">
         <ul class="nav-list">
-          <li class="nav-item" :class="{ active: activeSection === 'visual' }" @click="toggleSection('visual')">
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path d="M2.5 21.5l2-2 4-4L6 15l-4 4v2.5h2.5z" />
-              <path d="M6 15l9-9 3 3-9 9" />
-              <path d="M14.5 5.5l3.5-3.5 3 3-3.5 3.5" />
-            </svg>
+          <li
+            class="nav-item"
+            :class="{ active: activeSection === 'visual' }"
+            @click="toggleSection('visual')"
+          >
+            <IconVisual class="nav-icon" />
             <span class="nav-label">视觉 / 界面</span>
           </li>
-          <li class="nav-item" :class="{ active: activeSection === 'profile' }" @click="toggleSection('profile')">
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4z" />
-              <path d="M4 20v-2c0-2.21 3.58-4 8-4s8 1.79 8 4v2" />
-            </svg>
+          <li
+            class="nav-item"
+            :class="{ active: activeSection === 'profile' }"
+            @click="toggleSection('profile')"
+          >
+            <IconProfile class="nav-icon" />
             <span class="nav-label">个人资料</span>
           </li>
-          <li class="nav-item" :class="{ active: activeSection === 'assistant' }" @click="toggleSection('assistant')">
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10z" />
-            </svg>
+          <li
+            class="nav-item"
+            :class="{ active: activeSection === 'assistant' }"
+            @click="toggleSection('assistant')"
+          >
+            <IconAssistant class="nav-icon" />
             <span class="nav-label">交互助手</span>
           </li>
-          <li class="nav-item" :class="{ active: activeSection === 'publish' }" @click="toggleSection('publish')">
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
-              />
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M7 10l5-5m0 0l5 5m-5-5v12"
-              />
-            </svg>
+          <li
+            class="nav-item"
+            :class="{ active: activeSection === 'publish' }"
+            @click="toggleSection('publish')"
+          >
+            <IconPublish class="nav-icon" />
             <span class="nav-label">发布 与 上传</span>
           </li>
           <li
@@ -343,17 +261,7 @@
             :class="{ active: activeSection === 'admin' }"
             @click="toggleSection('admin')"
           >
-            <svg
-              class="nav-icon"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              fill="none"
-              stroke-width="2"
-            >
-              <path
-                d="M9.4 11c.2-.7.6-1.4 1.1-2.1 1-1.4 2.5-2.4 4.2-2.8M12 2a10 10 0 1 0 10 10c0-2-.6-3.9-1.7-5.5"
-              />
-            </svg>
+            <IconAdmin class="nav-icon" />
             <span class="nav-label">管理员</span>
           </li>
         </ul>
@@ -530,13 +438,30 @@
 <script>
 import GhostBtn from '@/components/atoms/GhostBtn.vue'
 import ToggleSwitch from '@/components/atoms/ToggleSwitch.vue'
-import BaseModal from '@/components/common/BaseModal.vue'
 import AdminControls from '@/components/molecules/AdminControls.vue'
+import BaseModal from '@/components/molecules/BaseModal.vue'
 import { useUserStore } from '@/stores/user'
+
+// 新增图标组件 import
+import IconAdmin from '@/components/icons/IconAdmin.vue'
+import IconAssistant from '@/components/icons/IconAssistant.vue'
+import IconProfile from '@/components/icons/IconProfile.vue'
+import IconPublish from '@/components/icons/IconPublish.vue'
+import IconVisual from '@/components/icons/IconVisual.vue'
 
 export default {
   name: 'SettingsPanel',
-  components: { GhostBtn, ToggleSwitch, AdminControls, BaseModal },
+  components: {
+    GhostBtn,
+    ToggleSwitch,
+    AdminControls,
+    BaseModal,
+    IconVisual,
+    IconProfile,
+    IconAssistant,
+    IconPublish,
+    IconAdmin
+  },
   emits: [
     'update:theme',
     'update:bgSrc',
@@ -955,9 +880,9 @@ body.dark {
 .settings-content {
   padding: 0 24px;
 }
+
 /* 针对背景设置弹窗里的文案，用浅灰或者更亮的颜色 */
 .setting-list .setting-item span {
-  color: #e0e0e0; /* 或者 #fff，根据你想要的亮度来调 */
+  color: #e0e0e0;
 }
-
 </style>
