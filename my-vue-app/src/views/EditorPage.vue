@@ -1,1 +1,7 @@
-<template><h2 style="padding:24px">EditorPage 占位</h2></template>
+<template>
+  <PostEditor />
+</template>
+
+<script setup>
+import PostEditor from '@/components/organisms/PostEditor.vue';
+</script>

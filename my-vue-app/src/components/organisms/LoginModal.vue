@@ -36,7 +36,7 @@ import { pbkdf2Hash } from '@/utils/crypto'
 import { computed, ref, watch } from 'vue'
 
 import ErrorMessage from '@/components/atoms/ErrorMessage.vue'
-import Button from '@/components/atoms/LoginButton.vue'
+import Button from '@/components/atoms/SubmitButton.vue'
 import AnimatedTitle from '@/components/molecules/AnimatedTitle.vue'
 import FormGroup from '@/components/molecules/FormGroup.vue'
 
