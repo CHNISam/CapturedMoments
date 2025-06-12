@@ -32,7 +32,7 @@
 </template>
 
 <script>
-import ImageSliderModal from '@/components/organisms/ImageSliderModal.vue';
+import ImageSliderModal from '@/components/organisms/albums/ImageSliderModal.vue';
 export default {
   name: 'AlbumsPage',
   components: { ImageSliderModal },
